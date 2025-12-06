@@ -2,7 +2,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
     font-family: 'Inter', sans-serif;
-    background-color: #fdfdfd;
+    background-color: #eeeeee; /* Minimalist Grey */
     color: #333;
     line-height: 1.6;
 }
@@ -17,10 +17,12 @@ a:hover { opacity: 0.6; }
     align-items: center;
     position: sticky;
     top: 0;
-    background: rgba(253, 253, 253, 0.95);
+    background: rgba(238, 238, 238, 0.95); /* Matches Grey Bg */
     z-index: 100;
+    backdrop-filter: blur(5px); /* Nice glass effect */
 }
 .site-logo-img { height: 24px; width: auto; display: block; }
+
 #nav-links {
     list-style: none;
     display: flex;
@@ -31,64 +33,60 @@ a:hover { opacity: 0.6; }
 }
 #nav-links a.active { font-weight: 600; border-bottom: 1px solid #333; }
 .mobile-menu-toggle { display: none; cursor: pointer; }
+.mobile-menu-toggle span {
+    display: block;
+    width: 25px;
+    height: 2px;
+    background-color: #333;
+    margin-bottom: 5px;
+}
 
-/* --- Fading Carousel (FIXED) --- */
+/* --- Fading Carousel --- */
 .carousel-container {
     position: relative;
     width: 100%;
-    height: 80vh; /* Occupy 80% of viewport height */
+    height: 80vh; 
     overflow: hidden;
-    background: #000;
+    background: #111; /* Dark bg for carousel */
 }
 
 .carousel-slide {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     opacity: 0;
-    transition: opacity 1s ease-in-out; /* Smooth fade transition */
+    transition: opacity 1s ease-in-out;
     z-index: 1;
     display: flex;
     justify-content: center;
     align-items: center;
 }
+.carousel-slide.active { opacity: 1; z-index: 2; }
 
-.carousel-slide.active {
-    opacity: 1;
-    z-index: 2;
-}
-
-/* Blurred Background */
 .carousel-bg {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
     background-size: cover;
     background-position: center;
     filter: blur(25px) brightness(0.6);
-    transform: scale(1.1); /* Prevent blur edges */
+    transform: scale(1.1);
     z-index: 1;
 }
 
-/* Main Image */
 .carousel-img {
     position: relative;
     max-width: 95%;
     max-height: 90%;
-    width: auto;
-    height: auto;
+    width: auto; height: auto;
     object-fit: contain;
     z-index: 2;
     box-shadow: 0 5px 20px rgba(0,0,0,0.5);
     cursor: pointer;
 }
 
-/* --- Date Overlay (KEPT) --- */
 .carousel-date {
     position: absolute;
-    bottom: 2rem;
-    right: 2rem;
+    bottom: 2rem; right: 2rem;
     color: rgba(255, 255, 255, 0.8);
     font-family: 'Inter', sans-serif;
     font-size: 0.85rem;
@@ -98,11 +96,9 @@ a:hover { opacity: 0.6; }
     pointer-events: none;
 }
 
-/* --- Navigation Arrows --- */
 .carousel-nav {
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 50%; transform: translateY(-50%);
     font-size: 2rem;
     color: rgba(255, 255, 255, 0.4);
     cursor: pointer;
@@ -114,11 +110,13 @@ a:hover { opacity: 0.6; }
 .carousel-nav.prev { left: 1rem; }
 .carousel-nav.next { right: 1rem; }
 
-/* --- Masonry Grid --- */
+/* --- Masonry Grid (Centered) --- */
 .masonry-grid {
     column-count: 3;
     column-gap: 1.5rem;
     padding: 2rem;
+    max-width: 1200px; /* Limits width to keep columns together */
+    margin: 0 auto;    /* Centers the grid container */
 }
 .grid-item {
     break-inside: avoid;
@@ -130,22 +128,21 @@ a:hover { opacity: 0.6; }
     display: block;
     cursor: pointer;
     transition: opacity 0.3s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05); /* Slight shadow for pop */
 }
 .grid-item img:hover { opacity: 0.8; }
 .photo-date {
-    font-size: 0.75rem;
-    color: #888;
-    margin-top: 5px;
-    text-align: right;
+    font-size: 0.75rem; color: #666;
+    margin-top: 5px; text-align: right;
 }
 
-.gallery-header { padding: 2rem 2rem 0; text-align: center; }
+.gallery-header { padding: 3rem 2rem 1rem; text-align: center; }
 .gallery-title { font-weight: 300; letter-spacing: 0.1em; text-transform: capitalize; }
 
 /* --- Lightbox --- */
 .lightbox {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(255,255,255,0.98);
+    background: rgba(238,238,238,0.98); /* Grey lightbox bg */
     display: flex; justify-content: center; align-items: center;
     z-index: 1000; opacity: 1; transition: opacity 0.3s;
 }
@@ -156,15 +153,37 @@ a:hover { opacity: 0.6; }
     font-size: 3rem; cursor: pointer; color: #333;
 }
 
-/* --- Mobile --- */
+/* --- Mobile Fixes --- */
 @media (max-width: 768px) {
-    .masonry-grid { column-count: 1; }
+    .masonry-grid { column-count: 1; padding: 1rem; }
+    
     .mobile-menu-toggle { display: block; }
+    
     #nav-links {
-        display: none; flex-direction: column; width: 100%;
-        position: absolute; top: 100%; left: 0; background: white; padding: 1rem;
+        display: none; 
+        flex-direction: column; 
+        width: 100%;
+        position: absolute; 
+        top: 100%; 
+        left: 0; 
+        background: #eeeeee; /* Ensure background is grey, not transparent */
+        padding: 1rem 0;
         box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        text-align: center;
     }
+    
     #nav-links.active { display: flex; }
-    .carousel-nav { display: none; } /* Hide arrows on mobile */
+    
+    #nav-links li {
+        padding: 1rem;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    #nav-links a {
+        color: #000; /* Force black text */
+        display: block;
+        font-size: 1.1rem;
+    }
+
+    .carousel-nav { display: none; }
 }
