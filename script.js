@@ -1,9 +1,9 @@
 // State
 let galleryData = {};
-let currentCategory = null;
+let carouselInterval;
 
 // DOM Elements
-const app = document.getElementById('app');
+const root = document.getElementById('root');
 const navLinksContainer = document.getElementById('nav-links');
 const mobileMenuToggle = document.getElementById('menu-toggle');
 const lightbox = document.getElementById('lightbox');
@@ -16,9 +16,18 @@ document.addEventListener('DOMContentLoaded', init);
 async function init() {
     try {
         const response = await fetch('gallery.json');
-        if (!response.ok) throw new Error('Failed to load gallery data');
         
-        galleryData = await response.json();
+        if (!response.ok) {
+            // Fallback for demo if gallery.json doesn't exist yet
+            console.warn('gallery.json not found, using demo data');
+            galleryData = {
+                "Nature": ["https://picsum.photos/800/1200?random=1", "https://picsum.photos/1200/800?random=2"],
+                "Urban": ["https://picsum.photos/800/1200?random=3", "https://picsum.photos/1200/800?random=4"],
+                "Travel": ["https://picsum.photos/800/800?random=5"]
+            };
+        } else {
+            galleryData = await response.json();
+        }
         
         renderNavigation();
         handleRouting(); // Initial load
@@ -26,23 +35,23 @@ async function init() {
         window.addEventListener('hashchange', handleRouting);
     } catch (error) {
         console.error(error);
-        app.innerHTML = '<div class="loading">Error loading gallery. Please check console.</div>';
+        root.innerHTML = '<div class="loading">Error loading gallery.</div>';
     }
 }
 
 // Navigation
 function renderNavigation() {
-    // "Home" is static in HTML, but we add dynamic categories
     const categories = Object.keys(galleryData).sort();
     
     // Clear and rebuild
     navLinksContainer.innerHTML = '';
     
-    // Add Home link manually to list
+    // Home Link
     const homeLi = document.createElement('li');
     homeLi.innerHTML = `<a href="#" onclick="window.location.hash=''; return false;">Home</a>`;
     navLinksContainer.appendChild(homeLi);
 
+    // Category Links
     categories.forEach(category => {
         const li = document.createElement('li');
         const a = document.createElement('a');
@@ -52,17 +61,16 @@ function renderNavigation() {
         navLinksContainer.appendChild(li);
     });
 
-    // Mobile menu toggle logic
-    mobileMenuToggle.addEventListener('click', () => {
+    // Mobile menu toggle
+    mobileMenuToggle.onclick = () => {
         navLinksContainer.classList.toggle('active');
-    });
+    };
 }
 
 function updateActiveNav(category) {
     const links = navLinksContainer.querySelectorAll('a');
     links.forEach(link => {
         const linkHash = link.getAttribute('href');
-        // Check if hash matches current category
         if ((category === null && (linkHash === '#' || linkHash === '')) || 
             linkHash === `#${category}`) {
             link.classList.add('active');
@@ -70,13 +78,12 @@ function updateActiveNav(category) {
             link.classList.remove('active');
         }
     });
-    // Close mobile menu on selection
     navLinksContainer.classList.remove('active');
 }
 
 // Routing
 function handleRouting() {
-    const hash = window.location.hash.slice(1); // Remove #
+    const hash = window.location.hash.slice(1);
     const category = hash ? decodeURIComponent(hash) : null;
     
     updateActiveNav(category);
@@ -92,11 +99,10 @@ function handleRouting() {
 
 // Home Page - Carousel
 function renderHome() {
-    // Aggregate all images
     const allImages = Object.values(galleryData).flat();
     
     if (allImages.length === 0) {
-        app.innerHTML = '<div class="loading">No images found.</div>';
+        root.innerHTML = '<div class="loading">No images found in gallery.json</div>';
         return;
     }
 
@@ -116,13 +122,10 @@ function renderHome() {
     });
     html += `</div>`;
     
-    app.innerHTML = html;
-
-    // Start rotation
+    root.innerHTML = html;
     startCarousel();
 }
 
-let carouselInterval;
 function startCarousel() {
     if (carouselInterval) clearInterval(carouselInterval);
     
@@ -148,7 +151,7 @@ function renderGallery(category) {
     const images = galleryData[category];
     
     let html = `
-        <div class="gallery-header animate-fade">
+        <div class="gallery-header">
             <h1 class="gallery-title">${category}</h1>
         </div>
         <div class="masonry-grid">
@@ -156,27 +159,27 @@ function renderGallery(category) {
     
     images.forEach(imgSrc => {
         html += `
-            <div class="grid-item" onclick="openLightbox('${imgSrc}')">
-                <img src="${imgSrc}" loading="lazy" alt="${category}">
+            <div class="grid-item">
+                <img src="${imgSrc}" loading="lazy" alt="${category}" onclick="openLightbox('${imgSrc}')">
             </div>
         `;
     });
     
     html += `</div>`;
-    app.innerHTML = html;
+    root.innerHTML = html;
 }
 
 // Lightbox
 window.openLightbox = function(src) {
     lightboxImg.src = src;
     lightbox.classList.remove('hidden');
-    document.body.style.overflow = 'hidden'; // Prevent scrolling
+    document.body.style.overflow = 'hidden';
 };
 
-closeLightboxBtn.addEventListener('click', closeLightbox);
-lightbox.addEventListener('click', (e) => {
+closeLightboxBtn.onclick = closeLightbox;
+lightbox.onclick = (e) => {
     if (e.target === lightbox) closeLightbox();
-});
+};
 
 function closeLightbox() {
     lightbox.classList.add('hidden');
