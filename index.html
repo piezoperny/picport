@@ -11,9 +11,8 @@
 {
   "imports": {
     "react": "https://aistudiocdn.com/react@^19.2.1",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
-    "react/": "https://aistudiocdn.com/react@^19.2.1/",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0"
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/"
   }
 }
 </script>
@@ -27,7 +26,7 @@
                 <a href="#" onclick="window.location.hash=''; return false;">PORTFOLIO</a>
             </div>
             <ul id="nav-links">
-                <!-- Dynamic links will be injected here -->
+                <!-- Dynamic links injected via script.js -->
             </ul>
             <div class="mobile-menu-toggle" id="menu-toggle">
                 <span></span>
@@ -37,8 +36,8 @@
     </header>
 
     <!-- Main Content Area -->
-    <main id="app">
-        <!-- Content injected by script.js -->
+    <!-- Changed ID to 'root' to satisfy any lingering environment defaults looking for it -->
+    <main id="root">
         <div class="loading">Loading Gallery...</div>
     </main>
 
