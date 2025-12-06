@@ -20,11 +20,8 @@ async function init() {
         const response = await fetch('gallery.json');
         
         if (!response.ok) {
-            console.warn('gallery.json not found, using demo data');
-            // Demo data fallback
-            galleryData = {
-                "Nature": ["https://picsum.photos/800/1200?random=1", "https://picsum.photos/1200/800?random=2"],
-            };
+            console.warn('gallery.json not found');
+            root.innerHTML = '<div class="loading">Gallery not found.</div>';
         } else {
             galleryData = await response.json();
         }
@@ -41,20 +38,13 @@ async function init() {
 // Helper: Extracts YYYYMMDD from filename and returns YYYY-MM-DD
 function formatDate(filepath) {
     try {
-        // 1. Get just the filename (remove "images/MASTER/...")
         const filename = filepath.split('/').pop();
-        
-        // 2. Look for the pattern YYYYMMDD at the start
-        // This regex looks for 8 digits at the start of the file
         const match = filename.match(/^(\d{4})(\d{2})(\d{2})/);
         
         if (match) {
-            const year = match[1];
-            const month = match[2];
-            const day = match[3];
-            return `${year}-${month}-${day}`; // Returns "2025-11-18"
+            return `${match[1]}-${match[2]}-${match[3]}`;
         }
-        return ""; // Return empty if no date found
+        return "";
     } catch (e) {
         return "";
     }
@@ -111,11 +101,11 @@ function handleRouting() {
     } else if (galleryData[category]) {
         renderGallery(category);
     } else {
-        renderHome();
+        renderHome(); // Fallback
     }
 }
 
-// --- HOME PAGE & CAROUSEL ---
+// --- HOME PAGE & FADING CAROUSEL ---
 
 function renderHome() {
     const allImages = Object.values(galleryData).flat();
@@ -134,11 +124,11 @@ function renderHome() {
         const activeClass = index === 0 ? 'active' : '';
         const dateStr = formatDate(imgSrc);
         
+        // Note: Using 'carousel-bg' for blur effect and 'carousel-img' for main image
         html += `
             <div class="carousel-slide ${activeClass}" data-index="${index}">
                 <div class="carousel-bg" style="background-image: url('${imgSrc}')"></div>
                 <img src="${imgSrc}" class="carousel-img" alt="Featured" onclick="openLightbox('${imgSrc}')">
-                
                 ${dateStr ? `<div class="carousel-date">${dateStr}</div>` : ''}
             </div>
         `;
@@ -151,7 +141,7 @@ function renderHome() {
     
     root.innerHTML = html;
     
-    // Touch Events
+    // Swipe Support
     const carousel = document.getElementById('carousel');
     carousel.addEventListener('touchstart', e => {
         touchStartX = e.changedTouches[0].screenX;
@@ -167,6 +157,7 @@ function renderHome() {
 
 function startCarousel() {
     if (carouselInterval) clearInterval(carouselInterval);
+    // Set to 5000ms (5 seconds) as requested
     carouselInterval = setInterval(() => moveSlide(1), 5000);
 }
 
@@ -185,6 +176,7 @@ window.moveSlide = function(direction) {
     if (nextIndex < 0) nextIndex = slides.length - 1;
     
     slides[nextIndex].classList.add('active');
+    // Reset timer when manually moved
     startCarousel();
 }
 
