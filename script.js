@@ -11,6 +11,7 @@ const mobileMenuToggle = document.getElementById('menu-toggle');
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightbox-img');
 const closeLightboxBtn = document.querySelector('.lightbox-close');
+const backToTopBtn = document.getElementById('back-to-top');
 
 // Init
 document.addEventListener('DOMContentLoaded', init);
@@ -25,7 +26,7 @@ async function init() {
         
         if (!response.ok) {
             console.warn('gallery.json not found');
-            root.innerHTML = '<div class="loading">Gallery not found.</div>';
+            root.innerHTML = '<div class="loading-container">Gallery not found.</div>';
         } else {
             galleryData = await response.json();
         }
@@ -35,9 +36,23 @@ async function init() {
         window.addEventListener('hashchange', handleRouting);
     } catch (error) {
         console.error(error);
-        root.innerHTML = '<div class="loading">Error loading gallery.</div>';
+        root.innerHTML = '<div class="loading-container">Error loading gallery.</div>';
     }
 }
+
+// Back to Top Logic
+window.addEventListener('scroll', () => {
+    if (window.scrollY > 300) {
+        backToTopBtn.classList.add('visible');
+    } else {
+        backToTopBtn.classList.remove('visible');
+    }
+});
+
+backToTopBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
 
 // Helper: Extracts YYYYMMDD from filename and returns YYYY-MM-DD
 function formatDate(filepath) {
@@ -115,7 +130,7 @@ function renderHome() {
     const allImages = Object.values(galleryData).flat();
     
     if (allImages.length === 0) {
-        root.innerHTML = '<div class="loading">No images found in gallery.json</div>';
+        root.innerHTML = '<div class="loading-container">No images found.</div>';
         return;
     }
 
@@ -128,7 +143,6 @@ function renderHome() {
         const activeClass = index === 0 ? 'active' : '';
         const dateStr = formatDate(imgSrc);
         
-        // Note: Using 'carousel-bg' for blur effect and 'carousel-img' for main image
         html += `
             <div class="carousel-slide ${activeClass}" data-index="${index}">
                 <div class="carousel-bg" style="background-image: url('${imgSrc}')"></div>
@@ -161,7 +175,6 @@ function renderHome() {
 
 function startCarousel() {
     if (carouselInterval) clearInterval(carouselInterval);
-    // Set to 5000ms (5 seconds)
     carouselInterval = setInterval(() => moveSlide(1), 5000);
 }
 
@@ -180,7 +193,6 @@ window.moveSlide = function(direction) {
     if (nextIndex < 0) nextIndex = slides.length - 1;
     
     slides[nextIndex].classList.add('active');
-    // Reset timer when manually moved
     startCarousel();
 }
 
@@ -231,7 +243,6 @@ window.openLightbox = function(src) {
 };
 
 closeLightboxBtn.onclick = closeLightbox;
-// This handles clicking the background to close (Request #4)
 lightbox.onclick = (e) => {
     if (e.target === lightbox) closeLightbox();
 };
