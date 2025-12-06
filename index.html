@@ -5,29 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Photography Portfolio</title>
     <meta name="description" content="Minimalist Photography Portfolio">
-    <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://aistudiocdn.com/react@^19.2.1",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0",
-    "react/": "https://aistudiocdn.com/react@^19.2.1/"
-  }
-}
-</script>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-    <!-- Navigation -->
     <header class="site-header">
         <nav>
             <div class="logo">
                 <a href="#" onclick="window.location.hash=''; return false;">PORTFOLIO</a>
             </div>
             <ul id="nav-links">
-                <!-- Dynamic links injected via script.js -->
-            </ul>
+                </ul>
             <div class="mobile-menu-toggle" id="menu-toggle">
                 <span></span>
                 <span></span>
@@ -35,13 +24,10 @@
         </nav>
     </header>
 
-    <!-- Main Content Area -->
-    <!-- Changed ID to 'root' to satisfy any lingering environment defaults looking for it -->
     <main id="root">
         <div class="loading">Loading Gallery...</div>
     </main>
 
-    <!-- Lightbox -->
     <div id="lightbox" class="lightbox hidden">
         <span class="lightbox-close">&times;</span>
         <img id="lightbox-img" src="" alt="Full Screen">
