@@ -5,6 +5,7 @@ body {
     background-color: #eeeeee; /* Minimalist Grey */
     color: #333;
     line-height: 1.6;
+    min-height: 100vh;
 }
 a { text-decoration: none; color: inherit; transition: opacity 0.3s; }
 a:hover { opacity: 0.6; }
@@ -17,9 +18,10 @@ a:hover { opacity: 0.6; }
     align-items: center;
     position: sticky;
     top: 0;
-    background: rgba(238, 238, 238, 0.95); /* Matches Grey Bg */
+    background: rgba(238, 238, 238, 0.95);
     z-index: 100;
-    backdrop-filter: blur(5px); /* Nice glass effect */
+    backdrop-filter: blur(5px);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
 }
 .site-logo-img { height: 24px; width: auto; display: block; }
 
@@ -47,7 +49,7 @@ a:hover { opacity: 0.6; }
     width: 100%;
     height: 80vh; 
     overflow: hidden;
-    background: #111; /* Dark bg for carousel */
+    background: #111; 
 }
 
 .carousel-slide {
@@ -110,27 +112,37 @@ a:hover { opacity: 0.6; }
 .carousel-nav.prev { left: 1rem; }
 .carousel-nav.next { right: 1rem; }
 
-/* --- Masonry Grid (Centered) --- */
+/* --- Flex Grid (This centers items) --- */
 .masonry-grid {
-    column-count: 3;
-    column-gap: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;       /* Allows items to wrap to next line */
+    justify-content: center; /* VITAL: Centers items horizontally */
+    align-items: flex-start; /* Aligns items to top of row (prevents stretching) */
+    gap: 1.5rem;
     padding: 2rem;
-    max-width: 1200px; /* Limits width to keep columns together */
-    margin: 0 auto;    /* Centers the grid container */
+    max-width: 1200px;
+    margin: 0 auto;
 }
+
 .grid-item {
-    break-inside: avoid;
-    margin-bottom: 1.5rem;
+    /* Calculates width for 3 columns: (100% - 2 gaps) / 3 */
+    flex: 0 0 calc((100% - 3rem) / 3);
+    max-width: 400px; /* Cap width for very large screens */
     position: relative;
+    margin-bottom: 0; /* Gap handles spacing now */
 }
+
 .grid-item img {
     width: 100%;
+    height: auto;
     display: block;
     cursor: pointer;
     transition: opacity 0.3s;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05); /* Slight shadow for pop */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    border-radius: 2px;
 }
 .grid-item img:hover { opacity: 0.8; }
+
 .photo-date {
     font-size: 0.75rem; color: #666;
     margin-top: 5px; text-align: right;
@@ -142,7 +154,7 @@ a:hover { opacity: 0.6; }
 /* --- Lightbox --- */
 .lightbox {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(238,238,238,0.98); /* Grey lightbox bg */
+    background: rgba(238,238,238,0.98); 
     display: flex; justify-content: center; align-items: center;
     z-index: 1000; opacity: 1; transition: opacity 0.3s;
 }
@@ -154,8 +166,14 @@ a:hover { opacity: 0.6; }
 }
 
 /* --- Mobile Fixes --- */
-@media (max-width: 768px) {
-    .masonry-grid { column-count: 1; padding: 1rem; }
+@media (max-width: 900px) {
+    /* 2 Columns on Tablet */
+    .grid-item { flex: 0 0 calc((100% - 1.5rem) / 2); }
+}
+
+@media (max-width: 600px) {
+    /* 1 Column on Mobile */
+    .grid-item { flex: 0 0 100%; max-width: 100%; }
     
     .mobile-menu-toggle { display: block; }
     
@@ -166,23 +184,22 @@ a:hover { opacity: 0.6; }
         position: absolute; 
         top: 100%; 
         left: 0; 
-        background: #eeeeee; /* Ensure background is grey, not transparent */
+        background: #eeeeee;
         padding: 1rem 0;
         box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         text-align: center;
+        z-index: 1000;
+        border-top: 1px solid #ddd;
     }
     
     #nav-links.active { display: flex; }
     
-    #nav-links li {
-        padding: 1rem;
-        border-bottom: 1px solid rgba(0,0,0,0.05);
-    }
-    
     #nav-links a {
-        color: #000; /* Force black text */
+        color: #000; /* Strict Black Text */
         display: block;
+        padding: 1rem;
         font-size: 1.1rem;
+        width: 100%;
     }
 
     .carousel-nav { display: none; }
