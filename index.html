@@ -8,7 +8,7 @@
     <meta name="description" content="Minimalist Photography Portfolio">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="styles.css?v=7">
+    <link rel="stylesheet" href="styles.css?v=8">
 </head>
 <body>
 
@@ -32,7 +32,9 @@
     </header>
 
     <main id="root">
-        <div class="loading">Loading Gallery...</div>
+        <div class="loading-container">
+            <div class="spinner"></div>
+        </div>
     </main>
     
     <footer class="site-footer">
@@ -46,11 +48,13 @@
         </div>
     </footer>
 
+    <a href="#" id="back-to-top" title="Back to Top">&#8593;</a>
+
     <div id="lightbox" class="lightbox hidden">
         <span class="lightbox-close">&times;</span>
         <img id="lightbox-img" src="" alt="Full Screen">
     </div>
 
-    <script src="script.js?v=7"></script>
+    <script src="script.js?v=8"></script>
 </body>
 </html>
