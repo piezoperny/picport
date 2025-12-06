@@ -48,17 +48,11 @@ a:hover { opacity: 0.6; }
     pointer-events: none; 
 }
 
-#nav-links {
-    list-style: none;
-    display: flex;
-    gap: 2rem;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+/* HAMBURGER MENU (Always Visible now) */
+.mobile-menu-toggle {
+    display: block; 
+    cursor: pointer;
 }
-#nav-links a.active { font-weight: 600; border-bottom: 1px solid #333; }
-
-.mobile-menu-toggle { display: none; cursor: pointer; }
 .mobile-menu-toggle span {
     display: block;
     width: 25px;
@@ -66,6 +60,45 @@ a:hover { opacity: 0.6; }
     background-color: #333;
     margin-bottom: 5px;
 }
+
+/* NAV LINKS (Vertical Dropdown Structure) */
+#nav-links {
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    width: 100%;
+    position: absolute;
+    top: 100%; /* Pushes it right below the header */
+    left: 0;
+    background: #eeeeee; /* Grey background matches body */
+    padding: 1rem 0;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    text-align: center;
+    z-index: 1000;
+    border-top: 1px solid #ddd;
+    list-style: none;
+}
+
+/* JS adds this class to show the menu */
+#nav-links.active {
+    display: flex;
+}
+
+#nav-links a {
+    display: block;
+    padding: 1rem;
+    color: #333;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+}
+
+#nav-links a:hover {
+    background-color: rgba(0,0,0,0.02);
+    opacity: 1; /* Override default opacity hover for menu */
+}
+#nav-links a.active { font-weight: 600; }
+
 
 /* --- Fading Carousel --- */
 .carousel-container {
@@ -153,7 +186,7 @@ a:hover { opacity: 0.6; }
     max-width: 400px;
     position: relative;
     margin-bottom: 0;
-    overflow: hidden; /* KEY: Keeps zoom inside the box */
+    overflow: hidden; 
     border-radius: 2px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.08);
 }
@@ -163,11 +196,11 @@ a:hover { opacity: 0.6; }
     height: auto;
     display: block;
     cursor: pointer;
-    transition: transform 0.5s ease, opacity 0.3s; /* Smooth zoom */
+    transition: transform 0.5s ease, opacity 0.3s;
 }
 .grid-item img:hover { 
     opacity: 1; 
-    transform: scale(1.03); /* The Zoom */
+    transform: scale(1.03); 
 }
 
 .photo-date {
@@ -261,40 +294,13 @@ a:hover { opacity: 0.6; }
     background: #555;
 }
 
-/* --- Mobile Fixes --- */
+/* --- Mobile Fixes (Updated) --- */
 @media (max-width: 900px) {
     .grid-item { flex: 0 0 calc((100% - 1.5rem) / 2); }
 }
 
 @media (max-width: 600px) {
     .grid-item { flex: 0 0 100%; max-width: 100%; }
-    
-    .mobile-menu-toggle { display: block; }
-    
-    #nav-links {
-        display: none; 
-        flex-direction: column; 
-        width: 100%;
-        position: absolute; 
-        top: 100%; 
-        left: 0; 
-        background: #eeeeee;
-        padding: 1rem 0;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        text-align: center;
-        z-index: 1000;
-        border-top: 1px solid #ddd;
-    }
-    
-    #nav-links.active { display: flex; }
-    
-    #nav-links a {
-        color: #000;
-        display: block;
-        padding: 1rem;
-        font-size: 1.1rem;
-        width: 100%;
-    }
-
+    /* Nav styles are now handled globally */
     .carousel-nav { display: none; }
 }
