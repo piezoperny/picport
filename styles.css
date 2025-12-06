@@ -30,12 +30,11 @@ a:hover { opacity: 0.6; }
     justify-content: space-between; 
     align-items: center;
     width: 100%; 
-    position: relative; /* Needed for absolute centering */
+    position: relative; 
 }
 
 .site-logo-img { height: 24px; width: auto; display: block; }
 
-/* NEW: Centered Title */
 .site-title {
     position: absolute;
     left: 50%;
@@ -45,8 +44,8 @@ a:hover { opacity: 0.6; }
     letter-spacing: 0.1em;
     font-weight: 500;
     color: #333;
-    white-space: nowrap; /* Prevents wrapping on small screens */
-    pointer-events: none; /* Lets clicks pass through if needed */
+    white-space: nowrap;
+    pointer-events: none; 
 }
 
 #nav-links {
@@ -137,7 +136,7 @@ a:hover { opacity: 0.6; }
 .carousel-nav.prev { left: 1rem; }
 .carousel-nav.next { right: 1rem; }
 
-/* --- Flex Grid (Centered) --- */
+/* --- Flex Grid (with Zoom Effect) --- */
 .masonry-grid {
     display: flex;
     flex-wrap: wrap;       
@@ -153,7 +152,10 @@ a:hover { opacity: 0.6; }
     flex: 0 0 calc((100% - 3rem) / 3);
     max-width: 400px;
     position: relative;
-    margin-bottom: 0; 
+    margin-bottom: 0;
+    overflow: hidden; /* KEY: Keeps zoom inside the box */
+    border-radius: 2px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
 }
 
 .grid-item img {
@@ -161,11 +163,12 @@ a:hover { opacity: 0.6; }
     height: auto;
     display: block;
     cursor: pointer;
-    transition: opacity 0.3s;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-    border-radius: 2px;
+    transition: transform 0.5s ease, opacity 0.3s; /* Smooth zoom */
 }
-.grid-item img:hover { opacity: 0.8; }
+.grid-item img:hover { 
+    opacity: 1; 
+    transform: scale(1.03); /* The Zoom */
+}
 
 .photo-date {
     font-size: 0.75rem; color: #666;
@@ -210,6 +213,52 @@ a:hover { opacity: 0.6; }
 .lightbox-close {
     position: absolute; top: 2rem; right: 2rem;
     font-size: 3rem; cursor: pointer; color: #333;
+}
+
+/* --- Loading Spinner --- */
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50vh;
+    width: 100%;
+}
+.spinner {
+    width: 40px; 
+    height: 40px; 
+    border: 3px solid rgba(0,0,0,0.1); 
+    border-top-color: #333; 
+    border-radius: 50%; 
+    animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* --- Back to Top Button --- */
+#back-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #333;
+    color: #fff;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, background 0.3s;
+    z-index: 999;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+#back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+}
+#back-to-top:hover {
+    background: #555;
 }
 
 /* --- Mobile Fixes --- */
