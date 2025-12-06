@@ -21,10 +21,9 @@ async function init() {
         
         if (!response.ok) {
             console.warn('gallery.json not found, using demo data');
+            // Demo data fallback
             galleryData = {
                 "Nature": ["https://picsum.photos/800/1200?random=1", "https://picsum.photos/1200/800?random=2"],
-                "Urban": ["https://picsum.photos/800/1200?random=3", "https://picsum.photos/1200/800?random=4"],
-                "Travel": ["https://picsum.photos/800/800?random=5"]
             };
         } else {
             galleryData = await response.json();
@@ -36,6 +35,28 @@ async function init() {
     } catch (error) {
         console.error(error);
         root.innerHTML = '<div class="loading">Error loading gallery.</div>';
+    }
+}
+
+// Helper: Extracts YYYYMMDD from filename and returns YYYY-MM-DD
+function formatDate(filepath) {
+    try {
+        // 1. Get just the filename (remove "images/MASTER/...")
+        const filename = filepath.split('/').pop();
+        
+        // 2. Look for the pattern YYYYMMDD at the start
+        // This regex looks for 8 digits at the start of the file
+        const match = filename.match(/^(\d{4})(\d{2})(\d{2})/);
+        
+        if (match) {
+            const year = match[1];
+            const month = match[2];
+            const day = match[3];
+            return `${year}-${month}-${day}`; // Returns "2025-11-18"
+        }
+        return ""; // Return empty if no date found
+    } catch (e) {
+        return "";
     }
 }
 
@@ -111,16 +132,18 @@ function renderHome() {
     let html = `<div class="carousel-container" id="carousel">`;
     selection.forEach((imgSrc, index) => {
         const activeClass = index === 0 ? 'active' : '';
-        // Added onclick to open lightbox even from carousel
+        const dateStr = formatDate(imgSrc);
+        
         html += `
             <div class="carousel-slide ${activeClass}" data-index="${index}">
                 <div class="carousel-bg" style="background-image: url('${imgSrc}')"></div>
                 <img src="${imgSrc}" class="carousel-img" alt="Featured" onclick="openLightbox('${imgSrc}')">
+                
+                ${dateStr ? `<div class="carousel-date">${dateStr}</div>` : ''}
             </div>
         `;
     });
     
-    // Add navigation arrows for desktop users (optional but nice)
     html += `
         <div class="carousel-nav prev" onclick="moveSlide(-1)">&#10094;</div>
         <div class="carousel-nav next" onclick="moveSlide(1)">&#10095;</div>
@@ -128,7 +151,7 @@ function renderHome() {
     
     root.innerHTML = html;
     
-    // Initialize Touch Events for Swiping
+    // Touch Events
     const carousel = document.getElementById('carousel');
     carousel.addEventListener('touchstart', e => {
         touchStartX = e.changedTouches[0].screenX;
@@ -147,7 +170,6 @@ function startCarousel() {
     carouselInterval = setInterval(() => moveSlide(1), 5000);
 }
 
-// Unified function to change slides
 window.moveSlide = function(direction) {
     const slides = document.querySelectorAll('.carousel-slide');
     if (!slides.length) return;
@@ -158,24 +180,21 @@ window.moveSlide = function(direction) {
         slide.classList.remove('active');
     });
     
-    // Calculate next index (loops around)
     let nextIndex = activeIndex + direction;
     if (nextIndex >= slides.length) nextIndex = 0;
     if (nextIndex < 0) nextIndex = slides.length - 1;
     
     slides[nextIndex].classList.add('active');
-    
-    // Reset timer so it doesn't auto-switch immediately after a manual switch
     startCarousel();
 }
 
 function handleSwipe() {
-    const swipeThreshold = 50; // Minimum distance to count as a swipe
+    const swipeThreshold = 50;
     if (touchEndX < touchStartX - swipeThreshold) {
-        moveSlide(1); // Swipe Left -> Next
+        moveSlide(1); 
     }
     if (touchEndX > touchStartX + swipeThreshold) {
-        moveSlide(-1); // Swipe Right -> Prev
+        moveSlide(-1);
     }
 }
 
@@ -194,9 +213,12 @@ function renderGallery(category) {
     `;
     
     images.forEach(imgSrc => {
+        const dateStr = formatDate(imgSrc);
+        
         html += `
             <div class="grid-item">
                 <img src="${imgSrc}" loading="lazy" alt="${category}" onclick="openLightbox('${imgSrc}')">
+                ${dateStr ? `<div class="photo-date">${dateStr}</div>` : ''}
             </div>
         `;
     });
@@ -206,9 +228,7 @@ function renderGallery(category) {
 }
 
 window.openLightbox = function(src) {
-    // Stop carousel if we open an image from home
     if (carouselInterval) clearInterval(carouselInterval);
-    
     lightboxImg.src = src;
     lightbox.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
@@ -223,9 +243,5 @@ function closeLightbox() {
     lightbox.classList.add('hidden');
     document.body.style.overflow = '';
     setTimeout(() => { lightboxImg.src = ''; }, 300);
-    
-    // Restart carousel if we are on the home page
-    if (!window.location.hash) {
-        startCarousel();
-    }
+    if (!window.location.hash) startCarousel();
 }
