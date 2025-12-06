@@ -75,3 +75,10 @@
         font-size: 0.8rem;
     }
 }
+
+/* Add this to styles.css */
+.site-logo-img {
+    height: 40px; /* Adjusts the logo to fit the header */
+    width: auto;  /* Keeps the aspect ratio */
+    vertical-align: middle;
+}
