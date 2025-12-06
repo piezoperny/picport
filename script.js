@@ -16,6 +16,10 @@ const closeLightboxBtn = document.querySelector('.lightbox-close');
 document.addEventListener('DOMContentLoaded', init);
 
 async function init() {
+    // 1. Set Footer Year Automatically
+    const yearSpan = document.getElementById('year');
+    if (yearSpan) yearSpan.textContent = new Date().getFullYear();
+
     try {
         const response = await fetch('gallery.json');
         
@@ -157,7 +161,7 @@ function renderHome() {
 
 function startCarousel() {
     if (carouselInterval) clearInterval(carouselInterval);
-    // Set to 5000ms (5 seconds) as requested
+    // Set to 5000ms (5 seconds)
     carouselInterval = setInterval(() => moveSlide(1), 5000);
 }
 
@@ -227,6 +231,7 @@ window.openLightbox = function(src) {
 };
 
 closeLightboxBtn.onclick = closeLightbox;
+// This handles clicking the background to close (Request #4)
 lightbox.onclick = (e) => {
     if (e.target === lightbox) closeLightbox();
 };
