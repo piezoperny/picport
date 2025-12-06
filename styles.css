@@ -1,5 +1,8 @@
 /* --- Global & Reset --- */
 * { box-sizing: border-box; margin: 0; padding: 0; }
+html {
+    scroll-behavior: smooth; /* Request #3: Smooth Scrolling */
+}
 body {
     font-family: 'Inter', sans-serif;
     background-color: #eeeeee; 
@@ -7,7 +10,7 @@ body {
     line-height: 1.6;
     min-height: 100vh;
     display: flex;
-    flex-direction: column; /* Needed for sticky footer */
+    flex-direction: column;
 }
 a { text-decoration: none; color: inherit; transition: opacity 0.3s; }
 a:hover { opacity: 0.6; }
@@ -21,15 +24,16 @@ a:hover { opacity: 0.6; }
     z-index: 100;
     backdrop-filter: blur(5px);
     border-bottom: 1px solid rgba(0,0,0,0.05);
-    /* Removed flex here, moved to nav below */
+    display: flex; /* Ensures the nav container behaves correctly */
+    width: 100%;
 }
 
-/* FIX: This ensures the logo stays left and menu goes right */
+/* FIX: Logo Left, Menu Right */
 .site-header nav {
     display: flex;
     justify-content: space-between; 
     align-items: center;
-    width: 100%;
+    width: 100%; 
 }
 
 .site-logo-img { height: 24px; width: auto; display: block; }
@@ -43,6 +47,7 @@ a:hover { opacity: 0.6; }
     letter-spacing: 0.05em;
 }
 #nav-links a.active { font-weight: 600; border-bottom: 1px solid #333; }
+
 .mobile-menu-toggle { display: none; cursor: pointer; }
 .mobile-menu-toggle span {
     display: block;
@@ -159,14 +164,27 @@ a:hover { opacity: 0.6; }
 .gallery-header { padding: 3rem 2rem 1rem; text-align: center; }
 .gallery-title { font-weight: 300; letter-spacing: 0.1em; text-transform: capitalize; }
 
-/* --- Footer --- */
+/* --- Footer (Updated) --- */
 .site-footer {
-    margin-top: auto; /* Pushes footer to bottom */
-    padding: 2rem;
+    margin-top: auto; 
+    padding: 3rem 2rem;
     text-align: center;
-    font-size: 0.8rem;
-    color: #888;
+    font-size: 0.85rem;
+    color: #666;
     border-top: 1px solid rgba(0,0,0,0.05);
+    background: #eeeeee;
+}
+
+.footer-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.footer-links a {
+    font-weight: 500;
+    color: #333;
+    margin: 0 5px;
 }
 
 /* --- Lightbox --- */
