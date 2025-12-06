@@ -1,6 +1,8 @@
 // State
 let galleryData = {};
 let carouselInterval;
+let touchStartX = 0;
+let touchEndX = 0;
 
 // DOM Elements
 const root = document.getElementById('root');
@@ -18,7 +20,6 @@ async function init() {
         const response = await fetch('gallery.json');
         
         if (!response.ok) {
-            // Fallback for demo if gallery.json doesn't exist yet
             console.warn('gallery.json not found, using demo data');
             galleryData = {
                 "Nature": ["https://picsum.photos/800/1200?random=1", "https://picsum.photos/1200/800?random=2"],
@@ -30,8 +31,7 @@ async function init() {
         }
         
         renderNavigation();
-        handleRouting(); // Initial load
-        
+        handleRouting(); 
         window.addEventListener('hashchange', handleRouting);
     } catch (error) {
         console.error(error);
@@ -42,8 +42,6 @@ async function init() {
 // Navigation
 function renderNavigation() {
     const categories = Object.keys(galleryData).sort();
-    
-    // Clear and rebuild
     navLinksContainer.innerHTML = '';
     
     // Home Link
@@ -61,7 +59,6 @@ function renderNavigation() {
         navLinksContainer.appendChild(li);
     });
 
-    // Mobile menu toggle
     mobileMenuToggle.onclick = () => {
         navLinksContainer.classList.toggle('active');
     };
@@ -93,11 +90,12 @@ function handleRouting() {
     } else if (galleryData[category]) {
         renderGallery(category);
     } else {
-        renderHome(); // Fallback
+        renderHome();
     }
 }
 
-// Home Page - Carousel
+// --- HOME PAGE & CAROUSEL ---
+
 function renderHome() {
     const allImages = Object.values(galleryData).flat();
     
@@ -110,41 +108,79 @@ function renderHome() {
     const shuffled = [...allImages].sort(() => 0.5 - Math.random());
     const selection = shuffled.slice(0, 10);
 
-    let html = `<div class="carousel-container">`;
+    let html = `<div class="carousel-container" id="carousel">`;
     selection.forEach((imgSrc, index) => {
         const activeClass = index === 0 ? 'active' : '';
+        // Added onclick to open lightbox even from carousel
         html += `
             <div class="carousel-slide ${activeClass}" data-index="${index}">
                 <div class="carousel-bg" style="background-image: url('${imgSrc}')"></div>
-                <img src="${imgSrc}" class="carousel-img" alt="Featured">
+                <img src="${imgSrc}" class="carousel-img" alt="Featured" onclick="openLightbox('${imgSrc}')">
             </div>
         `;
     });
-    html += `</div>`;
+    
+    // Add navigation arrows for desktop users (optional but nice)
+    html += `
+        <div class="carousel-nav prev" onclick="moveSlide(-1)">&#10094;</div>
+        <div class="carousel-nav next" onclick="moveSlide(1)">&#10095;</div>
+    </div>`;
     
     root.innerHTML = html;
+    
+    // Initialize Touch Events for Swiping
+    const carousel = document.getElementById('carousel');
+    carousel.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, {passive: true});
+
+    carousel.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    }, {passive: true});
+
     startCarousel();
 }
 
 function startCarousel() {
     if (carouselInterval) clearInterval(carouselInterval);
-    
-    carouselInterval = setInterval(() => {
-        const slides = document.querySelectorAll('.carousel-slide');
-        if (!slides.length) return;
-        
-        let activeIndex = 0;
-        slides.forEach((slide, index) => {
-            if (slide.classList.contains('active')) activeIndex = index;
-            slide.classList.remove('active');
-        });
-        
-        const nextIndex = (activeIndex + 1) % slides.length;
-        slides[nextIndex].classList.add('active');
-    }, 5000);
+    carouselInterval = setInterval(() => moveSlide(1), 5000);
 }
 
-// Gallery Page - Masonry
+// Unified function to change slides
+window.moveSlide = function(direction) {
+    const slides = document.querySelectorAll('.carousel-slide');
+    if (!slides.length) return;
+    
+    let activeIndex = 0;
+    slides.forEach((slide, index) => {
+        if (slide.classList.contains('active')) activeIndex = index;
+        slide.classList.remove('active');
+    });
+    
+    // Calculate next index (loops around)
+    let nextIndex = activeIndex + direction;
+    if (nextIndex >= slides.length) nextIndex = 0;
+    if (nextIndex < 0) nextIndex = slides.length - 1;
+    
+    slides[nextIndex].classList.add('active');
+    
+    // Reset timer so it doesn't auto-switch immediately after a manual switch
+    startCarousel();
+}
+
+function handleSwipe() {
+    const swipeThreshold = 50; // Minimum distance to count as a swipe
+    if (touchEndX < touchStartX - swipeThreshold) {
+        moveSlide(1); // Swipe Left -> Next
+    }
+    if (touchEndX > touchStartX + swipeThreshold) {
+        moveSlide(-1); // Swipe Right -> Prev
+    }
+}
+
+// --- GALLERY & LIGHTBOX ---
+
 function renderGallery(category) {
     if (carouselInterval) clearInterval(carouselInterval);
     
@@ -169,8 +205,10 @@ function renderGallery(category) {
     root.innerHTML = html;
 }
 
-// Lightbox
 window.openLightbox = function(src) {
+    // Stop carousel if we open an image from home
+    if (carouselInterval) clearInterval(carouselInterval);
+    
     lightboxImg.src = src;
     lightbox.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
@@ -185,4 +223,9 @@ function closeLightbox() {
     lightbox.classList.add('hidden');
     document.body.style.overflow = '';
     setTimeout(() => { lightboxImg.src = ''; }, 300);
+    
+    // Restart carousel if we are on the home page
+    if (!window.location.hash) {
+        startCarousel();
+    }
 }
