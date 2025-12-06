@@ -2,10 +2,12 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
     font-family: 'Inter', sans-serif;
-    background-color: #eeeeee; /* Minimalist Grey */
+    background-color: #eeeeee; 
     color: #333;
     line-height: 1.6;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column; /* Needed for sticky footer */
 }
 a { text-decoration: none; color: inherit; transition: opacity 0.3s; }
 a:hover { opacity: 0.6; }
@@ -13,16 +15,23 @@ a:hover { opacity: 0.6; }
 /* --- Header & Nav --- */
 .site-header {
     padding: 1.5rem 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     position: sticky;
     top: 0;
     background: rgba(238, 238, 238, 0.95);
     z-index: 100;
     backdrop-filter: blur(5px);
     border-bottom: 1px solid rgba(0,0,0,0.05);
+    /* Removed flex here, moved to nav below */
 }
+
+/* FIX: This ensures the logo stays left and menu goes right */
+.site-header nav {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    width: 100%;
+}
+
 .site-logo-img { height: 24px; width: auto; display: block; }
 
 #nav-links {
@@ -112,12 +121,12 @@ a:hover { opacity: 0.6; }
 .carousel-nav.prev { left: 1rem; }
 .carousel-nav.next { right: 1rem; }
 
-/* --- Flex Grid (This centers items) --- */
+/* --- Flex Grid (Centered) --- */
 .masonry-grid {
     display: flex;
-    flex-wrap: wrap;       /* Allows items to wrap to next line */
-    justify-content: center; /* VITAL: Centers items horizontally */
-    align-items: flex-start; /* Aligns items to top of row (prevents stretching) */
+    flex-wrap: wrap;       
+    justify-content: center; 
+    align-items: flex-start; 
     gap: 1.5rem;
     padding: 2rem;
     max-width: 1200px;
@@ -125,11 +134,10 @@ a:hover { opacity: 0.6; }
 }
 
 .grid-item {
-    /* Calculates width for 3 columns: (100% - 2 gaps) / 3 */
     flex: 0 0 calc((100% - 3rem) / 3);
-    max-width: 400px; /* Cap width for very large screens */
+    max-width: 400px;
     position: relative;
-    margin-bottom: 0; /* Gap handles spacing now */
+    margin-bottom: 0; 
 }
 
 .grid-item img {
@@ -151,6 +159,16 @@ a:hover { opacity: 0.6; }
 .gallery-header { padding: 3rem 2rem 1rem; text-align: center; }
 .gallery-title { font-weight: 300; letter-spacing: 0.1em; text-transform: capitalize; }
 
+/* --- Footer --- */
+.site-footer {
+    margin-top: auto; /* Pushes footer to bottom */
+    padding: 2rem;
+    text-align: center;
+    font-size: 0.8rem;
+    color: #888;
+    border-top: 1px solid rgba(0,0,0,0.05);
+}
+
 /* --- Lightbox --- */
 .lightbox {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -167,12 +185,10 @@ a:hover { opacity: 0.6; }
 
 /* --- Mobile Fixes --- */
 @media (max-width: 900px) {
-    /* 2 Columns on Tablet */
     .grid-item { flex: 0 0 calc((100% - 1.5rem) / 2); }
 }
 
 @media (max-width: 600px) {
-    /* 1 Column on Mobile */
     .grid-item { flex: 0 0 100%; max-width: 100%; }
     
     .mobile-menu-toggle { display: block; }
@@ -195,7 +211,7 @@ a:hover { opacity: 0.6; }
     #nav-links.active { display: flex; }
     
     #nav-links a {
-        color: #000; /* Strict Black Text */
+        color: #000;
         display: block;
         padding: 1rem;
         font-size: 1.1rem;
