@@ -1,8 +1,6 @@
 /* --- Global & Reset --- */
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html {
-    scroll-behavior: smooth; /* Request #3: Smooth Scrolling */
-}
+html { scroll-behavior: smooth; }
 body {
     font-family: 'Inter', sans-serif;
     background-color: #eeeeee; 
@@ -24,19 +22,32 @@ a:hover { opacity: 0.6; }
     z-index: 100;
     backdrop-filter: blur(5px);
     border-bottom: 1px solid rgba(0,0,0,0.05);
-    display: flex; /* Ensures the nav container behaves correctly */
     width: 100%;
 }
 
-/* FIX: Logo Left, Menu Right */
 .site-header nav {
     display: flex;
     justify-content: space-between; 
     align-items: center;
     width: 100%; 
+    position: relative; /* Needed for absolute centering */
 }
 
 .site-logo-img { height: 24px; width: auto; display: block; }
+
+/* NEW: Centered Title */
+.site-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 500;
+    color: #333;
+    white-space: nowrap; /* Prevents wrapping on small screens */
+    pointer-events: none; /* Lets clicks pass through if needed */
+}
 
 #nav-links {
     list-style: none;
@@ -164,7 +175,7 @@ a:hover { opacity: 0.6; }
 .gallery-header { padding: 3rem 2rem 1rem; text-align: center; }
 .gallery-title { font-weight: 300; letter-spacing: 0.1em; text-transform: capitalize; }
 
-/* --- Footer (Updated) --- */
+/* --- Footer --- */
 .site-footer {
     margin-top: auto; 
     padding: 3rem 2rem;
