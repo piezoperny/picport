@@ -39,3 +39,39 @@
         display: none;
     }
 }
+
+/* --- Date Styles --- */
+
+/* Date in the Masonry Grid */
+.photo-date {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 6px;
+    margin-bottom: 4px;
+    text-align: right;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0.05em;
+    opacity: 0.8;
+}
+
+/* Date in the Home Carousel */
+.carousel-date {
+    position: absolute;
+    bottom: 4rem; /* Sits above the bottom edge */
+    right: 10%;   /* Aligns slightly inwards from the right */
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    z-index: 3;
+    pointer-events: none;
+}
+
+/* Adjust for mobile */
+@media (max-width: 768px) {
+    .carousel-date {
+        bottom: 2rem;
+        right: 1rem;
+        font-size: 0.8rem;
+    }
+}
