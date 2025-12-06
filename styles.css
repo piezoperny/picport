@@ -105,6 +105,7 @@ main {
     width: 100%;
     height: calc(100vh - 64px);
     overflow: hidden;
+    background-color: #000;
 }
 
 .carousel-slide {
@@ -168,13 +169,14 @@ main {
     position: relative;
     cursor: zoom-in;
     overflow: hidden;
+    border-radius: 2px;
 }
 
 .grid-item img {
     width: 100%;
     display: block;
     transition: transform 0.5s ease;
-    border-radius: 2px;
+    background-color: #111;
 }
 
 .grid-item:hover img {
@@ -234,11 +236,10 @@ main {
 
 @media (max-width: 768px) {
     #nav-links {
-        display: none; /* Hide for now, simple implementation */
+        display: none;
     }
-    /* Simple mobile nav handling if needed */
     nav {
-        justify-content: center;
+        justify-content: space-between;
     }
     #nav-links.active {
         display: flex;
@@ -250,10 +251,9 @@ main {
         background: var(--nav-bg);
         padding: 1rem;
         text-align: center;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
     }
     .mobile-menu-toggle {
         display: flex;
-        position: absolute;
-        right: 1.5rem;
     }
 }
