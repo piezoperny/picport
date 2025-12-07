@@ -63,13 +63,13 @@ a:hover { opacity: 0.6; }
 
 /* NAV LINKS (Vertical Dropdown Structure) */
 #nav-links {
-    display: none; /* Hidden by default */
+    display: none; 
     flex-direction: column;
     width: 100%;
     position: absolute;
-    top: 100%; /* Pushes it right below the header */
+    top: 100%; 
     left: 0;
-    background: #eeeeee; /* Grey background matches body */
+    background: #eeeeee; 
     padding: 1rem 0;
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     text-align: center;
@@ -78,10 +78,7 @@ a:hover { opacity: 0.6; }
     list-style: none;
 }
 
-/* JS adds this class to show the menu */
-#nav-links.active {
-    display: flex;
-}
+#nav-links.active { display: flex; }
 
 #nav-links a {
     display: block;
@@ -95,10 +92,9 @@ a:hover { opacity: 0.6; }
 
 #nav-links a:hover {
     background-color: rgba(0,0,0,0.02);
-    opacity: 1; /* Override default opacity hover for menu */
+    opacity: 1; 
 }
 #nav-links a.active { font-weight: 600; }
-
 
 /* --- Fading Carousel --- */
 .carousel-container {
@@ -294,13 +290,20 @@ a:hover { opacity: 0.6; }
     background: #555;
 }
 
-/* --- Mobile Fixes (Updated) --- */
+/* --- Mobile Fixes --- */
 @media (max-width: 900px) {
     .grid-item { flex: 0 0 calc((100% - 1.5rem) / 2); }
 }
 
 @media (max-width: 600px) {
     .grid-item { flex: 0 0 100%; max-width: 100%; }
-    /* Nav styles are now handled globally */
-    .carousel-nav { display: none; }
+    
+    /* ENABLED: Arrows visible on mobile now */
+    .carousel-nav {
+        display: block;
+        font-size: 1.5rem; /* Slightly smaller arrows */
+        padding: 0.5rem;
+    }
+    .carousel-nav.prev { left: 0.5rem; }
+    .carousel-nav.next { right: 0.5rem; }
 }
