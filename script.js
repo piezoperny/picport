@@ -3,6 +3,7 @@ let galleryData = {};
 let carouselInterval;
 let touchStartX = 0;
 let touchEndX = 0;
+let logoRotation = 0; // Tracks current rotation
 
 // DOM Elements
 const root = document.getElementById('root');
@@ -12,14 +13,32 @@ const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightbox-img');
 const closeLightboxBtn = document.querySelector('.lightbox-close');
 const backToTopBtn = document.getElementById('back-to-top');
+// FIX: Grab the link wrapper instead of just the image
+const logoLink = document.getElementById('logo-link');
+const logoImg = document.querySelector('.site-logo-img');
 
 // Init
 document.addEventListener('DOMContentLoaded', init);
 
 async function init() {
-    // 1. Set Footer Year Automatically
+    // 1. Set Footer Year
     const yearSpan = document.getElementById('year');
     if (yearSpan) yearSpan.textContent = new Date().getFullYear();
+
+    // 2. Logo Rotation Feature (Attached to the Link)
+    if (logoLink && logoImg) {
+        logoLink.addEventListener('click', (e) => {
+            // Prevent the link from reloading/navigating so we can see the spin
+            e.preventDefault(); 
+            
+            // Random spin between 60deg and 360deg
+            const randomDeg = Math.floor(Math.random() * 300) + 60;
+            const direction = Math.random() < 0.5 ? -1 : 1;
+            
+            logoRotation += (randomDeg * direction);
+            logoImg.style.transform = `rotate(${logoRotation}deg)`;
+        });
+    }
 
     try {
         const response = await fetch('gallery.json');
@@ -54,7 +73,7 @@ backToTopBtn.addEventListener('click', (e) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
-// Helper: Extracts YYYYMMDD from filename and returns YYYY-MM-DD
+// Helper: Extracts YYYYMMDD from filename
 function formatDate(filepath) {
     try {
         const filename = filepath.split('/').pop();
