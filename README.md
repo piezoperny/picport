@@ -1,6 +1,4 @@
-# picport
-
-# marco's gallery
+# picport - marco's gallery
 
 personal photography portfolio. custom-built for visual focus.
 
