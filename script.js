@@ -3,7 +3,7 @@ let galleryData = {};
 let carouselInterval;
 let touchStartX = 0;
 let touchEndX = 0;
-let logoRotation = 0; // Tracks current rotation
+let logoRotation = 0; 
 
 // DOM Elements
 const root = document.getElementById('root');
@@ -13,7 +13,6 @@ const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightbox-img');
 const closeLightboxBtn = document.querySelector('.lightbox-close');
 const backToTopBtn = document.getElementById('back-to-top');
-// FIX: Grab the link wrapper instead of just the image
 const logoLink = document.getElementById('logo-link');
 const logoImg = document.querySelector('.site-logo-img');
 
@@ -21,20 +20,14 @@ const logoImg = document.querySelector('.site-logo-img');
 document.addEventListener('DOMContentLoaded', init);
 
 async function init() {
-    // 1. Set Footer Year
     const yearSpan = document.getElementById('year');
     if (yearSpan) yearSpan.textContent = new Date().getFullYear();
 
-    // 2. Logo Rotation Feature (Attached to the Link)
     if (logoLink && logoImg) {
         logoLink.addEventListener('click', (e) => {
-            // Prevent the link from reloading/navigating so we can see the spin
             e.preventDefault(); 
-            
-            // Random spin between 60deg and 360deg
             const randomDeg = Math.floor(Math.random() * 300) + 60;
             const direction = Math.random() < 0.5 ? -1 : 1;
-            
             logoRotation += (randomDeg * direction);
             logoImg.style.transform = `rotate(${logoRotation}deg)`;
         });
@@ -42,7 +35,6 @@ async function init() {
 
     try {
         const response = await fetch('gallery.json');
-        
         if (!response.ok) {
             console.warn('gallery.json not found');
             root.innerHTML = '<div class="loading-container">Gallery not found.</div>';
@@ -78,7 +70,6 @@ function formatDate(filepath) {
     try {
         const filename = filepath.split('/').pop();
         const match = filename.match(/^(\d{4})(\d{2})(\d{2})/);
-        
         if (match) {
             return `${match[1]}-${match[2]}-${match[3]}`;
         }
@@ -93,12 +84,17 @@ function renderNavigation() {
     const categories = Object.keys(galleryData).sort();
     navLinksContainer.innerHTML = '';
     
-    // Home Link
+    // 1. Home Link
     const homeLi = document.createElement('li');
     homeLi.innerHTML = `<a href="#" onclick="window.location.hash=''; return false;">Home</a>`;
     navLinksContainer.appendChild(homeLi);
 
-    // Category Links
+    // 2. "All" Link (New Feature)
+    const allLi = document.createElement('li');
+    allLi.innerHTML = `<a href="#all">All</a>`;
+    navLinksContainer.appendChild(allLi);
+
+    // 3. Category Links
     categories.forEach(category => {
         const li = document.createElement('li');
         const a = document.createElement('a');
@@ -117,7 +113,9 @@ function updateActiveNav(category) {
     const links = navLinksContainer.querySelectorAll('a');
     links.forEach(link => {
         const linkHash = link.getAttribute('href');
+        // Handle Home ('#' or ''), All ('#all'), or Categories ('#name')
         if ((category === null && (linkHash === '#' || linkHash === '')) || 
+            (category === 'all' && linkHash === '#all') ||
             linkHash === `#${category}`) {
             link.classList.add('active');
         } else {
@@ -136,15 +134,16 @@ function handleRouting() {
     
     if (!category) {
         renderHome();
+    } else if (category === 'all') {
+        renderAllGallery(); // New Function
     } else if (galleryData[category]) {
         renderGallery(category);
     } else {
-        renderHome(); // Fallback
+        renderHome(); 
     }
 }
 
-// --- HOME PAGE & FADING CAROUSEL ---
-
+// --- HOME PAGE ---
 function renderHome() {
     const allImages = Object.values(galleryData).flat();
     
@@ -153,7 +152,6 @@ function renderHome() {
         return;
     }
 
-    // Pick 10 random images
     const shuffled = [...allImages].sort(() => 0.5 - Math.random());
     const selection = shuffled.slice(0, 10);
 
@@ -192,6 +190,71 @@ function renderHome() {
     startCarousel();
 }
 
+// --- ALL GALLERY (SORTED BY DATE) ---
+function renderAllGallery() {
+    if (carouselInterval) clearInterval(carouselInterval);
+
+    // 1. Gather all images from all categories
+    let allImages = Object.values(galleryData).flat();
+
+    // 2. Sort by filename (which contains the date) descending
+    // This ensures 20251206 shows up before 20251118
+    allImages.sort((a, b) => {
+        const fileA = a.split('/').pop();
+        const fileB = b.split('/').pop();
+        return fileB.localeCompare(fileA);
+    });
+
+    let html = `
+        <div class="gallery-header">
+            <h1 class="gallery-title">archive</h1>
+        </div>
+        <div class="masonry-grid">
+    `;
+
+    allImages.forEach(imgSrc => {
+        const dateStr = formatDate(imgSrc);
+        html += `
+            <div class="grid-item">
+                <img src="${imgSrc}" loading="lazy" alt="Archive" onclick="openLightbox('${imgSrc}')">
+                ${dateStr ? `<div class="photo-date">${dateStr}</div>` : ''}
+            </div>
+        `;
+    });
+
+    html += `</div>`;
+    root.innerHTML = html;
+}
+
+// --- CATEGORY GALLERY ---
+function renderGallery(category) {
+    if (carouselInterval) clearInterval(carouselInterval);
+    
+    const images = galleryData[category];
+    
+    let html = `
+        <div class="gallery-header">
+            <h1 class="gallery-title">${category}</h1>
+        </div>
+        <div class="masonry-grid">
+    `;
+    
+    images.forEach(imgSrc => {
+        const dateStr = formatDate(imgSrc);
+        
+        html += `
+            <div class="grid-item">
+                <img src="${imgSrc}" loading="lazy" alt="${category}" onclick="openLightbox('${imgSrc}')">
+                ${dateStr ? `<div class="photo-date">${dateStr}</div>` : ''}
+            </div>
+        `;
+    });
+    
+    html += `</div>`;
+    root.innerHTML = html;
+}
+
+// --- CAROUSEL LOGIC ---
 function startCarousel() {
     if (carouselInterval) clearInterval(carouselInterval);
     carouselInterval = setInterval(() => moveSlide(1), 5000);
@@ -225,35 +288,7 @@ function handleSwipe() {
     }
 }
 
-// --- GALLERY & LIGHTBOX ---
-
-function renderGallery(category) {
-    if (carouselInterval) clearInterval(carouselInterval);
-    
-    const images = galleryData[category];
-    
-    let html = `
-        <div class="gallery-header">
-            <h1 class="gallery-title">${category}</h1>
-        </div>
-        <div class="masonry-grid">
-    `;
-    
-    images.forEach(imgSrc => {
-        const dateStr = formatDate(imgSrc);
-        
-        html += `
-            <div class="grid-item">
-                <img src="${imgSrc}" loading="lazy" alt="${category}" onclick="openLightbox('${imgSrc}')">
-                ${dateStr ? `<div class="photo-date">${dateStr}</div>` : ''}
-            </div>
-        `;
-    });
-    
-    html += `</div>`;
-    root.innerHTML = html;
-}
-
+// --- LIGHTBOX ---
 window.openLightbox = function(src) {
     if (carouselInterval) clearInterval(carouselInterval);
     lightboxImg.src = src;
