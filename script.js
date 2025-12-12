@@ -84,17 +84,14 @@ function renderNavigation() {
     const categories = Object.keys(galleryData).sort();
     navLinksContainer.innerHTML = '';
     
-    // 1. Home Link
     const homeLi = document.createElement('li');
     homeLi.innerHTML = `<a href="#" onclick="window.location.hash=''; return false;">Home</a>`;
     navLinksContainer.appendChild(homeLi);
 
-    // 2. "All" Link (New Feature)
     const allLi = document.createElement('li');
     allLi.innerHTML = `<a href="#all">All</a>`;
     navLinksContainer.appendChild(allLi);
 
-    // 3. Category Links
     categories.forEach(category => {
         const li = document.createElement('li');
         const a = document.createElement('a');
@@ -103,6 +100,10 @@ function renderNavigation() {
         li.appendChild(a);
         navLinksContainer.appendChild(li);
     });
+
+    const aboutLi = document.createElement('li');
+    aboutLi.innerHTML = `<a href="#about">About</a>`;
+    navLinksContainer.appendChild(aboutLi);
 
     mobileMenuToggle.onclick = () => {
         navLinksContainer.classList.toggle('active');
@@ -113,9 +114,9 @@ function updateActiveNav(category) {
     const links = navLinksContainer.querySelectorAll('a');
     links.forEach(link => {
         const linkHash = link.getAttribute('href');
-        // Handle Home ('#' or ''), All ('#all'), or Categories ('#name')
         if ((category === null && (linkHash === '#' || linkHash === '')) || 
             (category === 'all' && linkHash === '#all') ||
+            (category === 'about' && linkHash === '#about') ||
             linkHash === `#${category}`) {
             link.classList.add('active');
         } else {
@@ -135,7 +136,9 @@ function handleRouting() {
     if (!category) {
         renderHome();
     } else if (category === 'all') {
-        renderAllGallery(); // New Function
+        renderAllGallery();
+    } else if (category === 'about') {
+        renderAbout();
     } else if (galleryData[category]) {
         renderGallery(category);
     } else {
@@ -176,7 +179,6 @@ function renderHome() {
     
     root.innerHTML = html;
     
-    // Swipe Support
     const carousel = document.getElementById('carousel');
     carousel.addEventListener('touchstart', e => {
         touchStartX = e.changedTouches[0].screenX;
@@ -190,15 +192,29 @@ function renderHome() {
     startCarousel();
 }
 
-// --- ALL GALLERY (SORTED BY DATE) ---
+// --- ABOUT PAGE ---
+function renderAbout() {
+    if (carouselInterval) clearInterval(carouselInterval);
+    
+    const html = `
+        <div class="about-container">
+            <div class="about-text">
+                <p>marco pernazza</p>
+                <p>phd student in catalysis at itq, valencia.</p>
+                <p>exploring the intersection of science and visuals.</p>
+                <p>capturing light, shadows, and fleeting moments.</p>
+            </div>
+        </div>
+    `;
+    root.innerHTML = html;
+}
+
+// --- ALL GALLERY (SORTED) ---
 function renderAllGallery() {
     if (carouselInterval) clearInterval(carouselInterval);
 
-    // 1. Gather all images from all categories
     let allImages = Object.values(galleryData).flat();
 
-    // 2. Sort by filename (which contains the date) descending
-    // This ensures 20251206 shows up before 20251118
     allImages.sort((a, b) => {
         const fileA = a.split('/').pop();
         const fileB = b.split('/').pop();
