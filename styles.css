@@ -33,7 +33,6 @@ a:hover { opacity: 0.6; }
     position: relative; 
 }
 
-/* FIX: Ensure logo is clickable and on top */
 .logo {
     z-index: 20;
     position: relative;
@@ -44,7 +43,6 @@ a:hover { opacity: 0.6; }
     width: auto; 
     display: block; 
     cursor: pointer;
-    /* Smooth spin transition */
     transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -65,7 +63,7 @@ a:hover { opacity: 0.6; }
 .mobile-menu-toggle {
     display: block; 
     cursor: pointer;
-    z-index: 20; /* Keep menu button clickable too */
+    z-index: 20;
 }
 .mobile-menu-toggle span {
     display: block;
@@ -222,6 +220,23 @@ a:hover { opacity: 0.6; }
 .gallery-header { padding: 3rem 2rem 1rem; text-align: center; }
 .gallery-title { font-weight: 300; letter-spacing: 0.1em; text-transform: capitalize; }
 
+/* --- About Section --- */
+.about-container {
+    max-width: 600px;
+    margin: 4rem auto;
+    padding: 0 2rem;
+    text-align: center;
+    animation: fadeIn 0.5s ease;
+}
+.about-text p {
+    margin-bottom: 1.5rem;
+    font-weight: 300;
+    font-size: 1.1rem;
+    color: #444;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+
 /* --- Footer --- */
 .site-footer {
     margin-top: auto; 
@@ -243,6 +258,14 @@ a:hover { opacity: 0.6; }
     font-weight: 500;
     color: #333;
     margin: 0 5px;
+}
+
+/* Versioning Style */
+.site-version {
+    font-size: 0.7rem;
+    color: #999;
+    margin-top: 1rem;
+    letter-spacing: 0.05em;
 }
 
 /* --- Lightbox --- */
@@ -311,7 +334,18 @@ a:hover { opacity: 0.6; }
 }
 
 @media (max-width: 600px) {
-    .grid-item { flex: 0 0 100%; max-width: 100%; }
+    /* 1. Tighter grid gap */
+    .masonry-grid {
+        gap: 5px;
+        padding: 5px;
+    }
+
+    /* 2. Three Columns for Mobile */
+    .grid-item { 
+        /* (100% - 2 gaps) / 3 */
+        flex: 0 0 calc((100% - 10px) / 3); 
+        max-width: calc((100% - 10px) / 3);
+    }
     
     .carousel-nav {
         display: block !important; 
@@ -322,4 +356,6 @@ a:hover { opacity: 0.6; }
     }
     .carousel-nav.prev { left: 5px; }
     .carousel-nav.next { right: 5px; }
+    
+    .photo-date { display: none; }
 }
