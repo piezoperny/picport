@@ -1,7 +1,7 @@
 {{ define "main" }}
 <div class="carousel-container" id="carousel">
     {{ $allImages := slice }}
-    {{ range (where .Site.RegularPages "Section" "gallery") }}
+    {{ range (.Site.GetPage "section" "gallery").Sections }}
         {{ range .Resources.ByType "image" }}
             {{ $allImages = $allImages | append . }}
         {{ end }}
@@ -32,3 +32,4 @@
     });
 </script>
 {{ end }}
+
