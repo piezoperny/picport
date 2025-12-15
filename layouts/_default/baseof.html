@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ .Title | lower }} | {{ .Site.Title | lower }}</title>
+    <title>{{ if not .IsHome }}{{ .Title | lower }} | {{ end }}{{ .Site.Title | lower }}</title>
     <meta name="description" content="{{ .Site.Params.description }}">
     <link rel="icon" type="image/png" href="/favicon.png">
 
@@ -75,3 +75,4 @@
     <script src="{{ $script.Permalink }}"></script>
 </body>
 </html>
+
