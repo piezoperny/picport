@@ -15,7 +15,12 @@
     {{ range first 10 (shuffle $allImages) }}
     <div class="carousel-slide" data-index="{{ .Name }}">
         <div class="carousel-bg" style="background-image: url('{{ .RelPermalink }}')"></div>
-        <img src="{{ .RelPermalink }}" class="carousel-img" alt="Featured" onclick="openLightbox('{{ .RelPermalink }}')">
+        <img src="{{ $thumb.RelPermalink }}" 
+         alt="{{ .Name }}" 
+         loading="lazy"
+         onclick="openLightbox('{{ .RelPermalink }}')"
+         style="opacity: 0; transition: opacity 0.5s ease-in;"
+         onload="this.style.opacity=1;">
     </div>
     {{ end }}
 
@@ -29,3 +34,4 @@
     });
 </script>
 {{ end }}
+
