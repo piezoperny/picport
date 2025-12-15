@@ -216,8 +216,10 @@ a:hover { opacity: 0.6; }
 }
 
 .photo-date {
-    font-size: 0.75rem; color: #666;
-    margin-top: 5px; text-align: right;
+    font-size: 0.75rem; 
+    color: #444; /* WAS #666 - Made darker for contrast */
+    margin-top: 5px; 
+    text-align: right;
 }
 
 .gallery-header { padding: 3rem 2rem 1rem; text-align: center; }
