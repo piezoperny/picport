@@ -3,7 +3,7 @@
     <h1 class="gallery-title">archive</h1>
 </div>
 <div class="masonry-grid">
-    {{/* Gather all images from the gallery section */}}
+    {{/* Gather all images from all gallery folders */}}
     {{ $allImages := slice }}
     {{ range (.Site.GetPage "section" "gallery").Sections }}
         {{ range .Resources.ByType "image" }}
@@ -13,9 +13,40 @@
 
     {{/* Sort and Display */}}
     {{ range sort $allImages "Name" "desc" }}
-        <div class="grid-item">
+        
+        {{/* BLUR-UP CONTAINER */}}
+        <div class="grid-item" style="background-image: url('{{ (.Resize "20x jpg q20").RelPermalink }}'); background-size: cover;">
             {{ $thumb := .Resize "600x" }}
-            <img src="{{ $thumb.RelPermalink }}" loading="lazy" onclick="openLightbox('{{ .RelPermalink }}')">
+            <img src="{{ $thumb.RelPermalink }}" 
+                 alt="{{ .Name }}"
+                 loading="lazy" 
+                 onclick="openLightbox('{{ .RelPermalink }}')"
+                 style="opacity: 0; transition: opacity 0.5s ease-in;"
+                 onload="this.style.opacity=1;">
+
+            {{/* DATE PARSER */}}
+            {{ $dateStr := replaceRE "^(\\d{4})(\\d{2})(\\d{2}).*" "$1-$2-$3" .Name }}
+            {{ if ne $dateStr .Name }}
+                <div class="photo-date">{{ $dateStr }}</div>
+            {{ end }}
+
+            {{/* STATS PARSER (From Filename) */}}
+            {{ $parts := split .Name "-" }}
+            {{ if gt (len $parts) 1 }}
+                {{ $infoRaw := index $parts 1 }}
+                {{ $infoClean := replaceRE "\\.(jpg|jpeg|png|webp|gif)$" "" $infoRaw }}
+                {{ $stats := split $infoClean "_" }}
+                
+                {{ if ge (len $stats) 4 }}
+                    <div class="photo-exif" style="font-size: 0.65rem; color: #999; text-align: right; margin-top: 2px;">
+                        {{ index $stats 0 }} • 
+                        ISO {{ index $stats 1 }} • 
+                        {{ index $stats 2 }} • 
+                        {{ replace (index $stats 3) "-" "/" }}s
+                    </div>
+                {{ end }}
+            {{ end }}
+
         </div>
     {{ end }}
 </div>
