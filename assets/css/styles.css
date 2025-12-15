@@ -51,7 +51,7 @@ a:hover { opacity: 0.6; }
     left: 50%;
     transform: translateX(-50%);
     font-size: 0.85rem;
-    text-transform: uppercase;
+    text-transform: lowercase; /* CHANGED */
     letter-spacing: 0.1em;
     font-weight: 500;
     color: #333;
@@ -97,7 +97,7 @@ a:hover { opacity: 0.6; }
     padding: 1rem;
     color: #333;
     font-size: 1rem;
-    text-transform: uppercase;
+    text-transform: lowercase; /* CHANGED */
     letter-spacing: 0.05em;
     border-bottom: 1px solid rgba(0,0,0,0.03);
 }
@@ -198,7 +198,7 @@ a:hover { opacity: 0.6; }
     overflow: hidden; 
     border-radius: 2px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-    background-color: #eee; /* Fallback color */
+    background-color: #eee; 
     background-position: center;
     background-repeat: no-repeat;
 }
@@ -221,7 +221,11 @@ a:hover { opacity: 0.6; }
 }
 
 .gallery-header { padding: 3rem 2rem 1rem; text-align: center; }
-.gallery-title { font-weight: 300; letter-spacing: 0.1em; text-transform: capitalize; }
+.gallery-title { 
+    font-weight: 300; 
+    letter-spacing: 0.1em; 
+    text-transform: lowercase; /* CHANGED */
+}
 
 /* --- About Section --- */
 .about-container {
