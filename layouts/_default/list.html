@@ -23,10 +23,16 @@
                     <div class="photo-date">{{ $dateStr }}</div>
                 {{ end }}
 
+                {{/* FIX: Handle filenames with multiple dashes (like 1-500) */}}
                 {{ $parts := split .Name "-" }}
                 {{ if gt (len $parts) 1 }}
-                    {{ $infoRaw := index $parts 1 }}
+                    {{/* Rejoin everything after the first dash to keep shutter speeds intact */}}
+                    {{ $infoRaw := delimit (after 1 $parts) "-" }}
+                    
+                    {{/* Clean extension (case-insensitive) */}}
                     {{ $infoClean := replaceRE "(?i)\\.(jpg|jpeg|png|webp|gif)$" "" $infoRaw }}
+                    
+                    {{/* Split by underscore */}}
                     {{ $stats := split $infoClean "_" }}
                     
                     {{ if ge (len $stats) 4 }}
