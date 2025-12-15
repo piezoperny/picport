@@ -1,0 +1,22 @@
+{{ define "main" }}
+<div class="gallery-header">
+    <h1 class="gallery-title">archive</h1>
+</div>
+<div class="masonry-grid">
+    {{/* Gather all images from the gallery section */}}
+    {{ $allImages := slice }}
+    {{ range (.Site.GetPage "section" "gallery").Sections }}
+        {{ range .Resources.ByType "image" }}
+            {{ $allImages = $allImages | append . }}
+        {{ end }}
+    {{ end }}
+
+    {{/* Sort and Display */}}
+    {{ range sort $allImages "Name" "desc" }}
+        <div class="grid-item">
+            {{ $thumb := .Resize "600x" }}
+            <img src="{{ $thumb.RelPermalink }}" loading="lazy" onclick="openLightbox('{{ .RelPermalink }}')">
+        </div>
+    {{ end }}
+</div>
+{{ end }}
