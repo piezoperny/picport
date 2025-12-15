@@ -16,7 +16,15 @@
             {{ if ne $dateStr .Name }}
                 <div class="photo-date">{{ $dateStr }}</div>
             {{ end }}
+            
+            {{ with .Exif }}
+            <div class="photo-exif" style="font-size: 0.7rem; color: #999; text-align: right; margin-top: 2px;">
+            {{ .Tags.Model }} • ƒ/{{ .Tags.FNumber }} • {{ .Tags.ExposureTime }}s
+            </div>
+            {{ end }}
+            
         </div>
     {{ end }}
 </div>
 {{ end }}
+
