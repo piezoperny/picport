@@ -31,8 +31,8 @@
                 
                 {{ if ge (len $stats) 4 }}
                     <div class="photo-exif" style="font-size: 0.65rem; color: #999; text-align: right; margin-top: 2px;">
-                        {{ index $stats 0 }} • 
-                        ISO {{ index $stats 1 }} • 
+                        {{ index $stats 0 | lower }} • 
+                        iso {{ index $stats 1 }} • 
                         {{ index $stats 2 }} • 
                         {{ replace (index $stats 3) "-" "/" }}s
                     </div>
