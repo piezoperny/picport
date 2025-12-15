@@ -1,6 +1,7 @@
 {{ define "main" }}
 <div class="carousel-container" id="carousel">
     {{ $allImages := slice }}
+    {{/* 1. Use the Section lookup that works */}}
     {{ range (.Site.GetPage "section" "gallery").Sections }}
         {{ range .Resources.ByType "image" }}
             {{ $allImages = $allImages | append . }}
@@ -8,16 +9,19 @@
     {{ end }}
 
     {{ range first 10 (shuffle $allImages) }}
-    {{/* FIX: Define $thumb before using it. 1200px is good for carousel quality */}}
     {{ $thumb := .Resize "1200x" }}
     <div class="carousel-slide" data-index="{{ .Name }}">
+        {{/* This is the blurred background */}}
         <div class="carousel-bg" style="background-image: url('{{ .RelPermalink }}')"></div>
+        
+        {{/* FIX: Added class="carousel-img" below */}}
         <img src="{{ $thumb.RelPermalink }}" 
-         alt="{{ .Name }}" 
-         loading="lazy"
-         onclick="openLightbox('{{ .RelPermalink }}')"
-         style="opacity: 0; transition: opacity 0.5s ease-in;"
-         onload="this.style.opacity=1;">
+             class="carousel-img" 
+             alt="{{ .Name }}" 
+             loading="lazy"
+             onclick="openLightbox('{{ .RelPermalink }}')"
+             style="opacity: 0; transition: opacity 0.5s ease-in;"
+             onload="this.style.opacity=1;">
     </div>
     {{ end }}
 
@@ -25,11 +29,9 @@
     <div class="carousel-nav next" onclick="moveSlide(1)">&#10095;</div>
 </div>
 <script>
-    // Activate first slide immediately
     document.addEventListener("DOMContentLoaded", () => {
         const slides = document.querySelectorAll('.carousel-slide');
         if(slides.length > 0) slides[0].classList.add('active');
     });
 </script>
 {{ end }}
-
