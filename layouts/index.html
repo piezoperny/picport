@@ -1,12 +1,17 @@
 {{ define "main" }}
 <div class="carousel-container" id="carousel">
+    {{/* 1. Get the gallery section */}}
+    {{ $gallery := .Site.GetPage "section" "gallery" }}
+    
+    {{/* 2. Collect images from all subsections */}}
     {{ $allImages := slice }}
-    {{ range (where .Site.RegularPages "Section" "gallery") }}
+    {{ range $gallery.Sections }}
         {{ range .Resources.ByType "image" }}
             {{ $allImages = $allImages | append . }}
         {{ end }}
     {{ end }}
 
+    {{/* 3. Shuffle and display */}}
     {{ range first 10 (shuffle $allImages) }}
     <div class="carousel-slide" data-index="{{ .Name }}">
         <div class="carousel-bg" style="background-image: url('{{ .RelPermalink }}')"></div>
@@ -18,7 +23,6 @@
     <div class="carousel-nav next" onclick="moveSlide(1)">&#10095;</div>
 </div>
 <script>
-    // Activate first slide immediately
     document.addEventListener("DOMContentLoaded", () => {
         const slides = document.querySelectorAll('.carousel-slide');
         if(slides.length > 0) slides[0].classList.add('active');
