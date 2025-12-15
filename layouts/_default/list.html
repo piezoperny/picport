@@ -8,9 +8,11 @@
         <div class="grid-item">
             {{ $thumb := .Resize "600x" }} 
             <img src="{{ $thumb.RelPermalink }}" 
-                 loading="lazy" 
-                 alt="{{ .Name }}" 
-                 onclick="openLightbox('{{ .RelPermalink }}')">
+             alt="{{ .Name }}" 
+             loading="lazy"
+             onclick="openLightbox('{{ .RelPermalink }}')"
+             style="opacity: 0; transition: opacity 0.5s ease-in;"
+             onload="this.style.opacity=1;">
             
             {{ $dateStr := replaceRE "^(\\d{4})(\\d{2})(\\d{2}).*" "$1-$2-$3" .Name }}
             {{ if ne $dateStr .Name }}
@@ -27,4 +29,5 @@
     {{ end }}
 </div>
 {{ end }}
+
 
