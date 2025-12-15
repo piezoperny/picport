@@ -1,0 +1,20 @@
+baseURL = 'https://pics.pernazza.com/'
+languageCode = 'en-us'
+title = "marco's gallery"
+
+[params]
+  description = "visuals"
+  author = "Marco Pernazza"
+  instagram = "https://instagram.com/isoperny"
+  email = "marco@pernazza.com"
+  version = "v2.0"
+
+[menu]
+  [[menu.main]]
+    name = "All"
+    url = "/archive/"
+    weight = 10
+  [[menu.main]]
+    name = "About"
+    url = "/about/"
+    weight = 20

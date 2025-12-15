@@ -1,0 +1,27 @@
+{{ define "main" }}
+<div class="carousel-container" id="carousel">
+    {{ $allImages := slice }}
+    {{ range (where .Site.RegularPages "Section" "gallery") }}
+        {{ range .Resources.ByType "image" }}
+            {{ $allImages = $allImages | append . }}
+        {{ end }}
+    {{ end }}
+
+    {{ range first 10 (shuffle $allImages) }}
+    <div class="carousel-slide" data-index="{{ .Name }}">
+        <div class="carousel-bg" style="background-image: url('{{ .RelPermalink }}')"></div>
+        <img src="{{ .RelPermalink }}" class="carousel-img" alt="Featured" onclick="openLightbox('{{ .RelPermalink }}')">
+    </div>
+    {{ end }}
+
+    <div class="carousel-nav prev" onclick="moveSlide(-1)">&#10094;</div>
+    <div class="carousel-nav next" onclick="moveSlide(1)">&#10095;</div>
+</div>
+<script>
+    // Activate first slide immediately
+    document.addEventListener("DOMContentLoaded", () => {
+        const slides = document.querySelectorAll('.carousel-slide');
+        if(slides.length > 0) slides[0].classList.add('active');
+    });
+</script>
+{{ end }}
