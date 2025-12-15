@@ -19,22 +19,20 @@ function init() {
     const logoImg = document.querySelector('.site-logo-img');
     
     if (logoLink && logoImg) {
-        logoLink.addEventListener('click', (e) => {
-            // If we are on the homepage, don't reload, just spin!
-            if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
-                e.preventDefault();
-            }
-            
-            const randomDeg = Math.floor(Math.random() * 300) + 60;
-            const direction = Math.random() < 0.5 ? -1 : 1;
-            
-            // We use a global variable 'logoRotation' to keep track
-            // Make sure 'let logoRotation = 0;' is at the very top of your file
-            logoRotation += (randomDeg * direction);
-            logoImg.style.transform = `rotate(${logoRotation}deg)`;
-        });
+    logoLink.addEventListener('click', (e) => {
+        // Prevent navigation only if we are already on home
+        if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
+            e.preventDefault();
+        }
+        
+        // The Spin Logic
+        const randomDeg = Math.floor(Math.random() * 300) + 60;
+        const direction = Math.random() < 0.5 ? -1 : 1;
+        logoRotation += (randomDeg * direction);
+        logoImg.style.transform = `rotate(${logoRotation}deg)`;
+    });
     }
-
+    
     // 3. Carousel Logic
     if (document.getElementById('carousel')) {
         startCarousel();
