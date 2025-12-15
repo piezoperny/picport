@@ -3,7 +3,8 @@
     <h1 class="gallery-title">{{ .Title | lower }}</h1>
 </div>
 <div class="masonry-grid">
-    {{ range sort .Resources.ByType "image" "Name" "desc" }}
+    {{/* FIX: Add parentheses around (.Resources.ByType "image") */}}
+    {{ range sort (.Resources.ByType "image") "Name" "desc" }}
         <div class="grid-item">
             {{ $thumb := .Resize "600x" }} 
             <img src="{{ $thumb.RelPermalink }}" 
