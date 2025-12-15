@@ -1,0 +1,21 @@
+{{ define "main" }}
+<div class="gallery-header">
+    <h1 class="gallery-title">{{ .Title | lower }}</h1>
+</div>
+<div class="masonry-grid">
+    {{ range sort .Resources.ByType "image" "Name" "desc" }}
+        <div class="grid-item">
+            {{ $thumb := .Resize "600x" }} 
+            <img src="{{ $thumb.RelPermalink }}" 
+                 loading="lazy" 
+                 alt="{{ .Name }}" 
+                 onclick="openLightbox('{{ .RelPermalink }}')">
+            
+            {{ $dateStr := replaceRE "^(\\d{4})(\\d{2})(\\d{2}).*" "$1-$2-$3" .Name }}
+            {{ if ne $dateStr .Name }}
+                <div class="photo-date">{{ $dateStr }}</div>
+            {{ end }}
+        </div>
+    {{ end }}
+</div>
+{{ end }}
