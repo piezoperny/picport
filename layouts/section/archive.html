@@ -29,9 +29,10 @@
                     <div class="photo-date">{{ $dateStr }}</div>
                 {{ end }}
 
+                {{/* FIX: Handle filenames with multiple dashes */}}
                 {{ $parts := split .Name "-" }}
                 {{ if gt (len $parts) 1 }}
-                    {{ $infoRaw := index $parts 1 }}
+                    {{ $infoRaw := delimit (after 1 $parts) "-" }}
                     {{ $infoClean := replaceRE "(?i)\\.(jpg|jpeg|png|webp|gif)$" "" $infoRaw }}
                     {{ $stats := split $infoClean "_" }}
                     
