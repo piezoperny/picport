@@ -6,6 +6,18 @@
     <title>{{ .Title | lower }} | {{ .Site.Title | lower }}</title>
     <meta name="description" content="{{ .Site.Params.description }}">
     <link rel="icon" type="image/png" href="/favicon.png">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ .Site.BaseURL }}">
+    <meta property="og:title" content="{{ .Site.Title | lower }}">
+    <meta property="og:description" content="{{ .Site.Params.description }}">
+    <meta property="og:image" content="{{ .Site.BaseURL }}banner.png">
+
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ .Site.BaseURL }}">
+    <meta property="twitter:title" content="{{ .Site.Title | lower }}">
+    <meta property="twitter:description" content="{{ .Site.Params.description }}">
+    <meta property="twitter:image" content="{{ .Site.BaseURL }}banner.png">
     
     {{ $style := resources.Get "css/styles.css" | minify | fingerprint }}
     <link rel="stylesheet" href="{{ $style.Permalink }}">
