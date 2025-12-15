@@ -7,23 +7,35 @@ let logoRotation = 0;
 document.addEventListener('DOMContentLoaded', init);
 
 function init() {
-    // Mobile Menu
+    // 1. Mobile Menu Logic
     const toggle = document.getElementById('menu-toggle');
     const nav = document.getElementById('nav-links');
     if (toggle && nav) {
         toggle.onclick = () => nav.classList.toggle('active');
     }
 
-    // Logo Spin
+    // 2. spinning logo
     const logoLink = document.getElementById('logo-link');
     const logoImg = document.querySelector('.site-logo-img');
+    
     if (logoLink && logoImg) {
         logoLink.addEventListener('click', (e) => {
-             // Optional: spin logic here
+            // If we are on the homepage, don't reload, just spin!
+            if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
+                e.preventDefault();
+            }
+            
+            const randomDeg = Math.floor(Math.random() * 300) + 60;
+            const direction = Math.random() < 0.5 ? -1 : 1;
+            
+            // We use a global variable 'logoRotation' to keep track
+            // Make sure 'let logoRotation = 0;' is at the very top of your file
+            logoRotation += (randomDeg * direction);
+            logoImg.style.transform = `rotate(${logoRotation}deg)`;
         });
     }
 
-    // Start Carousel
+    // 3. Carousel Logic
     if (document.getElementById('carousel')) {
         startCarousel();
         setupSwipe();
