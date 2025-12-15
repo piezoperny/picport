@@ -198,6 +198,9 @@ a:hover { opacity: 0.6; }
     overflow: hidden; 
     border-radius: 2px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    background-color: #eee; /* Fallback color */
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .grid-item img {
