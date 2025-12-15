@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ .Title }} | {{ .Site.Title }}</title>
+    <title>{{ .Title | lower }} | {{ .Site.Title | lower }}</title>
     <meta name="description" content="{{ .Site.Params.description }}">
     <link rel="icon" type="image/png" href="/favicon.png">
     
@@ -19,15 +19,15 @@
                     <img src="/logo.png" alt="my portfolio" class="site-logo-img">
                 </a>
             </div>
-            <div class="site-title">{{ .Site.Title }}</div>
+            <div class="site-title">{{ .Site.Title | lower }}</div>
 
             <ul id="nav-links">
-                <li><a href="/">Home</a></li>
-                <li><a href="/archive">All</a></li>
+                <li><a href="/">home</a></li>
+                <li><a href="/archive">all</a></li>
                 {{ range (.Site.GetPage "section" "gallery").Sections }}
                 <li><a href="{{ .RelPermalink }}">{{ .Title | lower }}</a></li>
                 {{ end }}
-                <li><a href="/about">About</a></li>
+                <li><a href="/about">about</a></li>
             </ul>
 
             <div class="mobile-menu-toggle" id="menu-toggle">
@@ -62,5 +62,4 @@
     {{ $script := resources.Get "js/script.js" | minify | fingerprint }}
     <script src="{{ $script.Permalink }}"></script>
 </body>
-
 </html>
