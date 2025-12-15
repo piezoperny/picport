@@ -24,7 +24,7 @@
             <ul id="nav-links">
                 <li><a href="/">Home</a></li>
                 <li><a href="/archive">All</a></li>
-                {{ range .Site.GetPage "section" "gallery" | .Sections }}
+                {{ range (.Site.GetPage "section" "gallery").Sections }}
                 <li><a href="{{ .RelPermalink }}">{{ .Title | lower }}</a></li>
                 {{ end }}
                 <li><a href="/about">About</a></li>
@@ -62,4 +62,5 @@
     {{ $script := resources.Get "js/script.js" | minify | fingerprint }}
     <script src="{{ $script.Permalink }}"></script>
 </body>
+
 </html>
