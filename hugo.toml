@@ -7,7 +7,7 @@ title = "marco's gallery"
   author = "Marco Pernazza"
   instagram = "https://instagram.com/isoperny"
   email = "marco@pernazza.com"
-  version = "v2.04"
+  version = "v2.11"
 
 [menu]
   [[menu.main]]
@@ -23,5 +23,6 @@ title = "marco's gallery"
   [markup.goldmark]
     [markup.goldmark.renderer]
       unsafe = true
+
 
 
