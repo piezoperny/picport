@@ -22,8 +22,8 @@
     {{ $style := resources.Get "css/styles.css" | minify | fingerprint }}
     <link rel="stylesheet" href="{{ $style.Permalink }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-    <script data-goatcounter="https://YOUR-CODE.goatcounter.com/count"
-            async src="//gc.zgo.at/count.js"></script>
+    <script data-goatcounter="https://marcopernazza.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
     <header class="site-header">
@@ -77,5 +77,6 @@
     <script src="{{ $script.Permalink }}"></script>
 </body>
 </html>
+
 
 
