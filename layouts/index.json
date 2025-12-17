@@ -1,14 +1,24 @@
 {{- /* Generate a JSON list of images that contain coordinates (marked by "--") */ -}}
 [
     {{- $images := slice -}}
-    {{- range (.Site.GetPage "section" "gallery").Sections -}}
-        {{- range .Resources.ByType "image" -}}
-            {{- if in .Name "--" -}}
-                {{- $images = $images | append . -}}
+    
+    {{- /* 1. Get the gallery section securely */ -}}
+    {{- $gallery := .Site.GetPage "gallery" -}}
+    
+    {{- if $gallery -}}
+        {{- /* 2. Loop through all subsections (lines, mist, shadows...) */ -}}
+        {{- range $gallery.Sections -}}
+            {{- /* 3. Get images in each subsection */ -}}
+            {{- range .Resources.ByType "image" -}}
+                {{- /* 4. Check for the coordinate separator */ -}}
+                {{- if in .Name "--" -}}
+                    {{- $images = $images | append . -}}
+                {{- end -}}
             {{- end -}}
         {{- end -}}
     {{- end -}}
 
+    {{- /* 5. Output JSON */ -}}
     {{- range $index, $element := $images -}}
         {{- if $index -}},{{- end -}}
         {
