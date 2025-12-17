@@ -34,7 +34,9 @@
                 {{ if gt (len $parts) 1 }}
                     {{ $infoRaw := delimit (after 1 $parts) "-" }}
                     {{ $infoClean := replaceRE "(?i)\\.(jpg|jpeg|png|webp|gif)$" "" $infoRaw }}
-                    {{ $stats := split $infoClean "_" }}
+                    {{/* FIX: Remove coordinates starting with -- before splitting stats */}}
+                    {{ $infoStats := replaceRE "--.*$" "" $infoClean }}
+                    {{ $stats := split $infoStats "_" }}
                     
                     {{ if ge (len $stats) 4 }}
                         <div class="photo-exif" style="font-size: 0.65rem; color: #666; text-align: right; margin-top: 2px;">
