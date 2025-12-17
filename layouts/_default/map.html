@@ -1,0 +1,99 @@
+{{ define "main" }}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+    /* Map Container Sizing */
+    #map {
+        height: 85vh; /* Takes up most of the screen */
+        width: 100%;
+        background: #111;
+        z-index: 1;
+    }
+    
+    /* Dark Popup Styles */
+    .leaflet-popup-content-wrapper {
+        background: #222;
+        color: #eee;
+        border-radius: 4px;
+    }
+    .leaflet-popup-tip {
+        background: #222;
+    }
+    .popup-thumb {
+        width: 100%;
+        max-width: 200px;
+        height: auto;
+        display: block;
+        margin-bottom: 5px;
+        cursor: pointer;
+    }
+</style>
+
+<div id="map"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Initialize Map (Default view: Europe, Zoom 4)
+    // You can change the default [lat, lon] here
+    const map = L.map('map').setView([48.8566, 2.3522], 4);
+
+    // 2. Add Dark Theme Tiles (CartoDB Dark Matter)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap &copy; CARTO',
+        subdomains: 'abcd',
+        maxZoom: 19
+    }).addTo(map);
+
+    // 3. Fetch Data and Plot Markers
+    fetch('/index.json')
+        .then(response => response.json())
+        .then(data => {
+            let markers = 0;
+            
+            data.forEach(img => {
+                // Filename format expected:
+                // ... -shutter-LAT_LON.jpg
+                // Example: 20251012...-1_80-48.85_2.35.jpg
+                
+                // Remove extension
+                const cleanName = img.name.replace(/\.[^/.]+$/, ""); 
+                
+                // Split by '-' to get segments
+                const segments = cleanName.split('-');
+                
+                // The logic: Coordinates are in the LAST segment
+                // content: LAT_LON (separated by underscore)
+                const coordsPart = segments[segments.length - 1];
+
+                if (coordsPart.includes('_')) {
+                    const latLon = coordsPart.split('_');
+                    const lat = parseFloat(latLon[0]);
+                    const lon = parseFloat(latLon[1]);
+
+                    // Check if valid numbers
+                    if (!isNaN(lat) && !isNaN(lon)) {
+                        // Create Marker
+                        const marker = L.marker([lat, lon]).addTo(map);
+                        markers++;
+
+                        // Popup Content (Image thumbnail)
+                        const popupContent = `
+                            <div style="text-align:center">
+                                <img src="${img.url}" class="popup-thumb" onclick="openLightbox('${img.url}')">
+                                <br><small style="color:#aaa">Click to enlarge</small>
+                            </div>
+                        `;
+                        
+                        marker.bindPopup(popupContent);
+                    }
+                }
+            });
+            console.log("Map initialized with " + markers + " markers.");
+        })
+        .catch(err => console.error("Error loading map data:", err));
+});
+</script>
+
+{{ end }}
