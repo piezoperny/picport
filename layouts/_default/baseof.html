@@ -19,6 +19,8 @@
     <meta property="twitter:description" content="{{ .Site.Params.description }}">
     <meta property="twitter:image" content="{{ .Site.BaseURL }}banner.png">
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.4.0/color-thief.umd.js"></script>
+
     {{ $style := resources.Get "css/styles.css" | minify | fingerprint }}
     <link rel="stylesheet" href="{{ $style.Permalink }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -77,6 +79,3 @@
     <script src="{{ $script.Permalink }}"></script>
 </body>
 </html>
-
-
-
