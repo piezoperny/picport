@@ -1,3 +1,3 @@
 ---
-title: "Mines & Ethereal"
+title: "Mist & Ethereal"
 ---
