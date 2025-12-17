@@ -1,0 +1,20 @@
+{{- /* Generate a JSON list of all images with coordinates */ -}}
+[
+    {{- $images := slice -}}
+    {{- /* 1. Gather all images from gallery sections */ -}}
+    {{- range (.Site.GetPage "section" "gallery").Sections -}}
+        {{- range .Resources.ByType "image" -}}
+            {{- $images = $images | append . -}}
+        {{- end -}}
+    {{- end -}}
+
+    {{- /* 2. Loop through images and output JSON */ -}}
+    {{- range $index, $element := $images -}}
+        {{- if $index -}},{{- end -}}
+        {
+            "title": "{{ .Name }}",
+            "url": "{{ .RelPermalink }}",
+            "name": "{{ .Name }}" 
+        }
+    {{- end -}}
+]
