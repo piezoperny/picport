@@ -4,30 +4,32 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
-    /* Map Container Sizing */
+    /* Map Container */
     #map {
-        height: 85vh; /* Takes up most of the screen */
+        height: 85vh;
         width: 100%;
         background: #111;
         z-index: 1;
     }
     
-    /* Dark Popup Styles */
-    .leaflet-popup-content-wrapper {
+    /* Dark Theme Popup Styles */
+    .leaflet-popup-content-wrapper, .leaflet-popup-tip {
         background: #222;
         color: #eee;
-        border-radius: 4px;
+        border: 1px solid #444;
     }
-    .leaflet-popup-tip {
-        background: #222;
+    .leaflet-popup-content {
+        margin: 10px;
+        text-align: center;
     }
     .popup-thumb {
         width: 100%;
         max-width: 200px;
         height: auto;
         display: block;
-        margin-bottom: 5px;
+        margin-bottom: 8px;
         cursor: pointer;
+        border-radius: 2px;
     }
 </style>
 
@@ -35,62 +37,62 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. Initialize Map (Default view: Europe, Zoom 4)
-    // You can change the default [lat, lon] here
-    const map = L.map('map').setView([48.8566, 2.3522], 4);
+    // 1. Initialize Map (Centered on Europe by default)
+    const map = L.map('map').setView([46.0, 10.0], 4);
 
-    // 2. Add Dark Theme Tiles (CartoDB Dark Matter)
+    // 2. Add Dark Mode Tiles
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap &copy; CARTO',
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
         subdomains: 'abcd',
         maxZoom: 19
     }).addTo(map);
 
-    // 3. Fetch Data and Plot Markers
+    // 3. Fetch Data & Parse Filenames
     fetch('/index.json')
         .then(response => response.json())
         .then(data => {
-            let markers = 0;
+            let markersCount = 0;
             
             data.forEach(img => {
-                // Filename format expected:
-                // ... -shutter-LAT_LON.jpg
-                // Example: 20251012...-1_80-48.85_2.35.jpg
+                // Name Format: 
+                // DATE_TIME-CAM_ISO_AP_SS--LAT_LON.jpg
                 
-                // Remove extension
-                const cleanName = img.name.replace(/\.[^/.]+$/, ""); 
+                // A. Split by the double dash "--"
+                const parts = img.name.split('--');
                 
-                // Split by '-' to get segments
-                const segments = cleanName.split('-');
-                
-                // The logic: Coordinates are in the LAST segment
-                // content: LAT_LON (separated by underscore)
-                const coordsPart = segments[segments.length - 1];
+                // Ensure we actually have coordinates (length > 1)
+                if (parts.length > 1) {
+                    // B. Get the last part: "LAT_LON.jpg" (or .JPG)
+                    let coordsRaw = parts[parts.length - 1];
+                    
+                    // C. Remove extension (Case Insensitive)
+                    coordsRaw = coordsRaw.replace(/\.(jpg|jpeg|png|webp|gif)$/i, "");
+                    
+                    // D. Split by underscore to get Lat and Lon
+                    const latLon = coordsRaw.split('_');
+                    
+                    if (latLon.length >= 2) {
+                        const lat = parseFloat(latLon[0]);
+                        const lon = parseFloat(latLon[1]);
 
-                if (coordsPart.includes('_')) {
-                    const latLon = coordsPart.split('_');
-                    const lat = parseFloat(latLon[0]);
-                    const lon = parseFloat(latLon[1]);
+                        // E. Verify they are valid numbers
+                        if (!isNaN(lat) && !isNaN(lon)) {
+                            // Create Marker
+                            const marker = L.marker([lat, lon]).addTo(map);
+                            markersCount++;
 
-                    // Check if valid numbers
-                    if (!isNaN(lat) && !isNaN(lon)) {
-                        // Create Marker
-                        const marker = L.marker([lat, lon]).addTo(map);
-                        markers++;
-
-                        // Popup Content (Image thumbnail)
-                        const popupContent = `
-                            <div style="text-align:center">
-                                <img src="${img.url}" class="popup-thumb" onclick="openLightbox('${img.url}')">
-                                <br><small style="color:#aaa">Click to enlarge</small>
-                            </div>
-                        `;
-                        
-                        marker.bindPopup(popupContent);
+                            // Bind Popup (Image + Click to Lightbox)
+                            const popupHtml = `
+                                <div>
+                                    <img src="${img.url}" class="popup-thumb" onclick="openLightbox('${img.url}')">
+                                </div>
+                            `;
+                            marker.bindPopup(popupHtml);
+                        }
                     }
                 }
             });
-            console.log("Map initialized with " + markers + " markers.");
+            console.log(`Map loaded with ${markersCount} locations.`);
         })
         .catch(err => console.error("Error loading map data:", err));
 });
