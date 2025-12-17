@@ -4,6 +4,9 @@ let touchStartX = 0;
 let touchEndX = 0;
 let logoRotation = 0;
 
+// ADDED: Initialize ColorThief
+const colorThief = new ColorThief();
+
 document.addEventListener('DOMContentLoaded', init);
 
 function init() {
@@ -56,9 +59,47 @@ const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightbox-img');
 const closeBtn = document.querySelector('.lightbox-close');
 
+// REPLACED FUNCTION
 window.openLightbox = function(src) {
     if (carouselInterval) clearInterval(carouselInterval);
+    
+    // 1. Reset: Remove any existing palette from previous opens
+    const oldPalette = document.getElementById('palette-container');
+    if (oldPalette) oldPalette.remove();
+
+    // 2. Load the new image
     lightboxImg.src = src;
+    
+    // 3. Create a container for the new colors
+    const paletteContainer = document.createElement('div');
+    paletteContainer.id = 'palette-container';
+    lightbox.appendChild(paletteContainer);
+
+    // 4. Define the color extraction function
+    const extractColors = () => {
+        try {
+            // Get 5 dominant colors
+            const colors = colorThief.getPalette(lightboxImg, 5);
+            
+            // Create a circle (div) for each color
+            colors.forEach(color => {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch';
+                swatch.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+                paletteContainer.appendChild(swatch);
+            });
+        } catch (e) {
+            console.log("Image not loaded yet or CORS issue");
+        }
+    };
+
+    // 5. Execute extraction only when image is actually ready
+    if (lightboxImg.complete) {
+        extractColors();
+    } else {
+        lightboxImg.onload = extractColors;
+    }
+
     lightbox.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 };
