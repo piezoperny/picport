@@ -29,11 +29,10 @@
                     {{/* Rejoin everything after the first dash to keep shutter speeds intact */}}
                     {{ $infoRaw := delimit (after 1 $parts) "-" }}
                     
-                    {{/* Clean extension (case-insensitive) */}}
                     {{ $infoClean := replaceRE "(?i)\\.(jpg|jpeg|png|webp|gif)$" "" $infoRaw }}
-                    
-                    {{/* Split by underscore */}}
-                    {{ $stats := split $infoClean "_" }}
+                    {{/* FIX: Remove coordinates starting with -- before splitting stats */}}
+                    {{ $infoStats := replaceRE "--.*$" "" $infoClean }}
+                    {{ $stats := split $infoStats "_" }}
                     
                     {{ if ge (len $stats) 4 }}
                         <div class="photo-exif" style="font-size: 0.65rem; color: #666; text-align: right; margin-top: 2px;">
@@ -49,3 +48,4 @@
     {{ end }}
 </div>
 {{ end }}
+
