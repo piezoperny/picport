@@ -281,14 +281,40 @@ a:hover { opacity: 0.6; }
 .lightbox {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(238,238,238,0.98); 
-    display: flex; justify-content: center; align-items: center;
+    display: flex; 
+    flex-direction: column; /* Stacks image and palette vertically */
+    justify-content: center; 
+    align-items: center;
+    gap: 20px; /* Space between the image and the colors */
     z-index: 1000; opacity: 1; transition: opacity 0.3s;
 }
 .lightbox.hidden { opacity: 0; pointer-events: none; }
-.lightbox img { max-width: 90vw; max-height: 90vh; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+.lightbox img { max-width: 90vw; max-height: 80vh; box-shadow: 0 10px 30px rgba(0,0,0,0.1); } /* Reduced max-height slightly to make room for palette */
 .lightbox-close {
     position: absolute; top: 2rem; right: 2rem;
     font-size: 3rem; cursor: pointer; color: #333;
+}
+
+/* --- Palette Extractor Styles --- */
+#palette-container {
+    display: flex;
+    gap: 15px;
+    z-index: 1001;
+    animation: fadeIn 0.5s ease;
+}
+
+.color-swatch {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border: 2px solid #fff;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.color-swatch:hover {
+    transform: scale(1.2);
+    cursor: pointer;
 }
 
 /* --- Loading Spinner --- */
@@ -367,24 +393,4 @@ a:hover { opacity: 0.6; }
     .carousel-nav.next { right: 5px; }
     
     .photo-date { display: none; }
-}
-
-#palette-container {
-    display: flex;
-    gap: 10px;
-    z-index: 1001;
-    animation: fadeIn 0.5s ease;
-}
-
-.color-swatch {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-    border: 1px solid rgba(255,255,255,0.2);
-    transition: transform 0.2s;
-}
-
-.color-swatch:hover {
-    transform: scale(1.2);
 }
