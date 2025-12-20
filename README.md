@@ -5,7 +5,7 @@ personal photography portfolio. custom-built for visual focus.
 **live:** [pics.pernazza.com](https://pics.pernazza.com)
 
 ## about the author
-marco pernazza. phd student in catalysis at itq, valencia. exploring the intersection of chemical precision and visual fleetingness through light, deep shadows, and minimalist geometry.
+marco pernazza. phd student in catalysis at itq, valencia. exploring visual fleetingness through light, deep shadows, and minimalist geometry.
 
 ## features
 * **minimalist ui:** grey-on-grey theme, typography-led.
