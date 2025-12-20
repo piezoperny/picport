@@ -1,3 +1,9 @@
+---
+title: "About"
+layout: "single"
+---
+<div style="max-width: 700px; margin: 4rem auto; padding: 0 2rem;">
+
 # picport — marco's gallery
 
 personal photography portfolio. custom-built for visual focus.
@@ -22,12 +28,14 @@ marco pernazza. phd student in catalysis at itq, valencia. exploring visual flee
 * **hosting/automation:** github pages and github actions.
 
 ## workflow
-1.  upload photos to `images/MASTER`.
-2.  push to github.
-3.  github action builds `gallery.json` and deploys the site automatically.
+1. upload photos to `images/MASTER`.
+2. push to github.
+3. github action builds `gallery.json` and deploys the site automatically.
 
 ## contact
 * instagram: [@isoperny](https://instagram.com/isoperny)
 * email: marco@pernazza.com
 
 copyright 2025 marco pernazza
+
+</div>
