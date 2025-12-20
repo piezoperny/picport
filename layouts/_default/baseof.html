@@ -40,12 +40,14 @@
             <ul id="nav-links">
                 <li><a href="/">home</a></li>
                 <li><a href="/archive">all</a></li>
-                
                 <li><a href="/map">map</a></li>
+                
                 {{ range (.Site.GetPage "section" "gallery").Sections }}
                 <li><a href="{{ .RelPermalink }}">{{ .Title | lower }}</a></li>
                 {{ end }}
+                
                 <li><a href="/about">about</a></li>
+                <li id="theme-toggle" style="cursor: pointer; padding: 1rem;">🌙</li>
             </ul>
 
             <div class="mobile-menu-toggle" id="menu-toggle">
@@ -81,4 +83,5 @@
     <script src="{{ $script.Permalink }}"></script>
 </body>
 </html>
+
 
