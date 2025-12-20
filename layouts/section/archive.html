@@ -11,30 +11,26 @@
     {{ end }}
 
     {{ range sort $allImages "Name" "desc" }}
-        
         <div class="grid-item">
-            <div class="image-holder" style="position: relative; width: 100%; background-image: url('{{ (.Resize "20x jpg q20").RelPermalink }}'); background-size: cover; overflow: hidden;">
+            <div class="image-holder" style="background-image: url('{{ (.Resize "20x jpg q20").RelPermalink }}');">
                 {{ $thumb := .Resize "600x" }}
                 <img src="{{ $thumb.RelPermalink }}" 
                      alt="{{ .Name }}"
                      loading="lazy" 
                      onclick="openLightbox('{{ .RelPermalink }}')"
-                     style="width: 100%; display: block; opacity: 0; transition: opacity 0.5s ease-in;"
-                     onload="this.style.opacity=1;">
+                     onload="this.classList.add('loaded'); resizeGridItem(this.closest('.grid-item'));">
             </div>
 
-            <div class="meta-holder" style="padding: 8px 4px 0 4px;">
+            <div class="meta-holder">
                 {{ $dateStr := replaceRE "^(\\d{4})(\\d{2})(\\d{2}).*" "$1-$2-$3" .Name }}
                 {{ if ne $dateStr .Name }}
                     <div class="photo-date">{{ $dateStr }}</div>
                 {{ end }}
 
-                {{/* FIX: Handle filenames with multiple dashes */}}
                 {{ $parts := split .Name "-" }}
                 {{ if gt (len $parts) 1 }}
                     {{ $infoRaw := delimit (after 1 $parts) "-" }}
                     {{ $infoClean := replaceRE "(?i)\\.(jpg|jpeg|png|webp|gif)$" "" $infoRaw }}
-                    {{/* FIX: Remove coordinates starting with -- before splitting stats */}}
                     {{ $infoStats := replaceRE "--.*$" "" $infoClean }}
                     {{ $stats := split $infoStats "_" }}
                     
