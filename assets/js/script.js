@@ -56,9 +56,50 @@ function init() {
         });
     }
     
-    // 5. Masonry Grid Calculations
-    // Recalculate grid on resize
+    // 5. Grid Zoom Logic (NEW)
+    setupGridZoom();
+
+    // 6. Masonry Grid Calculations
     window.addEventListener("resize", resizeAllGridItems);
+}
+
+/* --- Grid Zoom Logic --- */
+function setupGridZoom() {
+    const root = document.documentElement;
+    const plusBtn = document.getElementById('grid-plus');
+    const minusBtn = document.getElementById('grid-minus');
+
+    // Load saved preference or default
+    let currentMinSize = parseInt(localStorage.getItem('gridMinSize')) || 350;
+    
+    // Apply initial
+    root.style.setProperty('--grid-item-min-width', currentMinSize + "px");
+
+    if (plusBtn && minusBtn) {
+        // Zoom IN (Fewer items per row -> Larger size)
+        plusBtn.addEventListener('click', () => {
+            if (currentMinSize < 800) {
+                currentMinSize += 50;
+                updateGridSize(currentMinSize);
+            }
+        });
+
+        // Zoom OUT (More items per row -> Smaller size)
+        minusBtn.addEventListener('click', () => {
+            if (currentMinSize > 150) {
+                currentMinSize -= 50;
+                updateGridSize(currentMinSize);
+            }
+        });
+    }
+}
+
+function updateGridSize(size) {
+    document.documentElement.style.setProperty('--grid-item-min-width', size + "px");
+    localStorage.setItem('gridMinSize', size);
+    
+    // Wait for CSS transition to settle slightly, then recalc masonry
+    setTimeout(resizeAllGridItems, 300); 
 }
 
 /* --- Masonry Grid Logic --- */
@@ -69,24 +110,17 @@ function resizeGridItem(item) {
     const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue('grid-auto-rows'));
     const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue('gap').split(' ')[0]) || 0;
     
-    // We need the height of the content (image + meta)
-    // We target the first child (image-holder) and the meta-holder
     const imgHolder = item.querySelector('.image-holder');
     const metaHolder = item.querySelector('.meta-holder');
     
     if(!imgHolder) return;
 
-    // Calculate total height needed
     let contentHeight = imgHolder.getBoundingClientRect().height;
     if (metaHolder) contentHeight += metaHolder.getBoundingClientRect().height;
     
-    // Add a tiny buffer for margin-bottom visual included in the item
     contentHeight += 10; 
 
-    // Calculate how many rows to span
-    // Formula: span = ceil( (height + gap) / (rowHeight + gap) )
     const rowSpan = Math.ceil((contentHeight + rowGap) / (rowHeight + rowGap));
-    
     item.style.gridRowEnd = "span " + rowSpan;
 }
 
@@ -97,7 +131,6 @@ function resizeAllGridItems() {
     }
 }
 
-// Window Load ensures images are dimensioned before we calculate
 window.addEventListener("load", resizeAllGridItems);
 
 
