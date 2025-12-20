@@ -8,7 +8,7 @@ const colorThief = new ColorThief();
 document.addEventListener('DOMContentLoaded', init);
 
 function init() {
-    // 1. Mobile Menu Logic
+    // 1. Mobile Menu
     const toggle = document.getElementById('menu-toggle');
     const nav = document.getElementById('nav-links');
     if (toggle && nav) {
@@ -30,26 +30,22 @@ function init() {
         });
     }
 
-    // 3. Carousel Logic
+    // 3. Carousel
     if (document.getElementById('carousel')) {
         startCarousel();
         setupSwipe();
     }
 
-    // 4. Dark Mode Logic
+    // 4. Dark Mode
     const themeToggle = document.getElementById('theme-toggle');
     const body = document.body;
-    
-    // Check saved preference
     if (localStorage.getItem('theme') === 'dark') {
         body.classList.add('dark-mode');
         if(themeToggle) themeToggle.innerText = '☀️';
     }
-
     if (themeToggle) {
         themeToggle.addEventListener('click', () => {
             body.classList.toggle('dark-mode');
-            
             if (body.classList.contains('dark-mode')) {
                 localStorage.setItem('theme', 'dark');
                 themeToggle.innerText = '☀️';
@@ -59,9 +55,53 @@ function init() {
             }
         });
     }
+    
+    // 5. Masonry Grid Calculations
+    // Recalculate grid on resize
+    window.addEventListener("resize", resizeAllGridItems);
 }
 
-// Back to Top
+/* --- Masonry Grid Logic --- */
+function resizeGridItem(item) {
+    const grid = document.querySelector(".masonry-grid");
+    if (!grid) return;
+
+    const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue('grid-auto-rows'));
+    const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue('gap').split(' ')[0]) || 0;
+    
+    // We need the height of the content (image + meta)
+    // We target the first child (image-holder) and the meta-holder
+    const imgHolder = item.querySelector('.image-holder');
+    const metaHolder = item.querySelector('.meta-holder');
+    
+    if(!imgHolder) return;
+
+    // Calculate total height needed
+    let contentHeight = imgHolder.getBoundingClientRect().height;
+    if (metaHolder) contentHeight += metaHolder.getBoundingClientRect().height;
+    
+    // Add a tiny buffer for margin-bottom visual included in the item
+    contentHeight += 10; 
+
+    // Calculate how many rows to span
+    // Formula: span = ceil( (height + gap) / (rowHeight + gap) )
+    const rowSpan = Math.ceil((contentHeight + rowGap) / (rowHeight + rowGap));
+    
+    item.style.gridRowEnd = "span " + rowSpan;
+}
+
+function resizeAllGridItems() {
+    const allItems = document.getElementsByClassName("grid-item");
+    for (let x = 0; x < allItems.length; x++) {
+        resizeGridItem(allItems[x]);
+    }
+}
+
+// Window Load ensures images are dimensioned before we calculate
+window.addEventListener("load", resizeAllGridItems);
+
+
+/* --- Back to Top --- */
 const backToTopBtn = document.getElementById('back-to-top');
 if (backToTopBtn) {
     window.addEventListener('scroll', () => {
@@ -74,52 +114,45 @@ if (backToTopBtn) {
     });
 }
 
-// Lightbox
+/* --- Lightbox --- */
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightbox-img');
 const closeBtn = document.querySelector('.lightbox-close');
 
 window.openLightbox = function(src) {
     if (carouselInterval) clearInterval(carouselInterval);
-    
-    // Reset contents
     const oldPalette = document.getElementById('palette-container');
     if (oldPalette) oldPalette.remove();
-    
     const oldLoc = document.getElementById('lightbox-location');
     if (oldLoc) oldLoc.remove();
 
     lightboxImg.src = src;
     
-    // Create Palette Container
+    // Palette
     const paletteContainer = document.createElement('div');
     paletteContainer.id = 'palette-container';
     lightbox.appendChild(paletteContainer);
 
-    // --- NEW: Location Logic ---
+    // Location
     const filename = src.split('/').pop();
     if (filename.includes('--')) {
         const parts = filename.split('--');
         if (parts.length > 1) {
             let coordsRaw = parts[parts.length - 1];
             coordsRaw = coordsRaw.replace(/\.(jpg|jpeg|png|webp|gif)$/i, "");
-            
             const latLon = coordsRaw.split('_');
             if (latLon.length >= 2) {
                 const lat = latLon[0];
                 const lon = latLon[1];
-                
                 const locDiv = document.createElement('div');
                 locDiv.id = 'lightbox-location';
                 Object.assign(locDiv.style, {
-                    position: 'absolute',
-                    bottom: '20px', left: '20px',
+                    position: 'absolute', bottom: '20px', left: '20px',
                     color: '#fff', background: 'rgba(0,0,0,0.6)',
                     padding: '8px 12px', borderRadius: '4px',
                     fontSize: '0.85rem', cursor: 'pointer', zIndex: '1002'
                 });
                 locDiv.innerHTML = `📍 ${lat}, ${lon}`;
-                
                 locDiv.onclick = (e) => {
                     e.stopPropagation();
                     window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lon}`, '_blank');
@@ -129,7 +162,6 @@ window.openLightbox = function(src) {
         }
     }
 
-    // Color Extraction
     const extractColors = () => {
         try {
             const colors = colorThief.getPalette(lightboxImg, 5);
@@ -139,7 +171,7 @@ window.openLightbox = function(src) {
                 swatch.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
                 paletteContainer.appendChild(swatch);
             });
-        } catch (e) { console.log("CORS/Loading issue"); }
+        } catch (e) { }
     };
 
     if (lightboxImg.complete) extractColors();
@@ -159,7 +191,7 @@ function closeLightbox() {
     if (document.getElementById('carousel')) startCarousel();
 }
 
-// Carousel
+// Carousel Functions
 function startCarousel() {
     if (carouselInterval) clearInterval(carouselInterval);
     carouselInterval = setInterval(() => moveSlide(1), 5000);
