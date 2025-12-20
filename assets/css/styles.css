@@ -43,6 +43,7 @@ body {
     backdrop-filter: blur(5px);
     border-bottom: 1px solid var(--border-color);
     width: 100%;
+    transition: background-color 0.3s, border-bottom 0.3s;
 }
 
 .site-header nav {
@@ -71,7 +72,7 @@ body {
     left: 50%;
     transform: translateX(-50%);
     font-size: 0.85rem;
-    text-transform: lowercase; /* CHANGED */
+    text-transform: lowercase;
     letter-spacing: 0.1em;
     font-weight: 500;
     color: var(--text-color);
@@ -89,8 +90,9 @@ body {
     display: block;
     width: 25px;
     height: 2px;
-    background-color: #333;
+    background-color: var(--text-color);
     margin-bottom: 5px;
+    transition: background-color 0.3s;
 }
 
 /* NAV LINKS */
@@ -101,12 +103,12 @@ body {
     position: absolute;
     top: 100%; 
     left: 0;
-    background: #eeeeee; 
+    background: var(--bg-color); 
     padding: 1rem 0;
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     text-align: center;
     z-index: 1000;
-    border-top: 1px solid #ddd;
+    border-top: 1px solid var(--border-color);
     list-style: none;
 }
 
@@ -115,11 +117,11 @@ body {
 #nav-links a {
     display: block;
     padding: 1rem;
-    color: #333;
+    color: var(--text-color);
     font-size: 1rem;
-    text-transform: lowercase; /* CHANGED */
+    text-transform: lowercase;
     letter-spacing: 0.05em;
-    border-bottom: 1px solid rgba(0,0,0,0.03);
+    border-bottom: 1px solid var(--border-color);
 }
 
 #nav-links a:hover {
@@ -134,7 +136,7 @@ body {
     width: 100%;
     height: 80vh; 
     overflow: hidden;
-    background: #111; 
+    background: #111; /* Keep dark background for photos */
 }
 
 .carousel-slide {
@@ -218,9 +220,10 @@ body {
     overflow: hidden; 
     border-radius: 2px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-    background-color: #eee; 
+    background-color: var(--card-bg); 
     background-position: center;
     background-repeat: no-repeat;
+    transition: background-color 0.3s;
 }
 
 .grid-item img {
@@ -237,7 +240,7 @@ body {
 
 .photo-date {
     font-size: 0.75rem; 
-    color: #444; /* WAS #666 - Made darker for contrast */
+    color: var(--text-muted);
     margin-top: 5px; 
     text-align: right;
 }
@@ -246,7 +249,8 @@ body {
 .gallery-title { 
     font-weight: 300; 
     letter-spacing: 0.1em; 
-    text-transform: lowercase; /* CHANGED */
+    text-transform: lowercase;
+    color: var(--text-color);
 }
 
 /* --- About Section --- */
@@ -261,7 +265,7 @@ body {
     margin-bottom: 1.5rem;
     font-weight: 300;
     font-size: 1.1rem;
-    color: #444;
+    color: var(--text-color);
 }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -272,9 +276,10 @@ body {
     padding: 3rem 2rem;
     text-align: center;
     font-size: 0.85rem;
-    color: #666;
-    border-top: 1px solid rgba(0,0,0,0.05);
-    background: #eeeeee;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-color);
+    transition: background-color 0.3s, border-top 0.3s, color 0.3s;
 }
 
 .footer-content {
@@ -285,14 +290,14 @@ body {
 
 .footer-links a {
     font-weight: 500;
-    color: #333;
+    color: var(--text-color);
     margin: 0 5px;
 }
 
 /* Versioning Style */
 .site-version {
     font-size: 0.7rem;
-    color: #999;
+    color: var(--text-muted);
     margin-top: 1rem;
     letter-spacing: 0.05em;
 }
@@ -300,19 +305,19 @@ body {
 /* --- Lightbox --- */
 .lightbox {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(238,238,238,0.98); 
+    background: var(--lightbox-bg); 
     display: flex; 
-    flex-direction: column; /* Stacks image and palette vertically */
+    flex-direction: column; 
     justify-content: center; 
     align-items: center;
-    gap: 20px; /* Space between the image and the colors */
-    z-index: 1000; opacity: 1; transition: opacity 0.3s;
+    gap: 20px; 
+    z-index: 1000; opacity: 1; transition: opacity 0.3s, background-color 0.3s;
 }
 .lightbox.hidden { opacity: 0; pointer-events: none; }
-.lightbox img { max-width: 90vw; max-height: 80vh; box-shadow: 0 10px 30px rgba(0,0,0,0.1); } /* Reduced max-height slightly to make room for palette */
+.lightbox img { max-width: 90vw; max-height: 80vh; box-shadow: 0 10px 30px rgba(0,0,0,0.1); } 
 .lightbox-close {
     position: absolute; top: 2rem; right: 2rem;
-    font-size: 3rem; cursor: pointer; color: #333;
+    font-size: 3rem; cursor: pointer; color: var(--text-color);
 }
 
 /* --- Palette Extractor Styles --- */
@@ -349,7 +354,7 @@ body {
     width: 40px; 
     height: 40px; 
     border: 3px solid rgba(0,0,0,0.1); 
-    border-top-color: #333; 
+    border-top-color: var(--text-color); 
     border-radius: 50%; 
     animation: spin 1s linear infinite;
 }
@@ -360,8 +365,8 @@ body {
     position: fixed;
     bottom: 30px;
     right: 30px;
-    background: #333;
-    color: #fff;
+    background: var(--text-color);
+    color: var(--bg-color);
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -380,7 +385,7 @@ body {
     visibility: visible;
 }
 #back-to-top:hover {
-    background: #555;
+    opacity: 0.8;
 }
 
 /* --- Mobile Fixes --- */
