@@ -1,7 +1,13 @@
 {{ define "main" }}
 <div class="gallery-header">
     <h1 class="gallery-title">archive</h1>
+
+    <div class="grid-controls">
+        <button id="grid-minus" class="grid-control-btn" title="Zoom Out (More Photos)">-</button>
+        <button id="grid-plus" class="grid-control-btn" title="Zoom In (Larger Photos)">+</button>
+    </div>
 </div>
+
 <div class="masonry-grid">
     {{ $allImages := slice }}
     {{ range (.Site.GetPage "section" "gallery").Sections }}
