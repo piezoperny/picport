@@ -1,9 +1,3 @@
----
-title: "About"
-layout: "single"
----
-<div style="max-width: 700px; margin: 4rem auto; padding: 0 2rem;">
-
 # picport — marco's gallery
 
 personal photography portfolio. custom-built for visual focus.
@@ -14,7 +8,7 @@ personal photography portfolio. custom-built for visual focus.
 marco pernazza. phd student in catalysis at itq, valencia. exploring visual fleetingness through light, deep shadows, and minimalist geometry.
 
 ## features
-* **minimalist ui:** grey-on-grey theme, typography-led.
+* **minimalist ui:** customizable dark/light theme, typography-led.
 * **responsive:** custom hamburger menu, swipe carousel, and centered flex grid.
 * **interactive:** spinning logo, smooth scrolling, and lightbox functionality.
 * **automated:** python script and github actions auto-update the gallery from image folders.
