@@ -1,17 +1,37 @@
 /* --- Global & Reset --- */
+:root {
+    --bg-color: #eeeeee;
+    --text-color: #333333;
+    --text-muted: #666666;
+    --header-bg: rgba(238, 238, 238, 0.95);
+    --card-bg: #eeeeee;
+    --lightbox-bg: rgba(238, 238, 238, 0.98);
+    --border-color: rgba(0,0,0,0.05);
+}
+
+body.dark-mode {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --text-muted: #aaaaaa;
+    --header-bg: rgba(18, 18, 18, 0.95);
+    --card-bg: #1e1e1e;
+    --lightbox-bg: rgba(18, 18, 18, 0.98);
+    --border-color: rgba(255,255,255,0.1);
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
+
 body {
     font-family: 'Inter', sans-serif;
-    background-color: #eeeeee; 
-    color: #333;
+    background-color: var(--bg-color); 
+    color: var(--text-color);
     line-height: 1.6;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    transition: background-color 0.3s, color 0.3s;
 }
-a { text-decoration: none; color: inherit; transition: opacity 0.3s; }
-a:hover { opacity: 0.6; }
 
 /* --- Header & Nav --- */
 .site-header {
