@@ -1,3 +1,3 @@
 ---
-title: "Lines & Shapes"
+title: "lines & shapes"
 ---

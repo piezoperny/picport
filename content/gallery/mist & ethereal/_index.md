@@ -1,3 +1,3 @@
 ---
-title: "Mist & Ethereal"
+title: "mist & ethereal"
 ---

@@ -7,6 +7,6 @@ layout: "single"
         <p>marco pernazza</p>
         <p>phd student in catalysis at itq, valencia.</p>
         <p>exploring the intersection of science and visuals.</p>
-        <p>capturing light, shadows, and fleeting moments.</p>
+        <p>capturing moments.</p>
     </div>
 </div>
