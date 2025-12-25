@@ -60,18 +60,20 @@ function init() {
     window.addEventListener("resize", resizeAllGridItems);
     
     // 6. Deep Linking: Handle incoming links (e.g. #20251222_132739)
-    // We use window 'load' to ensure all images and scripts are fully ready
-    window.addEventListener('load', () => {
-        if (window.location.hash) {
-            handleDeepLink();
-        }
-    });
+    // We use a retry mechanism because the Masonry grid takes time to render
+    if (window.location.hash) {
+        window.addEventListener('load', () => {
+            checkAndOpenDeepLink(0);
+        });
+    }
 }
 
-function handleDeepLink() {
-    const targetTimestamp = window.location.hash.substring(1); // Get '20251222_132739'
-    
-    // Robust search: Look for any element that has an onclick calling openLightbox with this timestamp
+// Robust Deep Link Handler: Retries 10 times (2 seconds total) to find the image
+function checkAndOpenDeepLink(attempts) {
+    const targetTimestamp = window.location.hash.substring(1);
+    if (!targetTimestamp) return;
+
+    // Look for any image or trigger containing this timestamp in its onclick
     const triggers = Array.from(document.querySelectorAll('[onclick*="openLightbox"]'));
     const match = triggers.find(el => {
         const clickAttr = el.getAttribute('onclick');
@@ -79,12 +81,14 @@ function handleDeepLink() {
     });
     
     if (match) {
-        // Extract the full URL from the onclick attribute: openLightbox('URL')
         const urlMatch = match.getAttribute('onclick').match(/'([^']+)'/);
         if (urlMatch) {
-            // Short timeout to ensure layout shifts are done
+            // Found it! Open it.
             setTimeout(() => openLightbox(urlMatch[1]), 100);
         }
+    } else if (attempts < 10) {
+        // If not found yet (Masonry still loading), wait 200ms and try again
+        setTimeout(() => checkAndOpenDeepLink(attempts + 1), 200);
     }
 }
 
