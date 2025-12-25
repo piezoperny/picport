@@ -56,52 +56,46 @@ function init() {
         });
     }
 
-    // 5. Deep Linking: Open Lightbox from URL Hash (Timestamp only)
-    if (window.location.hash) {
-        const targetTimestamp = window.location.hash.substring(1);
-        
-        // Find all elements with an openLightbox click handler
-        const triggers = Array.from(document.querySelectorAll('[onclick*="openLightbox"]'));
-        
-        // Find the one where the filename starts with our timestamp
-        const match = triggers.find(el => {
-            const clickAttr = el.getAttribute('onclick');
-            // Extract the filename part from the onclick string
-            const filenamePart = clickAttr.split('/').pop().replace("')", "");
-            return filenamePart.startsWith(targetTimestamp);
-        });
-        
-        if (match) {
-            const urlMatch = match.getAttribute('onclick').match(/'([^']+)'/);
-            if (urlMatch) {
-                // Small delay to ensure the DOM and Masonry are ready
-                setTimeout(() => openLightbox(urlMatch[1]), 300);
-            }
+    // 5. Masonry Grid Calculations
+    window.addEventListener("resize", resizeAllGridItems);
+    
+    // 6. Deep Linking: Handle incoming links (e.g. #20251206_173945)
+    // We use window 'load' to ensure images and scripts are fully ready
+    window.addEventListener('load', () => {
+        if (window.location.hash) {
+            handleDeepLink();
+        }
+    });
+}
+
+function handleDeepLink() {
+    const targetTimestamp = window.location.hash.substring(1); // Get '20251206_173945'
+    
+    // Robust search: Look for any element that has an onclick calling openLightbox with this timestamp
+    const triggers = Array.from(document.querySelectorAll('[onclick*="openLightbox"]'));
+    const match = triggers.find(el => el.getAttribute('onclick').includes(targetTimestamp));
+    
+    if (match) {
+        // Extract the full URL from the onclick attribute: openLightbox('URL')
+        const urlMatch = match.getAttribute('onclick').match(/'([^']+)'/);
+        if (urlMatch) {
+            openLightbox(urlMatch[1]);
         }
     }
-    
-    // 6. Masonry Grid Calculations
-    window.addEventListener("resize", resizeAllGridItems);
 }
 
 /* --- Masonry Grid Logic --- */
 function resizeGridItem(item) {
     const grid = document.querySelector(".masonry-grid");
     if (!grid) return;
-
     const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue('grid-auto-rows'));
     const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue('gap').split(' ')[0]) || 0;
-    
     const imgHolder = item.querySelector('.image-holder');
     const metaHolder = item.querySelector('.meta-holder');
-    
     if(!imgHolder) return;
-
     let contentHeight = imgHolder.getBoundingClientRect().height;
     if (metaHolder) contentHeight += metaHolder.getBoundingClientRect().height;
-    
     contentHeight += 10; 
-
     const rowSpan = Math.ceil((contentHeight + rowGap) / (rowHeight + rowGap));
     item.style.gridRowEnd = "span " + rowSpan;
 }
@@ -112,7 +106,6 @@ function resizeAllGridItems() {
         resizeGridItem(allItems[x]);
     }
 }
-
 window.addEventListener("load", resizeAllGridItems);
 
 /* --- Back to Top --- */
@@ -128,7 +121,7 @@ if (backToTopBtn) {
     });
 }
 
-/* --- Lightbox Functionality --- */
+/* --- Lightbox --- */
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightbox-img');
 const closeBtn = document.querySelector('.lightbox-close');
@@ -136,7 +129,7 @@ const closeBtn = document.querySelector('.lightbox-close');
 window.openLightbox = function(src) {
     if (carouselInterval) clearInterval(carouselInterval);
     
-    // Clean up dynamic elements
+    // Clear old elements
     ['palette-container', 'lightbox-location', 'lightbox-share'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.remove();
@@ -144,11 +137,10 @@ window.openLightbox = function(src) {
 
     lightboxImg.src = src;
     
-    // 1. Update URL Hash with CLEAN Timestamp (YYYYMMDD_HHMMSS)
+    // 1. Update URL Hash with strictly YYYYMMDD_HHMMSS
     const filename = src.split('/').pop();
-    // Use only the first 15 characters (e.g., "20251123_175514")
-    const cleanTimestamp = filename.substring(0, 15);
-    window.location.hash = cleanTimestamp;
+    const timestamp = filename.substring(0, 15);
+    window.location.hash = timestamp;
 
     // 2. Add Share Button
     const shareBtn = document.createElement('div');
@@ -168,21 +160,19 @@ window.openLightbox = function(src) {
     };
     lightbox.appendChild(shareBtn);
 
-    // 3. Palette Extraction
+    // 3. Palette
     const paletteContainer = document.createElement('div');
     paletteContainer.id = 'palette-container';
     lightbox.appendChild(paletteContainer);
 
-    // 4. Map Location Logic
+    // 4. Location
     if (filename.includes('--')) {
         const parts = filename.split('--');
         if (parts.length > 1) {
-            let coordsRaw = parts[parts.length - 1];
-            coordsRaw = coordsRaw.replace(/\.(jpg|jpeg|png|webp|gif)$/i, "");
+            let coordsRaw = parts[parts.length - 1].replace(/\.(jpg|jpeg|png|webp|gif)$/i, "");
             const latLon = coordsRaw.split('_');
             if (latLon.length >= 2) {
-                const lat = latLon[0];
-                const lon = latLon[1];
+                const lat = latLon[0]; const lon = latLon[1];
                 const locDiv = document.createElement('div');
                 locDiv.id = 'lightbox-location';
                 Object.assign(locDiv.style, {
@@ -226,10 +216,8 @@ if (lightbox) lightbox.onclick = (e) => { if (e.target === lightbox) closeLightb
 function closeLightbox() {
     lightbox.classList.add('hidden');
     document.body.style.overflow = '';
-    
-    // Clear URL Hash without page reload
+    // Clear hash without reload
     history.pushState("", document.title, window.location.pathname + window.location.search);
-    
     setTimeout(() => { lightboxImg.src = ''; }, 300);
     if (document.getElementById('carousel')) startCarousel();
 }
@@ -239,7 +227,6 @@ function startCarousel() {
     if (carouselInterval) clearInterval(carouselInterval);
     carouselInterval = setInterval(() => moveSlide(1), 5000);
 }
-
 window.moveSlide = function(direction) {
     const slides = document.querySelectorAll('.carousel-slide');
     if (!slides.length) return;
@@ -254,7 +241,6 @@ window.moveSlide = function(direction) {
     slides[nextIndex].classList.add('active');
     startCarousel();
 }
-
 function setupSwipe() {
     const carousel = document.getElementById('carousel');
     if(carousel) {
