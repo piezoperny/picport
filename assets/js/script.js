@@ -59,8 +59,7 @@ function init() {
     // 5. Masonry Grid Calculations
     window.addEventListener("resize", resizeAllGridItems);
     
-    // 6. Deep Linking: Handle incoming links (e.g. #20251222_132739)
-    // We use a retry mechanism because the Masonry grid takes time to render
+    // 6. Deep Linking: Handle incoming links
     if (window.location.hash) {
         window.addEventListener('load', () => {
             checkAndOpenDeepLink(0);
@@ -68,10 +67,10 @@ function init() {
     }
 }
 
-// Robust Deep Link Handler: Retries 10 times (2 seconds total) to find the image
+// Robust Deep Link Handler: Retries and handles redirects if the image isn't on the current page
 function checkAndOpenDeepLink(attempts) {
     const targetTimestamp = window.location.hash.substring(1);
-    if (!targetTimestamp) return;
+    if (!targetTimestamp || targetTimestamp.length < 8) return;
 
     // Look for any image or trigger containing this timestamp in its onclick
     const triggers = Array.from(document.querySelectorAll('[onclick*="openLightbox"]'));
@@ -83,12 +82,17 @@ function checkAndOpenDeepLink(attempts) {
     if (match) {
         const urlMatch = match.getAttribute('onclick').match(/'([^']+)'/);
         if (urlMatch) {
-            // Found it! Open it.
             setTimeout(() => openLightbox(urlMatch[1]), 100);
         }
-    } else if (attempts < 10) {
-        // If not found yet (Masonry still loading), wait 200ms and try again
+    } else if (attempts < 15) {
+        // Retry for about 3 seconds total to allow Masonry/Images to load
         setTimeout(() => checkAndOpenDeepLink(attempts + 1), 200);
+    } else {
+        // GLOBAL FALLBACK: If image isn't found on the current page (e.g., Homepage or Map),
+        // redirect to the Archive page which contains all images.
+        if (!window.location.pathname.includes('/archive')) {
+            window.location.href = "/archive/" + window.location.hash;
+        }
     }
 }
 
@@ -145,7 +149,7 @@ window.openLightbox = function(src) {
 
     lightboxImg.src = src;
     
-    // 1. Update URL Hash with CLEAN Timestamp (YYYYMMDD_HHMMSS)
+    // 1. Update URL Hash with CLEAN Timestamp
     const filename = src.split('/').pop();
     const cleanTimestamp = filename.substring(0, 15);
     window.location.hash = cleanTimestamp;
@@ -173,7 +177,7 @@ window.openLightbox = function(src) {
     paletteContainer.id = 'palette-container';
     lightbox.appendChild(paletteContainer);
 
-    // 4. Location extraction
+    // 4. Location extraction & Map fix
     if (filename.includes('--')) {
         const parts = filename.split('--');
         if (parts.length > 1) {
@@ -192,6 +196,7 @@ window.openLightbox = function(src) {
                 locDiv.innerHTML = `📍 ${lat}, ${lon}`;
                 locDiv.onclick = (e) => {
                     e.stopPropagation();
+                    // Fixed standard Google Maps URL
                     window.open(`https://www.google.com/maps?q=${lat},${lon}`, '_blank');
                 };
                 lightbox.appendChild(locDiv);
@@ -224,7 +229,6 @@ if (lightbox) lightbox.onclick = (e) => { if (e.target === lightbox) closeLightb
 function closeLightbox() {
     lightbox.classList.add('hidden');
     document.body.style.overflow = '';
-    // Clear hash without reload
     history.pushState("", document.title, window.location.pathname + window.location.search);
     setTimeout(() => { lightboxImg.src = ''; }, 300);
     if (document.getElementById('carousel')) startCarousel();
