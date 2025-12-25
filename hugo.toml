@@ -7,7 +7,7 @@ title = "marco's gallery"
   author = "Marco Pernazza"
   instagram = "https://instagram.com/isoperny"
   email = "marco@pernazza.com"
-  version = "v2.30"
+  version = "v2.35"
 
 [menu]
   [[menu.main]]
