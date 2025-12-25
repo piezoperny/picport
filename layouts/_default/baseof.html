@@ -59,6 +59,59 @@
         async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
-    ...
+    <header class="site-header">
+        <nav>
+            <div class="logo">
+                <a href="/" id="logo-link">
+                    <img src="/logo.png" alt="my portfolio" class="site-logo-img">
+                </a>
+            </div>
+            <div class="site-title">{{ .Site.Title | lower }}</div>
+
+            <ul id="nav-links">
+                <li><a href="/">home</a></li>
+                <li><a href="/archive">all</a></li>
+                <li><a href="/map">map</a></li>
+                
+                {{ range (.Site.GetPage "section" "gallery").Sections }}
+                <li><a href="{{ .RelPermalink }}">{{ .Title | lower }}</a></li>
+                {{ end }}
+                
+                <li><a href="/about">about</a></li>
+                <li id="theme-toggle" style="cursor: pointer; padding: 1rem;">🌙</li>
+            </ul>
+
+            <div class="mobile-menu-toggle" id="menu-toggle">
+                <span></span><span></span>
+            </div>
+        </nav>
+    </header>
+
+    <main id="root">
+        {{ block "main" . }}{{ end }}
+    </main>
+    
+    <footer class="site-footer">
+        <div class="footer-content">
+            <p>&copy; <span id="year">{{ now.Year }}</span> {{ .Site.Params.author | lower }}</p>
+            <div class="footer-links">
+                <a href="{{ .Site.Params.instagram }}" target="_blank">@isoperny</a>
+                <span>&bull;</span>
+                <a href="mailto:{{ .Site.Params.email }}">{{ .Site.Params.email }}</a>
+            </div>
+            <div class="site-version">{{ .Site.Params.version }} &bull; updated: {{ now.Format "Jan 02 2006" | lower }}</div>
+        </div>
+    </footer>
+
+    <a href="#" id="back-to-top" title="Back to Top">&#8593;</a>
+
+    <div id="lightbox" class="lightbox hidden">
+        <span class="lightbox-close">&times;</span>
+        <img id="lightbox-img" src="" alt="Full Screen">
+    </div>
+
+    {{ $script := resources.Get "js/script.js" | minify | fingerprint }}
+    <script src="{{ $script.Permalink }}"></script>
 </body>
 </html>
+
