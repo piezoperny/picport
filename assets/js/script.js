@@ -56,18 +56,26 @@ function init() {
         });
     }
 
-    // 5. Deep Linking: Open Lightbox from URL Hash
+    // 5. Deep Linking: Open Lightbox from URL Hash (Timestamp only)
     if (window.location.hash) {
-        const targetHash = window.location.hash.substring(1);
-        // Find triggers on the current page (grid items or carousel slides)
+        const targetTimestamp = window.location.hash.substring(1);
+        
+        // Find all elements with an openLightbox click handler
         const triggers = Array.from(document.querySelectorAll('[onclick*="openLightbox"]'));
-        const match = triggers.find(el => el.getAttribute('onclick').includes(targetHash));
+        
+        // Find the one where the filename starts with our timestamp
+        const match = triggers.find(el => {
+            const clickAttr = el.getAttribute('onclick');
+            // Extract the filename part from the onclick string
+            const filenamePart = clickAttr.split('/').pop().replace("')", "");
+            return filenamePart.startsWith(targetTimestamp);
+        });
         
         if (match) {
             const urlMatch = match.getAttribute('onclick').match(/'([^']+)'/);
             if (urlMatch) {
-                // Short delay to ensure images/layout are ready
-                setTimeout(() => openLightbox(urlMatch[1]), 500);
+                // Small delay to ensure the DOM and Masonry are ready
+                setTimeout(() => openLightbox(urlMatch[1]), 300);
             }
         }
     }
@@ -120,7 +128,7 @@ if (backToTopBtn) {
     });
 }
 
-/* --- Updated Lightbox with Sharing --- */
+/* --- Lightbox Functionality --- */
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightbox-img');
 const closeBtn = document.querySelector('.lightbox-close');
@@ -128,7 +136,7 @@ const closeBtn = document.querySelector('.lightbox-close');
 window.openLightbox = function(src) {
     if (carouselInterval) clearInterval(carouselInterval);
     
-    // Clear dynamic elements
+    // Clean up dynamic elements
     ['palette-container', 'lightbox-location', 'lightbox-share'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.remove();
@@ -136,9 +144,11 @@ window.openLightbox = function(src) {
 
     lightboxImg.src = src;
     
-    // 1. Update URL Hash
+    // 1. Update URL Hash with CLEAN Timestamp (YYYYMMDD_HHMMSS)
     const filename = src.split('/').pop();
-    window.location.hash = filename;
+    // Use only the first 15 characters (e.g., "20251123_175514")
+    const cleanTimestamp = filename.substring(0, 15);
+    window.location.hash = cleanTimestamp;
 
     // 2. Add Share Button
     const shareBtn = document.createElement('div');
@@ -158,12 +168,12 @@ window.openLightbox = function(src) {
     };
     lightbox.appendChild(shareBtn);
 
-    // 3. Palette
+    // 3. Palette Extraction
     const paletteContainer = document.createElement('div');
     paletteContainer.id = 'palette-container';
     lightbox.appendChild(paletteContainer);
 
-    // 4. Location logic
+    // 4. Map Location Logic
     if (filename.includes('--')) {
         const parts = filename.split('--');
         if (parts.length > 1) {
@@ -217,7 +227,7 @@ function closeLightbox() {
     lightbox.classList.add('hidden');
     document.body.style.overflow = '';
     
-    // Clear URL Hash without reloading
+    // Clear URL Hash without page reload
     history.pushState("", document.title, window.location.pathname + window.location.search);
     
     setTimeout(() => { lightboxImg.src = ''; }, 300);
