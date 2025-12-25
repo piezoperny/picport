@@ -3,6 +3,10 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
 <style>
     /* Map Container */
     #map {
@@ -37,7 +41,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. Initialize Map (Centered on Europe by default)
+    // 1. Initialize Map
     const map = L.map('map').setView([46.0, 10.0], 4);
 
     // 2. Add Dark Mode Tiles
@@ -47,52 +51,40 @@ document.addEventListener('DOMContentLoaded', function() {
         maxZoom: 19
     }).addTo(map);
 
-    // 3. Fetch Data & Parse Filenames
+    // 3. Initialize the Cluster Group
+    const markers = L.markerClusterGroup();
+
+    // 4. Fetch Data & Parse Filenames
     fetch('/index.json')
         .then(response => response.json())
         .then(data => {
-            let markersCount = 0;
-            
             data.forEach(img => {
-                // Name Format: 
-                // DATE_TIME-CAM_ISO_AP_SS--LAT_LON.jpg
-                
-                // A. Split by the double dash "--"
                 const parts = img.name.split('--');
-                
-                // Ensure we actually have coordinates (length > 1)
                 if (parts.length > 1) {
-                    // B. Get the last part: "LAT_LON.jpg" (or .JPG)
-                    let coordsRaw = parts[parts.length - 1];
-                    
-                    // C. Remove extension (Case Insensitive)
-                    coordsRaw = coordsRaw.replace(/\.(jpg|jpeg|png|webp|gif)$/i, "");
-                    
-                    // D. Split by underscore to get Lat and Lon
+                    let coordsRaw = parts[parts.length - 1].replace(/\.(jpg|jpeg|png|webp|gif)$/i, "");
                     const latLon = coordsRaw.split('_');
                     
                     if (latLon.length >= 2) {
                         const lat = parseFloat(latLon[0]);
                         const lon = parseFloat(latLon[1]);
 
-                        // E. Verify they are valid numbers
                         if (!isNaN(lat) && !isNaN(lon)) {
-                            // Create Marker
-                            const marker = L.marker([lat, lon]).addTo(map);
-                            markersCount++;
-
-                            // Bind Popup (Image + Click to Lightbox)
+                            const marker = L.marker([lat, lon]);
                             const popupHtml = `
                                 <div>
                                     <img src="${img.url}" class="popup-thumb" onclick="openLightbox('${img.url}')">
                                 </div>
                             `;
                             marker.bindPopup(popupHtml);
+                            
+                            // Add marker to the cluster group instead of directly to map
+                            markers.addLayer(marker);
                         }
                     }
                 }
             });
-            console.log(`Map loaded with ${markersCount} locations.`);
+            // Add the final cluster group to the map
+            map.addLayer(markers);
         })
         .catch(err => console.error("Error loading map data:", err));
 });
