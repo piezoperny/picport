@@ -1,5 +1,4 @@
 {{ define "main" }}
-
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -8,53 +7,24 @@
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
 <style>
-    /* Map Container */
-    #map {
-        height: 85vh;
-        width: 100%;
-        background: #111;
-        z-index: 1;
-    }
-    
-    /* Dark Theme Popup Styles */
-    .leaflet-popup-content-wrapper, .leaflet-popup-tip {
-        background: #222;
-        color: #eee;
-        border: 1px solid #444;
-    }
-    .leaflet-popup-content {
-        margin: 10px;
-        text-align: center;
-    }
-    .popup-thumb {
-        width: 100%;
-        max-width: 200px;
-        height: auto;
-        display: block;
-        margin-bottom: 8px;
-        cursor: pointer;
-        border-radius: 2px;
-    }
+    #map { height: 85vh; width: 100%; background: #111; z-index: 1; }
+    .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: #222; color: #eee; border: 1px solid #444; }
+    .leaflet-popup-content { margin: 10px; text-align: center; }
+    .popup-thumb { width: 100%; max-width: 200px; height: auto; display: block; margin-bottom: 8px; cursor: pointer; border-radius: 2px; }
 </style>
 
 <div id="map"></div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. Initialize Map
     const map = L.map('map').setView([46.0, 10.0], 4);
-
-    // 2. Add Dark Mode Tiles
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-        subdomains: 'abcd',
+        attribution: '&copy; OSM & CARTO',
         maxZoom: 19
     }).addTo(map);
 
-    // 3. Initialize the Cluster Group
     const markers = L.markerClusterGroup();
 
-    // 4. Fetch Data & Parse Filenames
     fetch('/index.json')
         .then(response => response.json())
         .then(data => {
@@ -63,31 +33,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (parts.length > 1) {
                     let coordsRaw = parts[parts.length - 1].replace(/\.(jpg|jpeg|png|webp|gif)$/i, "");
                     const latLon = coordsRaw.split('_');
-                    
                     if (latLon.length >= 2) {
                         const lat = parseFloat(latLon[0]);
                         const lon = parseFloat(latLon[1]);
-
                         if (!isNaN(lat) && !isNaN(lon)) {
                             const marker = L.marker([lat, lon]);
-                            const popupHtml = `
-                                <div>
-                                    <img src="${img.url}" class="popup-thumb" onclick="openLightbox('${img.url}')">
-                                </div>
-                            `;
+                            const popupHtml = `<div><img src="${img.url}" class="popup-thumb" onclick="openLightbox('${img.url}')"></div>`;
                             marker.bindPopup(popupHtml);
-                            
-                            // Add marker to the cluster group instead of directly to map
                             markers.addLayer(marker);
                         }
                     }
                 }
             });
-            // Add the final cluster group to the map
             map.addLayer(markers);
-        })
-        .catch(err => console.error("Error loading map data:", err));
+        });
 });
 </script>
-
 {{ end }}
