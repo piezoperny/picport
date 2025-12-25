@@ -55,9 +55,24 @@ function init() {
             }
         });
     }
+
+    // 5. Deep Linking: Open Lightbox from URL Hash
+    if (window.location.hash) {
+        const targetHash = window.location.hash.substring(1);
+        // Find triggers on the current page (grid items or carousel slides)
+        const triggers = Array.from(document.querySelectorAll('[onclick*="openLightbox"]'));
+        const match = triggers.find(el => el.getAttribute('onclick').includes(targetHash));
+        
+        if (match) {
+            const urlMatch = match.getAttribute('onclick').match(/'([^']+)'/);
+            if (urlMatch) {
+                // Short delay to ensure images/layout are ready
+                setTimeout(() => openLightbox(urlMatch[1]), 500);
+            }
+        }
+    }
     
-    // 5. Masonry Grid Calculations
-    // Recalculate grid on resize
+    // 6. Masonry Grid Calculations
     window.addEventListener("resize", resizeAllGridItems);
 }
 
@@ -69,24 +84,17 @@ function resizeGridItem(item) {
     const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue('grid-auto-rows'));
     const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue('gap').split(' ')[0]) || 0;
     
-    // We need the height of the content (image + meta)
-    // We target the first child (image-holder) and the meta-holder
     const imgHolder = item.querySelector('.image-holder');
     const metaHolder = item.querySelector('.meta-holder');
     
     if(!imgHolder) return;
 
-    // Calculate total height needed
     let contentHeight = imgHolder.getBoundingClientRect().height;
     if (metaHolder) contentHeight += metaHolder.getBoundingClientRect().height;
     
-    // Add a tiny buffer for margin-bottom visual included in the item
     contentHeight += 10; 
 
-    // Calculate how many rows to span
-    // Formula: span = ceil( (height + gap) / (rowHeight + gap) )
     const rowSpan = Math.ceil((contentHeight + rowGap) / (rowHeight + rowGap));
-    
     item.style.gridRowEnd = "span " + rowSpan;
 }
 
@@ -97,9 +105,7 @@ function resizeAllGridItems() {
     }
 }
 
-// Window Load ensures images are dimensioned before we calculate
 window.addEventListener("load", resizeAllGridItems);
-
 
 /* --- Back to Top --- */
 const backToTopBtn = document.getElementById('back-to-top');
@@ -114,27 +120,50 @@ if (backToTopBtn) {
     });
 }
 
-/* --- Lightbox --- */
+/* --- Updated Lightbox with Sharing --- */
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightbox-img');
 const closeBtn = document.querySelector('.lightbox-close');
 
 window.openLightbox = function(src) {
     if (carouselInterval) clearInterval(carouselInterval);
-    const oldPalette = document.getElementById('palette-container');
-    if (oldPalette) oldPalette.remove();
-    const oldLoc = document.getElementById('lightbox-location');
-    if (oldLoc) oldLoc.remove();
+    
+    // Clear dynamic elements
+    ['palette-container', 'lightbox-location', 'lightbox-share'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.remove();
+    });
 
     lightboxImg.src = src;
     
-    // Palette
+    // 1. Update URL Hash
+    const filename = src.split('/').pop();
+    window.location.hash = filename;
+
+    // 2. Add Share Button
+    const shareBtn = document.createElement('div');
+    shareBtn.id = 'lightbox-share';
+    Object.assign(shareBtn.style, {
+        position: 'absolute', bottom: '20px', right: '20px',
+        color: '#fff', background: 'rgba(0,0,0,0.6)',
+        padding: '8px 12px', borderRadius: '4px',
+        fontSize: '0.85rem', cursor: 'pointer', zIndex: '1002'
+    });
+    shareBtn.innerHTML = `🔗 share`;
+    shareBtn.onclick = (e) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(window.location.href);
+        shareBtn.innerHTML = '✅ copied!';
+        setTimeout(() => { shareBtn.innerHTML = '🔗 share'; }, 2000);
+    };
+    lightbox.appendChild(shareBtn);
+
+    // 3. Palette
     const paletteContainer = document.createElement('div');
     paletteContainer.id = 'palette-container';
     lightbox.appendChild(paletteContainer);
 
-    // Location
-    const filename = src.split('/').pop();
+    // 4. Location logic
     if (filename.includes('--')) {
         const parts = filename.split('--');
         if (parts.length > 1) {
@@ -155,7 +184,7 @@ window.openLightbox = function(src) {
                 locDiv.innerHTML = `📍 ${lat}, ${lon}`;
                 locDiv.onclick = (e) => {
                     e.stopPropagation();
-                    window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lon}`, '_blank');
+                    window.open(`https://www.google.com/maps?q=${lat},${lon}`, '_blank');
                 };
                 lightbox.appendChild(locDiv);
             }
@@ -187,6 +216,10 @@ if (lightbox) lightbox.onclick = (e) => { if (e.target === lightbox) closeLightb
 function closeLightbox() {
     lightbox.classList.add('hidden');
     document.body.style.overflow = '';
+    
+    // Clear URL Hash without reloading
+    history.pushState("", document.title, window.location.pathname + window.location.search);
+    
     setTimeout(() => { lightboxImg.src = ''; }, 300);
     if (document.getElementById('carousel')) startCarousel();
 }
