@@ -1,57 +1,24 @@
 {{ define "main" }}
-<div class="gallery-header">
-    <h1 class="gallery-title">archive</h1>
-</div>
+<div class="gallery-header"><h1 class="gallery-title">archive</h1></div>
 <div class="masonry-grid">
     {{ $allImages := slice }}
     {{ range (.Site.GetPage "section" "gallery").Sections }}
-        {{ range .Resources.ByType "image" }}
-            {{ $allImages = $allImages | append . }}
-        {{ end }}
+        {{ range .Resources.ByType "image" }}{{ $allImages = $allImages | append . }}{{ end }}
     {{ end }}
-
     {{ range sort $allImages "Name" "desc" }}
         <div class="grid-item">
             <div class="image-holder" style="background-image: url('{{ (.Resize "20x jpg q20").RelPermalink }}');">
-                {{ $w300 := .Resize "300x" }}
                 {{ $w600 := .Resize "600x" }}
-                {{ $w900 := .Resize "900x" }}
-                {{ $w1200 := .Resize "1200x" }}
-
                 <img src="{{ $w600.RelPermalink }}" 
-                     srcset="{{ $w300.RelPermalink }} 300w, 
-                             {{ $w600.RelPermalink }} 600w, 
-                             {{ $w900.RelPermalink }} 900w, 
-                             {{ $w1200.RelPermalink }} 1200w"
-                     sizes="(max-width: 600px) 48vw, (max-width: 1200px) 30vw, 350px"
-                     alt="photography by {{ $.Site.Params.author | lower }}"
-                     loading="lazy" 
+                     srcset="{{ (.Resize "300x").RelPermalink }} 300w, {{ $w600.RelPermalink }} 600w"
+                     alt="photography" loading="lazy" 
+                     data-timestamp="{{ substr .Name 0 15 }}"
                      onclick="openLightbox('{{ .RelPermalink }}')"
                      onload="this.classList.add('loaded'); resizeGridItem(this.closest('.grid-item'));">
             </div>
-
             <div class="meta-holder">
                 {{ $dateStr := replaceRE "^(\\d{4})(\\d{2})(\\d{2}).*" "$1-$2-$3" .Name }}
-                {{ if ne $dateStr .Name }}
-                    <div class="photo-date">{{ $dateStr }}</div>
-                {{ end }}
-
-                {{ $parts := split .Name "-" }}
-                {{ if gt (len $parts) 1 }}
-                    {{ $infoRaw := delimit (after 1 $parts) "-" }}
-                    {{ $infoClean := replaceRE "(?i)\\.(jpg|jpeg|png|webp|gif)$" "" $infoRaw }}
-                    {{ $infoStats := replaceRE "--.*$" "" $infoClean }}
-                    {{ $stats := split $infoStats "_" }}
-                    
-                    {{ if ge (len $stats) 4 }}
-                        <div class="photo-exif" style="font-size: 0.65rem; color: #666; text-align: right; margin-top: 2px;">
-                            {{ index $stats 0 | lower }} • 
-                            iso {{ index $stats 1 }} • 
-                            f/{{ index $stats 2 }} • 
-                            {{ replace (index $stats 3) "-" "/" }}s
-                        </div>
-                    {{ end }}
-                {{ end }}
+                <div class="photo-date">{{ $dateStr }}</div>
             </div>
         </div>
     {{ end }}
