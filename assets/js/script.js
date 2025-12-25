@@ -58,40 +58,6 @@ function init() {
 
     // 5. Masonry Grid Calculations
     window.addEventListener("resize", resizeAllGridItems);
-    
-    // 6. Deep Linking: Improved logic to handle direct links
-    if (window.location.hash) {
-        // Use window load to ensure all resources are ready
-        window.addEventListener('load', () => {
-            checkAndOpenDeepLink(0);
-        });
-    }
-}
-
-// Fixed Deep Link Handler
-function checkAndOpenDeepLink(attempts) {
-    const targetTimestamp = window.location.hash.substring(1);
-    if (!targetTimestamp || targetTimestamp.length < 8) return;
-
-    // Look for the specific image using the data-timestamp attribute you already have in your HTML
-    const match = document.querySelector(`[data-timestamp*="${targetTimestamp}"]`);
-    
-    if (match) {
-        // Get the full URL from the onclick attribute
-        const clickAttr = match.getAttribute('onclick');
-        const urlMatch = clickAttr ? clickAttr.match(/'([^']+)'/) : null;
-        if (urlMatch) {
-            setTimeout(() => openLightbox(urlMatch[1]), 150);
-        }
-    } else if (attempts < 20) {
-        // Retry for up to 4 seconds (20 * 200ms) to allow large galleries to render
-        setTimeout(() => checkAndOpenDeepLink(attempts + 1), 200);
-    } else {
-        // Fallback: If not found on home/map, try redirecting to archive
-        if (!window.location.pathname.includes('/archive')) {
-            window.location.href = "/archive/" + window.location.hash;
-        }
-    }
 }
 
 /* --- Masonry Grid Logic --- */
@@ -139,7 +105,8 @@ const closeBtn = document.querySelector('.lightbox-close');
 window.openLightbox = function(src) {
     if (carouselInterval) clearInterval(carouselInterval);
     
-    ['palette-container', 'lightbox-location', 'lightbox-share'].forEach(id => {
+    // Clear old dynamic elements
+    ['palette-container', 'lightbox-location'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.remove();
     });
@@ -147,33 +114,13 @@ window.openLightbox = function(src) {
     lightboxImg.src = src;
     
     const filename = src.split('/').pop();
-    const cleanTimestamp = filename.substring(0, 15);
-    window.location.hash = cleanTimestamp;
 
-    // Share Button
-    const shareBtn = document.createElement('div');
-    shareBtn.id = 'lightbox-share';
-    Object.assign(shareBtn.style, {
-        position: 'absolute', bottom: '20px', right: '20px',
-        color: '#fff', background: 'rgba(0,0,0,0.6)',
-        padding: '8px 12px', borderRadius: '4px',
-        fontSize: '0.85rem', cursor: 'pointer', zIndex: '1002'
-    });
-    shareBtn.innerHTML = `🔗 share`;
-    shareBtn.onclick = (e) => {
-        e.stopPropagation();
-        navigator.clipboard.writeText(window.location.href);
-        shareBtn.innerHTML = '✅ copied!';
-        setTimeout(() => { shareBtn.innerHTML = '🔗 share'; }, 2000);
-    };
-    lightbox.appendChild(shareBtn);
-
-    // Palette extraction
+    // 1. Palette extraction
     const paletteContainer = document.createElement('div');
     paletteContainer.id = 'palette-container';
     lightbox.appendChild(paletteContainer);
 
-    // Location extraction
+    // 2. Location extraction
     if (filename.includes('--')) {
         const parts = filename.split('--');
         if (parts.length > 1) {
@@ -224,11 +171,11 @@ if (lightbox) lightbox.onclick = (e) => { if (e.target === lightbox) closeLightb
 function closeLightbox() {
     lightbox.classList.add('hidden');
     document.body.style.overflow = '';
-    history.pushState("", document.title, window.location.pathname + window.location.search);
     setTimeout(() => { lightboxImg.src = ''; }, 300);
     if (document.getElementById('carousel')) startCarousel();
 }
 
+// Carousel Functions
 function startCarousel() {
     if (carouselInterval) clearInterval(carouselInterval);
     carouselInterval = setInterval(() => moveSlide(1), 5000);
