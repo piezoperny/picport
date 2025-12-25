@@ -18,7 +18,7 @@
                              {{ $w900.RelPermalink }} 900w, 
                              {{ $w1200.RelPermalink }} 1200w"
                      sizes="(max-width: 600px) 48vw, (max-width: 1200px) 30vw, 350px"
-                     alt="photography by {{ .Site.Params.author | lower }}" 
+                     alt="photography by {{ $.Site.Params.author | lower }}" 
                      loading="lazy"
                      onclick="openLightbox('{{ .RelPermalink }}')"
                      onload="this.classList.add('loaded'); resizeGridItem(this.closest('.grid-item'));">
