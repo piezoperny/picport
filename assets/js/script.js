@@ -59,37 +59,35 @@ function init() {
     // 5. Masonry Grid Calculations
     window.addEventListener("resize", resizeAllGridItems);
     
-    // 6. Deep Linking: Handle incoming links
+    // 6. Deep Linking: Improved logic to handle direct links
     if (window.location.hash) {
+        // Use window load to ensure all resources are ready
         window.addEventListener('load', () => {
             checkAndOpenDeepLink(0);
         });
     }
 }
 
-// Robust Deep Link Handler: Retries and handles redirects if the image isn't on the current page
+// Fixed Deep Link Handler
 function checkAndOpenDeepLink(attempts) {
     const targetTimestamp = window.location.hash.substring(1);
     if (!targetTimestamp || targetTimestamp.length < 8) return;
 
-    // Look for any image or trigger containing this timestamp in its onclick
-    const triggers = Array.from(document.querySelectorAll('[onclick*="openLightbox"]'));
-    const match = triggers.find(el => {
-        const clickAttr = el.getAttribute('onclick');
-        return clickAttr && clickAttr.includes(targetTimestamp);
-    });
+    // Look for the specific image using the data-timestamp attribute you already have in your HTML
+    const match = document.querySelector(`[data-timestamp*="${targetTimestamp}"]`);
     
     if (match) {
-        const urlMatch = match.getAttribute('onclick').match(/'([^']+)'/);
+        // Get the full URL from the onclick attribute
+        const clickAttr = match.getAttribute('onclick');
+        const urlMatch = clickAttr ? clickAttr.match(/'([^']+)'/) : null;
         if (urlMatch) {
-            setTimeout(() => openLightbox(urlMatch[1]), 100);
+            setTimeout(() => openLightbox(urlMatch[1]), 150);
         }
-    } else if (attempts < 15) {
-        // Retry for about 3 seconds total to allow Masonry/Images to load
+    } else if (attempts < 20) {
+        // Retry for up to 4 seconds (20 * 200ms) to allow large galleries to render
         setTimeout(() => checkAndOpenDeepLink(attempts + 1), 200);
     } else {
-        // GLOBAL FALLBACK: If image isn't found on the current page (e.g., Homepage or Map),
-        // redirect to the Archive page which contains all images.
+        // Fallback: If not found on home/map, try redirecting to archive
         if (!window.location.pathname.includes('/archive')) {
             window.location.href = "/archive/" + window.location.hash;
         }
@@ -141,7 +139,6 @@ const closeBtn = document.querySelector('.lightbox-close');
 window.openLightbox = function(src) {
     if (carouselInterval) clearInterval(carouselInterval);
     
-    // Clear old dynamic elements
     ['palette-container', 'lightbox-location', 'lightbox-share'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.remove();
@@ -149,12 +146,11 @@ window.openLightbox = function(src) {
 
     lightboxImg.src = src;
     
-    // 1. Update URL Hash with CLEAN Timestamp
     const filename = src.split('/').pop();
     const cleanTimestamp = filename.substring(0, 15);
     window.location.hash = cleanTimestamp;
 
-    // 2. Add Share Button
+    // Share Button
     const shareBtn = document.createElement('div');
     shareBtn.id = 'lightbox-share';
     Object.assign(shareBtn.style, {
@@ -172,12 +168,12 @@ window.openLightbox = function(src) {
     };
     lightbox.appendChild(shareBtn);
 
-    // 3. Palette extraction
+    // Palette extraction
     const paletteContainer = document.createElement('div');
     paletteContainer.id = 'palette-container';
     lightbox.appendChild(paletteContainer);
 
-    // 4. Location extraction & Map fix
+    // Location extraction
     if (filename.includes('--')) {
         const parts = filename.split('--');
         if (parts.length > 1) {
@@ -196,7 +192,6 @@ window.openLightbox = function(src) {
                 locDiv.innerHTML = `📍 ${lat}, ${lon}`;
                 locDiv.onclick = (e) => {
                     e.stopPropagation();
-                    // Fixed standard Google Maps URL
                     window.open(`https://www.google.com/maps?q=${lat},${lon}`, '_blank');
                 };
                 lightbox.appendChild(locDiv);
@@ -234,7 +229,6 @@ function closeLightbox() {
     if (document.getElementById('carousel')) startCarousel();
 }
 
-// Carousel Functions
 function startCarousel() {
     if (carouselInterval) clearInterval(carouselInterval);
     carouselInterval = setInterval(() => moveSlide(1), 5000);
