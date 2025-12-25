@@ -46,6 +46,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             map.addLayer(markers);
+
+            // NEW: Support deep linking on the map page directly from the JSON data
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                const targetImg = data.find(img => img.name.includes(hash));
+                if (targetImg) {
+                    setTimeout(() => openLightbox(targetImg.url), 300);
+                }
+            }
         });
 });
 </script>
