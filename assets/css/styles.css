@@ -3,28 +3,39 @@
     --bg-color: #eeeeee;
     --text-color: #333333;
     --text-muted: #666666;
-    --header-bg: rgba(238, 238, 238, 0.95);
-    --card-bg: #eeeeee;
+    /* Glassy Header Colors */
+    --header-bg: rgba(238, 238, 238, 0.85);
+    --header-border: rgba(0,0,0,0.08);
+    --card-bg: #e5e5e5; /* Slightly darker than bg for the matte effect */
     --lightbox-bg: rgba(238, 238, 238, 0.98);
     --border-color: rgba(0,0,0,0.05);
+    --accent-cursor: #333333;
 }
 
 body.dark-mode {
     /* PANTONE 276 C Base: #221d35 */
     --bg-color: #221d35; 
     --text-color: #e0e0e0;
-    --text-muted: #a3a0ac; /* Muted lavender-grey to match the hue */
-    --header-bg: rgba(34, 29, 53, 0.95); /* Pantone 276 C with opacity */
-    --card-bg: #2d2645; /* Slightly lighter/elevated version of 276 C */
+    --text-muted: #a3a0ac; 
+    --header-bg: rgba(34, 29, 53, 0.85);
+    --header-border: rgba(255,255,255,0.1);
+    --card-bg: #2d2645; /* Matte Frame Color */
     --lightbox-bg: rgba(34, 29, 53, 0.98);
     --border-color: rgba(255,255,255,0.08);
+    --accent-cursor: #e0e0e0;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 
+/* Custom Cursor Logic (Desktop Only) */
+@media (hover: hover) and (pointer: fine) {
+    body { cursor: none; }
+    a, button, img, .logo, .mobile-menu-toggle { cursor: none; }
+}
+
 body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Playfair Display', serif; /* EDITORIAL TYPOGRAPHY UPDATE */
     background-color: var(--bg-color); 
     color: var(--text-color);
     line-height: 1.6;
@@ -32,19 +43,26 @@ body {
     display: flex;
     flex-direction: column;
     transition: background-color 0.3s, color 0.3s;
+    overflow-x: hidden;
 }
 
-/* --- Header & Nav --- */
+/* --- Floating Dock Header --- */
 .site-header {
-    padding: 1.5rem 2rem;
-    position: sticky;
-    top: 0;
+    position: fixed;
+    top: 20px; /* Floating from top */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px; /* Constrained width for "Dock" look */
+    padding: 0.8rem 1.5rem;
     background: var(--header-bg);
+    border: 1px solid var(--header-border);
+    border-radius: 50px; /* Pill Shape */
     z-index: 100;
-    backdrop-filter: blur(5px);
-    border-bottom: 1px solid var(--border-color);
-    width: 100%;
-    transition: background-color 0.3s, border-bottom 0.3s;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transition: background-color 0.3s, border-color 0.3s, top 0.3s;
 }
 
 .site-header nav {
@@ -58,78 +76,118 @@ body {
 .logo {
     z-index: 20;
     position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .site-logo-img { 
-    height: 24px; 
+    height: 28px; 
     width: auto; 
     display: block; 
-    cursor: pointer;
     transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .site-title {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 0.85rem;
+    font-size: 1rem;
+    font-style: italic; /* Emphasize Playfair Italic */
     text-transform: lowercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.05em;
     font-weight: 500;
     color: var(--text-color);
     white-space: nowrap;
     pointer-events: none; 
 }
 
+/* Position Site Title Absolutely to center it in the dock? 
+   Or keep it next to logo? Let's keep next to logo for clarity. */
+.site-title {
+    position: static;
+    transform: none;
+}
+
 /* HAMBURGER MENU */
 .mobile-menu-toggle {
     display: block; 
-    cursor: pointer;
+    cursor: none; /* For custom cursor */
     z-index: 20;
+    padding: 5px;
 }
 .mobile-menu-toggle span {
     display: block;
-    width: 25px;
+    width: 20px;
     height: 2px;
     background-color: var(--text-color);
-    margin-bottom: 5px;
+    margin-bottom: 4px;
     transition: background-color 0.3s;
 }
 
-/* NAV LINKS */
+/* NAV LINKS (Dropdown from Dock) */
 #nav-links {
     display: none; 
     flex-direction: column;
-    width: 100%;
+    width: 100%; /* Match dock width approx */
     position: absolute;
-    top: 100%; 
+    top: 120%; 
     left: 0;
-    background: var(--bg-color); 
+    background: var(--header-bg); 
     padding: 1rem 0;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    border-radius: 20px; /* Rounded dropdown */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     text-align: center;
     z-index: 1000;
-    border-top: 1px solid var(--border-color);
+    border: 1px solid var(--header-border);
     list-style: none;
+    backdrop-filter: blur(12px);
 }
 
 #nav-links.active { display: flex; }
 
 #nav-links a {
     display: block;
-    padding: 1rem;
+    padding: 0.8rem;
     color: var(--text-color);
     font-size: 1rem;
-    text-transform: lowercase;
-    letter-spacing: 0.05em;
+    font-style: italic;
+    text-decoration: none;
     border-bottom: 1px solid var(--border-color);
 }
+#nav-links a:last-child { border-bottom: none; }
+#nav-links a:hover { opacity: 0.6; }
 
-#nav-links a:hover {
-    background-color: rgba(0,0,0,0.02);
-    opacity: 1; 
+/* --- Custom Cursor Styles --- */
+.cursor-dot, .cursor-outline {
+    position: fixed;
+    top: 0; left: 0;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    z-index: 9999;
+    pointer-events: none;
+    display: none; /* Hidden on mobile by default media query */
 }
-#nav-links a.active { font-weight: 600; }
+
+@media (hover: hover) and (pointer: fine) {
+    .cursor-dot, .cursor-outline { display: block; }
+}
+
+.cursor-dot {
+    width: 8px; height: 8px;
+    background-color: var(--accent-cursor);
+}
+
+.cursor-outline {
+    width: 40px; height: 40px;
+    border: 1px solid var(--accent-cursor);
+    transition: width 0.2s, height 0.2s, background-color 0.2s;
+}
+
+/* Hover state for cursor */
+body.hovering .cursor-outline {
+    width: 60px;
+    height: 60px;
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: invert(1);
+}
 
 /* --- Fading Carousel --- */
 .carousel-container {
@@ -138,6 +196,8 @@ body {
     height: 80vh; 
     overflow: hidden;
     background: #111;
+    /* Move carousel up slightly since header is floating */
+    margin-top: 0; 
 }
 
 .carousel-slide {
@@ -165,23 +225,20 @@ body {
 
 .carousel-img {
     position: relative;
-    max-width: 95%;
-    max-height: 90%;
+    max-width: 90%;
+    max-height: 85%;
     width: auto; height: auto;
     object-fit: contain;
     z-index: 2;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
-    cursor: pointer;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
 }
 
 .carousel-date {
     position: absolute;
     bottom: 2rem; right: 2rem;
     color: rgba(255, 255, 255, 0.8);
-    font-family: 'Inter', sans-serif;
-    font-size: 0.85rem;
-    letter-spacing: 0.1em;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    font-style: italic;
+    font-size: 0.9rem;
     z-index: 3;
     pointer-events: none;
 }
@@ -191,7 +248,7 @@ body {
     top: 50%; transform: translateY(-50%);
     font-size: 2rem;
     color: rgba(255, 255, 255, 0.4);
-    cursor: pointer;
+    cursor: none; /* use custom cursor */
     z-index: 10;
     padding: 1rem;
     user-select: none;
@@ -201,31 +258,32 @@ body {
 .carousel-nav.prev { left: 1rem; }
 .carousel-nav.next { right: 1rem; }
 
-/* --- TRUE MASONRY GRID (CSS Grid + JS) --- */
+/* --- Matte Border Masonry Grid --- */
 .masonry-grid {
     display: grid;
-    /* Default for Desktop: Auto-fit based on 350px min-width */
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    grid-auto-rows: 10px; /* Small row height for granular spanning */
-    gap: 0 1.5rem; /* Horizontal gap only, vertical handled by rows */
-    padding: 2rem;
+    grid-auto-rows: 10px; 
+    gap: 0 2rem; /* Wider horizontal gap */
+    padding: 6rem 2rem 2rem 2rem; /* Top padding clears the floating header */
     max-width: 1400px;
     margin: 0 auto;
-    opacity: 0; /* Hidden until JS calculates layout to prevent FOUC */
+    opacity: 0; 
     animation: fadeInGrid 0.5s ease forwards;
 }
 
 @keyframes fadeInGrid { to { opacity: 1; } }
 
 .grid-item {
-    margin-bottom: 1.5rem; /* Visual bottom margin */
-    border-radius: 2px;
+    margin-bottom: 2.5rem; /* More vertical breathing room */
     background-color: var(--card-bg);
-    transition: transform 0.3s, background-color 0.3s;
+    transition: transform 0.3s ease;
     break-inside: avoid;
+    
+    /* THE MATTE EFFECT */
+    padding: 1.5rem; /* Creates the frame around the image */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
 }
 
-/* --- Smoother Blur-Up Loading --- */
 .image-holder {
     position: relative;
     width: 100%;
@@ -234,16 +292,15 @@ body {
     background-position: center;
 }
 
-/* The pseudo-element creates the blur effect on the tiny thumbnail */
 .image-holder::before {
     content: "";
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-image: inherit; /* Inherits the tiny URL from inline style */
+    background-image: inherit; 
     background-size: cover;
     background-position: center;
-    filter: blur(15px); /* Strong blur for abstract look */
-    transform: scale(1.1); /* Hide white edges from blur */
+    filter: blur(15px); 
+    transform: scale(1.1); 
     z-index: 1;
 }
 
@@ -253,111 +310,96 @@ body {
     width: 100%;
     height: auto;
     display: block;
-    cursor: pointer;
-    opacity: 0; /* Hidden initially */
+    opacity: 0; 
     transition: opacity 0.8s ease-in-out, transform 0.5s ease;
 }
 
-/* Class added by JS/Inline when loaded */
-.grid-item img.loaded {
-    opacity: 1;
-}
-
-.grid-item img:hover {
-    transform: scale(1.02);
-}
+.grid-item img.loaded { opacity: 1; }
+.grid-item:hover { transform: translateY(-5px); }
 
 .meta-holder {
-    padding: 8px 4px 0 4px;
+    padding-top: 1rem;
+    padding-bottom: 0.2rem;
+    text-align: center; /* Center align metadata for editorial feel */
 }
 
 .photo-meta {
-    font-size: 0.7rem;
+    font-family: 'Inter', sans-serif; /* Keep meta legible with sans-serif? Or switch to Playfair? User said Playfair default. Let's try Playfair italics. */
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 0.8rem;
     color: var(--text-color);
-    font-weight: 500;
-    letter-spacing: 0.02em;
     opacity: 0.8;
     text-transform: lowercase; 
 }
 
 .photo-date {
-    font-size: 0.75rem; 
+    font-family: 'Inter', sans-serif; /* Keep date clean */
+    font-size: 0.7rem; 
     color: var(--text-muted);
-    margin-top: 3px; 
-    text-align: right;
+    margin-top: 5px; 
+    text-align: center;
 }
 
-.gallery-header { padding: 3rem 2rem 1rem; text-align: center; }
+.gallery-header { padding: 6rem 2rem 1rem; text-align: center; } /* Adjusted for floating header */
 .gallery-title { 
-    font-weight: 300; 
-    letter-spacing: 0.1em; 
+    font-weight: 400; 
+    font-style: italic;
+    font-size: 2.5rem; /* Larger, more editorial */
     text-transform: lowercase;
     color: var(--text-color);
 }
 
-/* --- Footer, About, Lightbox etc --- */
+/* --- Footer --- */
 .site-footer {
     margin-top: auto; 
-    padding: 3rem 2rem 6rem 2rem;
+    padding: 4rem 2rem 6rem 2rem;
     text-align: center;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
+    font-style: italic;
     color: var(--text-muted);
     border-top: 1px solid var(--border-color);
     background: var(--bg-color);
-    transition: background-color 0.3s, border-top 0.3s, color 0.3s;
+    transition: background-color 0.3s;
 }
 
-.footer-content { display: flex; flex-direction: column; gap: 0.5rem; }
-.footer-links a { font-weight: 500; color: var(--text-color); margin: 0 5px; }
-.site-version { font-size: 0.7rem; color: var(--text-muted); margin-top: 1rem; letter-spacing: 0.05em; }
+.footer-links a { color: var(--text-color); margin: 0 10px; text-decoration: none; }
+.site-version { font-size: 0.75rem; margin-top: 1.5rem; font-family: 'Inter', sans-serif; }
 
+/* Lightbox */
 .lightbox {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: var(--lightbox-bg); 
     display: flex; flex-direction: column; justify-content: center; align-items: center;
-    gap: 20px; z-index: 1000; opacity: 1; transition: opacity 0.3s, background-color 0.3s;
+    gap: 20px; z-index: 2000; opacity: 1; transition: opacity 0.3s;
 }
 .lightbox.hidden { opacity: 0; pointer-events: none; }
-.lightbox img { max-width: 90vw; max-height: 80vh; box-shadow: 0 10px 30px rgba(0,0,0,0.1); } 
-.lightbox-close { position: absolute; top: 2rem; right: 2rem; font-size: 3rem; cursor: pointer; color: var(--text-color); }
+.lightbox img { max-width: 90vw; max-height: 80vh; box-shadow: 0 20px 50px rgba(0,0,0,0.2); cursor: none; } 
+.lightbox-close { position: absolute; top: 2rem; right: 2rem; font-size: 3rem; cursor: none; color: var(--text-color); }
 
 /* Lightbox Extras */
-#palette-container { display: flex; gap: 15px; z-index: 1001; animation: fadeIn 0.5s ease; }
-.color-swatch { width: 35px; height: 35px; border-radius: 50%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 2px solid #fff; transition: transform 0.2s; }
-.color-swatch:hover { transform: scale(1.2); cursor: pointer; }
+#palette-container { display: flex; gap: 15px; z-index: 2001; }
+.color-swatch { width: 35px; height: 35px; border-radius: 50%; border: 2px solid #fff; cursor: none; }
 
 #lightbox-location, #lightbox-details {
     position: absolute;
     color: #fff;
     background: rgba(0,0,0,0.6);
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    z-index: 1002;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-style: italic;
+    z-index: 2002;
     text-transform: lowercase; 
+    backdrop-filter: blur(5px);
 }
 
-#lightbox-location {
-    bottom: 20px;
-    left: 20px;
-    cursor: pointer;
-}
-
-#lightbox-details {
-    bottom: 20px;
-    right: 20px;
-    display: flex;
-    gap: 15px;
-    cursor: default;
-}
-#lightbox-details span {
-    white-space: nowrap;
-}
+#lightbox-location { bottom: 30px; left: 30px; cursor: none; }
+#lightbox-details { bottom: 30px; right: 30px; display: flex; gap: 15px; cursor: none; }
 
 /* About */
-.about-container { max-width: 600px; margin: 4rem auto; padding: 0 2rem; text-align: center; animation: fadeIn 0.5s ease; }
-.about-text p { margin-bottom: 1.5rem; font-weight: 300; font-size: 1.1rem; color: var(--text-color); }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.about-container { max-width: 600px; margin: 8rem auto; padding: 0 2rem; text-align: center; }
+.about-text p { margin-bottom: 2rem; font-size: 1.25rem; color: var(--text-color); }
 
 /* Back to Top */
 #back-to-top {
@@ -366,38 +408,33 @@ body {
     width: 40px; height: 40px; border-radius: 50%;
     display: flex; justify-content: center; align-items: center;
     font-size: 1.2rem; opacity: 0; visibility: hidden;
-    transition: opacity 0.3s, visibility 0.3s, background 0.3s;
-    z-index: 999; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transition: opacity 0.3s;
+    z-index: 999; 
+    cursor: none;
+    text-decoration: none;
 }
 #back-to-top.visible { opacity: 1; visibility: visible; }
-#back-to-top:hover { opacity: 0.8; }
 
 /* Mobile */
 @media (max-width: 600px) {
+    .site-header { width: 95%; top: 10px; padding: 0.6rem 1rem; }
+    
     .masonry-grid { 
-        padding: 10px; 
-        gap: 0 10px;
-        grid-template-columns: repeat(2, 1fr);
+        padding: 5rem 1rem 1rem 1rem; 
+        gap: 0 1rem;
+        grid-template-columns: repeat(1, 1fr); /* Single column on mobile for editorial look */
     }
     
-    .carousel-nav { display: block !important; font-size: 1.5rem; padding: 1rem 0.5rem; background: rgba(0,0,0,0.1); border-radius: 4px; }
-    .carousel-nav.prev { left: 5px; }
-    .carousel-nav.next { right: 5px; }
+    .grid-item { padding: 1rem; } /* Smaller matte on mobile */
     
-    .photo-date { 
-        display: block; /* Fixed: Date is now visible on mobile */
-        font-size: 0.65rem;
-        margin-top: 2px;
-        opacity: 0.7;
-    }
+    .carousel-nav { display: block !important; background: rgba(0,0,0,0.1); border-radius: 50%; }
     
-    .photo-meta { font-size: 0.6rem; }
+    .photo-date { display: block; opacity: 0.7; }
     
     #lightbox-details {
-        bottom: 60px;
-        right: auto;
-        left: 20px;
-        flex-wrap: wrap;
-        gap: 10px;
+        bottom: 70px;
+        right: auto; left: 20px;
+        flex-wrap: wrap; gap: 10px;
     }
+    #lightbox-location { bottom: 20px; left: 20px; }
 }
