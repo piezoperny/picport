@@ -8,7 +8,7 @@ const colorThief = new ColorThief();
 document.addEventListener('DOMContentLoaded', init);
 
 function init() {
-    setupLayoutSwitcher(); // New Layout Logic
+    setupLayoutSwitcher(); 
 
     // 1. Mobile Menu
     const toggle = document.getElementById('menu-toggle');
@@ -59,11 +59,11 @@ function init() {
         });
     }
 
-    // 5. Masonry Grid Calculations (Run initially if we are in grid mode)
+    // 5. Run Grid Calculation initially
     window.addEventListener("resize", resizeAllGridItems);
 }
 
-/* --- Layout Switcher (List vs Grid) --- */
+/* --- Layout Switcher --- */
 function setupLayoutSwitcher() {
     const feed = document.getElementById('gallery-feed');
     const btnList = document.getElementById('btn-list');
@@ -79,23 +79,24 @@ function setupLayoutSwitcher() {
     btnGrid.addEventListener('click', () => setLayout('grid'));
 
     function setLayout(mode) {
-        // Update Classes
         feed.classList.remove('layout-list', 'layout-grid');
         feed.classList.add(`layout-${mode}`);
         
-        // Update Buttons
         btnList.classList.toggle('active', mode === 'list');
         btnGrid.classList.toggle('active', mode === 'grid');
         
-        // Save
         localStorage.setItem('layoutPreference', mode);
 
-        // Handle Masonry Logic
         if (mode === 'grid') {
-            // Wait for transition or immediate render
-            setTimeout(resizeAllGridItems, 50);
+            // Force recalculation for masonry
+            setTimeout(resizeAllGridItems, 100);
+            // Also retry image load triggers
+            const imgs = document.querySelectorAll('.media-frame img');
+            imgs.forEach(img => {
+                if(img.complete) resizeGridItem(img.closest('.gallery-item'));
+            });
         } else {
-            // Clear masonry styles
+            // Clean up grid styles
             const items = document.querySelectorAll('.gallery-item');
             items.forEach(item => item.style.removeProperty('grid-row-end'));
         }
@@ -104,22 +105,33 @@ function setupLayoutSwitcher() {
 
 /* --- Masonry Grid Logic --- */
 function resizeGridItem(item) {
-    const grid = document.querySelector(".layout-grid"); // Only apply if grid class exists
+    if (!item) return;
+    const grid = document.querySelector(".layout-grid");
+    // Only calculate if we are actually in grid mode
     if (!grid) return;
     
     const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue('grid-auto-rows'));
     const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue('gap').split(' ')[0]) || 0;
     
-    // We need to calculate height of content inside the item
-    // In grid mode, the content is just children height + padding
-    const rowSpan = Math.ceil((item.getBoundingClientRect().height + rowGap) / (rowHeight + rowGap));
+    // FIX: Use .media-frame instead of .image-holder
+    const mediaFrame = item.querySelector('.media-frame');
+    const metaDiv = item.querySelector('.gallery-meta');
+    
+    if (!mediaFrame) return;
+
+    // Calculate total height of content
+    let contentHeight = mediaFrame.getBoundingClientRect().height;
+    if (metaDiv) contentHeight += metaDiv.getBoundingClientRect().height;
+    
+    // Add internal padding of the card (e.g. 1rem top + 1rem bottom = 32px approx)
+    contentHeight += 40; 
+
+    const rowSpan = Math.ceil((contentHeight + rowGap) / (rowHeight + rowGap));
     item.style.gridRowEnd = "span " + rowSpan;
 }
 
 function resizeAllGridItems() {
-    // Only resize if we are in grid mode
     if (!document.querySelector('.layout-grid')) return;
-    
     const allItems = document.getElementsByClassName("gallery-item");
     for (let x = 0; x < allItems.length; x++) {
         resizeGridItem(allItems[x]);
@@ -149,7 +161,6 @@ const closeBtn = document.querySelector('.lightbox-close');
 window.openLightbox = function(src) {
     if (carouselInterval) clearInterval(carouselInterval);
     
-    // Clear old dynamic elements
     ['palette-container', 'lightbox-location', 'lightbox-details'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.remove();
@@ -157,7 +168,6 @@ window.openLightbox = function(src) {
 
     lightboxImg.src = src;
     
-    // Decode Filename for Info
     const filename = decodeURIComponent(src.split('/').pop());
     const parts = filename.split('--');
     const namePart = parts[0];
@@ -226,18 +236,12 @@ window.openLightbox = function(src) {
 };
 
 function navigateLightbox(dir) {
-    // Look for images inside the unified gallery items
     const imgs = Array.from(document.querySelectorAll('.gallery-item img'));
     const currentSrc = lightboxImg.getAttribute('src');
     
-    // Find index of image that matches current source
-    // Note: The img tag inside media-frame doesn't have onclick, the wrapper does.
-    // So we match by src directly.
     let currentIndex = imgs.findIndex(img => img.src.includes(currentSrc) || currentSrc.includes(img.src));
     
-    // Fallback if src match is tricky due to relative/absolute paths
     if (currentIndex === -1) {
-         // Try to find via wrapper onclick
          const wrappers = Array.from(document.querySelectorAll('.media-frame'));
          currentIndex = wrappers.findIndex(div => {
              const attr = div.getAttribute('onclick');
@@ -250,15 +254,12 @@ function navigateLightbox(dir) {
         if (nextIndex >= imgs.length) nextIndex = 0;
         if (nextIndex < 0) nextIndex = imgs.length - 1;
         
-        // Find the wrapper of the next image to get the onclick link
         const nextImg = imgs[nextIndex];
         const wrapper = nextImg.closest('.media-frame');
         
         if (wrapper) {
             const match = wrapper.getAttribute('onclick').match(/openLightbox\('([^']+)'\)/);
-            if (match && match[1]) {
-                openLightbox(match[1]);
-            }
+            if (match && match[1]) openLightbox(match[1]);
         }
     }
 }
@@ -266,7 +267,6 @@ function navigateLightbox(dir) {
 document.addEventListener('keydown', function(e) {
     const lightbox = document.getElementById('lightbox');
     const isLightboxOpen = lightbox && !lightbox.classList.contains('hidden');
-
     if (isLightboxOpen) {
         if (e.key === 'ArrowLeft') navigateLightbox(-1);
         if (e.key === 'ArrowRight') navigateLightbox(1);
@@ -287,7 +287,6 @@ function closeLightbox() {
     if (document.getElementById('carousel')) startCarousel();
 }
 
-// Carousel Functions
 function startCarousel() {
     if (carouselInterval) clearInterval(carouselInterval);
     carouselInterval = setInterval(() => moveSlide(1), 5000);
