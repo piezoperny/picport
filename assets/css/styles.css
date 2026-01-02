@@ -455,7 +455,12 @@ body {
     .layout-list .media-frame { width: 100%; padding: 0; box-shadow: none; background: transparent; }
     .layout-list .gallery-meta, .layout-list .gallery-item:nth-child(even) .gallery-meta { align-items: flex-start; width: 100%; }
     
-    .layout-grid { grid-template-columns: 1fr; gap: 1rem; padding: 0 1rem; }
+    /* UPDATED: Force 2 columns on mobile */
+    .layout-grid { 
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 0.5rem; 
+        padding: 0 0.5rem; 
+    }
     
     #lightbox-details { bottom: 70px; right: auto; left: 20px; flex-wrap: wrap; gap: 10px; }
     #lightbox-location { bottom: 20px; left: 20px; }
