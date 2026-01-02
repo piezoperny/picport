@@ -276,6 +276,7 @@ body {
     font-weight: 500;
     letter-spacing: 0.02em;
     opacity: 0.8;
+    text-transform: lowercase; /* Added lowercase enforcement */
 }
 
 .photo-date {
@@ -332,6 +333,7 @@ body {
     border-radius: 4px;
     font-size: 0.85rem;
     z-index: 1002;
+    text-transform: lowercase; /* Added lowercase enforcement */
 }
 
 #lightbox-location {
