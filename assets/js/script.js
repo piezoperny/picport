@@ -128,7 +128,7 @@ window.openLightbox = function(src) {
 
     lightboxImg.src = src;
     
-    // Decode Filename for Info (fixes %20 issue)
+    // Decode Filename for Info
     const filename = decodeURIComponent(src.split('/').pop());
     
     // Structure: Date-Camera_ISO_Aperture_Shutter--Coords.jpg
@@ -146,16 +146,19 @@ window.openLightbox = function(src) {
             let shutter = techInfo.pop();
             let aperture = techInfo.pop();
             let iso = techInfo.pop();
-            let camera = techInfo.join(' '); // Join remaining parts as Camera Name
+            let camera = techInfo.join(' '); 
 
-            // Format values
+            // Format values & Force Lowercase
             shutter = shutter.replace('1-', '1/') + ' s';
             aperture = 'f/' + aperture;
-            iso = 'ISO ' + iso;
+            iso = 'iso ' + iso;
+            camera = '📷 ' + camera;
+
+            const finalString = `${camera} • ${iso} • ${aperture} • ${shutter}`.toLowerCase();
 
             const detailsDiv = document.createElement('div');
             detailsDiv.id = 'lightbox-details';
-            detailsDiv.innerHTML = `<span>📷 ${camera}</span> <span>${iso}</span> <span>${aperture}</span> <span>${shutter}</span>`;
+            detailsDiv.innerHTML = `<span>${finalString}</span>`;
             lightbox.appendChild(detailsDiv);
         }
     }
@@ -176,7 +179,7 @@ window.openLightbox = function(src) {
             locDiv.innerHTML = `📍 ${lat}, ${lon}`;
             locDiv.onclick = (e) => {
                 e.stopPropagation();
-                window.open(`https://www.google.com/maps?q=$?q=${lat},${lon}`, '_blank');
+                window.open(`http://googleusercontent.com/maps.google.com/${lat},${lon}`, '_blank');
             };
             lightbox.appendChild(locDiv);
         }
