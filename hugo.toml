@@ -1,10 +1,9 @@
 baseURL = 'https://pics.pernazza.com/'
 languageCode = 'en-us'
 title = 'picport'
-theme = 'picport'
 
 [params]
-  description = "Marco's photography portfolio"
+  description = "marco's photography portfolio"
   darkMode = true
   version = "v1.2"
 
