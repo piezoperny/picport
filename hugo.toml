@@ -4,7 +4,7 @@ title = "marco's gallery"
 
 [params]
   description = "visuals"
-  author = "Marco Pernazza"
+  author = "marco pernazza"
   instagram = "https://instagram.com/isoperny"
   email = "marco@pernazza.com"
   version = "v3.01"
@@ -26,6 +26,7 @@ title = "marco's gallery"
 
 [outputs]
   home = ["HTML", "JSON"]
+
 
 
 
