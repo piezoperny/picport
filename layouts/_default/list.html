@@ -1,20 +1,26 @@
 {{ define "main" }}
+<div class="layout-controls">
+    <button id="btn-list" class="layout-btn active">list</button>
+    <span>/</span>
+    <button id="btn-grid" class="layout-btn">grid</button>
+</div>
+
 <div class="gallery-header"><h1 class="gallery-title">{{ .Title | lower }}</h1></div>
 
-<div class="asymmetric-feed">
+<div id="gallery-feed" class="layout-list">
     {{ range sort (.Resources.ByType "image") "Name" "desc" }}
-        <div class="feed-item">
-            <div class="feed-image-frame" onclick="openLightbox('{{ .RelPermalink }}')">
+        <div class="gallery-item">
+            <div class="media-frame" onclick="openLightbox('{{ .RelPermalink }}')">
                 {{ $w900 := .Resize "900x" }}
                 <img src="{{ $w900.RelPermalink }}" 
                      alt="photography" loading="lazy" 
-                     class="feed-img">
+                     onload="resizeGridItem(this.closest('.gallery-item'))">
             </div>
             
-            <div class="feed-text-content">
+            <div class="gallery-meta">
                 {{ $dateStr := replaceRE "^(\\d{4})(\\d{2})(\\d{2}).*" "$1-$2-$3" .Name }}
                 {{ if ne $dateStr .Name }}
-                    <span class="feed-date">{{ $dateStr }}</span>
+                    <span class="meta-date">{{ $dateStr }}</span>
                 {{ end }}
                 
                 {{/* Tech Spec Parsing Logic */}}
@@ -29,14 +35,14 @@
                         {{ $camParts := first (sub (len $parts) 3) $parts }}
                         {{ $camera := delimit $camParts " " }}
                         
-                        <p class="feed-meta">
+                        <div class="meta-tech">
                             {{ (print $camera) | lower }}<br>
                             {{ (print "iso " $iso " • f/" $aperture " • " $shutter " s") | lower }}
-                        </p>
+                        </div>
                     {{ end }}
                 {{ end }}
                 
-                <span class="feed-action" onclick="openLightbox('{{ .RelPermalink }}')">view details</span>
+                <span class="meta-action" onclick="openLightbox('{{ .RelPermalink }}')">view details</span>
             </div>
         </div>
     {{ end }}
