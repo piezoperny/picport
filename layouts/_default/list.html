@@ -14,8 +14,6 @@
                      onload="this.classList.add('loaded'); resizeGridItem(this.closest('.grid-item'));">
             </div>
             <div class="meta-holder">
-                {{ $dateStr := replaceRE "^(\\d{4})(\\d{2})(\\d{2}).*" "$1-$2-$3" .Name }}
-                
                 {{/* Tech Spec Parsing Logic */}}
                 {{ $base := index (split .Name "--") 0 }} {{/* Remove Coords */}}
                 {{ if gt (len $base) 16 }}
@@ -29,12 +27,12 @@
                         {{ $camera := delimit $camParts " " }}
                         
                         <div class="photo-meta">
-                            {{ $camera }} &bull; ISO {{ $iso }} &bull; f/{{ $aperture }} &bull; {{ $shutter }} s
+                             {{ (print $camera " • iso " $iso " • f/" $aperture " • " $shutter " s") | lower }}
                         </div>
                     {{ end }}
                 {{ end }}
 
-                {{ if ne $dateStr .Name }}<div class="photo-date">{{ $dateStr }}</div>{{ end }}
+                {{ if ne $dateStr .Name }}<div class="photo-date">{{ replaceRE "^(\\d{4})(\\d{2})(\\d{2}).*" "$1-$2-$3" .Name }}</div>{{ end }}
             </div>
         </div>
     {{ end }}
