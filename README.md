@@ -32,4 +32,4 @@ marco pernazza. phd student in catalysis at itq, valencia. exploring visual flee
 * instagram: [@isoperny](https://instagram.com/isoperny)
 * email: marco@pernazza.com
 
-copyright 2025 marco pernazza
+copyright 2026 marco pernazza
