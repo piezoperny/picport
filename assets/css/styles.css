@@ -26,7 +26,7 @@ body.dark-mode {
 html { scroll-behavior: smooth; }
 
 body {
-    font-family: 'Cormorant Garamond', serif; /* FONT UPDATE */
+    font-family: 'Cormorant Garamond', serif; 
     background-color: var(--bg-color); 
     color: var(--text-color);
     line-height: 1.6;
@@ -120,15 +120,17 @@ body {
     display: block;
     padding: 0.8rem;
     color: var(--text-color);
-    font-size: 1.1rem; /* Slightly larger for Cormorant */
+    font-size: 1.1rem; 
     font-weight: 500;
     text-decoration: none;
     border-bottom: 1px solid var(--border-color);
+    font-style: normal; /* No Italics */
 }
 #nav-links a:last-child { border-bottom: none; }
 #nav-links a:hover { opacity: 0.6; }
+.nav-divider { height: 1px; background: var(--border-color); margin: 5px 2rem; }
 
-/* --- Carousel --- */
+/* --- Carousel & Home Title --- */
 .carousel-container {
     position: relative;
     width: 100%;
@@ -136,6 +138,26 @@ body {
     overflow: hidden;
     background: #111;
     margin-top: 0; 
+}
+
+/* HOME TITLE OVERLAY */
+.home-title {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    color: #fff;
+    font-weight: 300;
+    font-size: 3rem;
+    text-align: center;
+    letter-spacing: 0.1em;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    pointer-events: none;
+    width: 100%;
+    padding: 0 20px;
+    mix-blend-mode: overlay; /* Subtle blend with images */
+    font-style: normal; /* No Italics */
 }
 
 .carousel-slide {
@@ -175,10 +197,10 @@ body {
     position: absolute;
     bottom: 2rem; right: 2rem;
     color: rgba(255, 255, 255, 0.8);
-    font-style: italic;
     font-size: 1rem;
     z-index: 3;
     pointer-events: none;
+    font-style: normal; /* No Italics */
 }
 
 .carousel-nav {
@@ -201,7 +223,7 @@ body {
     display: flex;
     justify-content: center;
     gap: 20px;
-    padding-top: 6rem; /* Clear fixed header */
+    padding-top: 6rem; 
     padding-bottom: 2rem;
     opacity: 0.6;
     transition: opacity 0.3s;
@@ -214,10 +236,10 @@ body {
     color: var(--text-color);
     font-family: 'Cormorant Garamond', serif;
     font-size: 1rem;
-    font-style: italic;
     cursor: pointer;
     padding-bottom: 2px;
     border-bottom: 1px solid transparent;
+    font-style: normal; /* No Italics */
 }
 .layout-btn.active {
     font-weight: 700;
@@ -261,13 +283,14 @@ body {
     font-size: 0.75rem;
     color: var(--text-muted);
     letter-spacing: 0.05em;
+    font-style: normal;
 }
 
 .meta-tech {
     font-size: 1.1rem;
-    font-style: italic;
     color: var(--text-color);
     line-height: 1.4;
+    font-style: normal; /* No Italics */
 }
 
 .meta-action {
@@ -287,21 +310,21 @@ body {
     display: flex;
     flex-direction: column;
     gap: 6rem;
-    max-width: 1000px; /* Constrain width for list view */
+    max-width: 1000px; 
 }
 
 .layout-list .gallery-item {
     display: flex;
     align-items: center;
     gap: 4rem;
-    background: transparent; /* No card bg for whole item in list mode */
+    background: transparent; 
 }
 .layout-list .gallery-item:nth-child(even) { flex-direction: row-reverse; text-align: right; }
 
 .layout-list .media-frame {
     flex: 1.5;
     padding: 1.5rem;
-    background-color: var(--card-bg); /* Matte frame only on image */
+    background-color: var(--card-bg);
     box-shadow: 0 10px 30px rgba(0,0,0,0.03);
 }
 .layout-list .media-frame:hover { transform: scale(1.02); }
@@ -311,7 +334,6 @@ body {
     gap: 1rem;
     justify-content: center;
 }
-/* Align items in list mode */
 .layout-list .gallery-item:nth-child(even) .gallery-meta { align-items: flex-end; }
 .layout-list .gallery-item:nth-child(odd) .gallery-meta { align-items: flex-start; }
 
@@ -326,14 +348,12 @@ body {
 
 .layout-grid .gallery-item {
     margin-bottom: 2.5rem;
-    padding: 1rem; /* Smaller matte frame */
+    padding: 1rem; 
     display: block;
     box-shadow: 0 2px 10px rgba(0,0,0,0.02);
 }
 
-.layout-grid .media-frame {
-    margin-bottom: 1rem;
-}
+.layout-grid .media-frame { margin-bottom: 1rem; }
 .layout-grid .media-frame:hover img { transform: scale(1.03); }
 
 .layout-grid .gallery-meta {
@@ -343,22 +363,19 @@ body {
 }
 
 .layout-grid .meta-tech { font-size: 0.95rem; }
-.layout-grid .meta-action { display: none; } /* Hide action button in grid for cleanliness */
+.layout-grid .meta-action { display: none; }
 .layout-grid .meta-date { margin-top: 0.2rem; }
 
 
 /* --- Header Titles --- */
-.gallery-header { 
-    /* Padding is handled by layout-controls container essentially */
-    text-align: center; 
-} 
+.gallery-header { text-align: center; } 
 .gallery-title { 
     font-weight: 400; 
-    font-style: italic;
     font-size: 3rem; 
     text-transform: lowercase;
     color: var(--text-color);
     margin-bottom: 0.5rem;
+    font-style: normal; /* No Italics */
 }
 
 /* --- Footer --- */
@@ -367,11 +384,11 @@ body {
     padding: 6rem 2rem;
     text-align: center;
     font-size: 1.1rem;
-    font-style: italic;
     color: var(--text-muted);
     border-top: 1px solid var(--border-color);
     background: var(--bg-color);
     transition: background-color 0.3s;
+    font-style: normal; /* No Italics */
 }
 .footer-links a { color: var(--text-color); margin: 0 10px; text-decoration: none; }
 .site-version { font-size: 0.8rem; margin-top: 1.5rem; font-family: 'Inter', sans-serif; opacity: 0.7; }
@@ -397,13 +414,17 @@ body {
     padding: 8px 16px;
     border-radius: 50px;
     font-size: 1rem;
-    font-style: italic;
     z-index: 2002;
     text-transform: lowercase; 
     backdrop-filter: blur(5px);
+    font-style: normal; /* No Italics */
 }
 #lightbox-location { bottom: 30px; left: 30px; cursor: pointer; }
 #lightbox-details { bottom: 30px; right: 30px; display: flex; gap: 15px; cursor: default; }
+
+/* About */
+.about-container { max-width: 600px; margin: 8rem auto; padding: 0 2rem; text-align: center; }
+.about-text p { margin-bottom: 2rem; font-size: 1.25rem; color: var(--text-color); }
 
 /* Back to Top */
 #back-to-top {
@@ -424,7 +445,6 @@ body {
     
     .layout-controls { padding-top: 5rem; }
     
-    /* Force Grid/List to look similar on mobile (stacked) */
     .layout-list { padding: 0 1rem; gap: 3rem; }
     
     .layout-list .gallery-item, 
@@ -433,7 +453,7 @@ body {
         align-items: flex-start;
         text-align: left;
         gap: 1rem;
-        background: var(--card-bg); /* Add card bg back for mobile list items */
+        background: var(--card-bg);
         padding: 1rem;
     }
     
@@ -444,9 +464,10 @@ body {
         align-items: flex-start; width: 100%; 
     }
     
-    /* Grid Mobile */
     .layout-grid { grid-template-columns: 1fr; gap: 1rem; padding: 0 1rem; }
     
     #lightbox-details { bottom: 70px; right: auto; left: 20px; flex-wrap: wrap; gap: 10px; }
     #lightbox-location { bottom: 20px; left: 20px; }
+    
+    .home-title { font-size: 2rem; }
 }
