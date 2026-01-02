@@ -1,7 +1,6 @@
 {{ define "main" }}
 <div class="carousel-container" id="carousel">
     
-    {{/* Title moved to header, logic updated to find resources recursively */}}
     {{ $slides := slice }}
     {{ with .Site.GetPage "section" "gallery" }}
         {{ range .Sections }}
@@ -17,7 +16,8 @@
     <div class="carousel-slide {{ if eq $index 0 }}active{{ end }}">
         <div class="carousel-bg" style="background-image: url('{{ .RelPermalink }}');"></div>
         {{ $w1200 := .Resize "1200x" }}
-        <img src="{{ $w1200.RelPermalink }}" class="carousel-img" alt="featured photo">
+        <img src="{{ $w1200.RelPermalink }}" class="carousel-img" alt="featured photo" 
+             onclick="openLightbox('{{ .RelPermalink }}')" style="cursor: pointer;">
         <div class="carousel-date">{{ replaceRE "^(\\d{4})(\\d{2})(\\d{2}).*" "$1.$2.$3" .Name }}</div>
     </div>
     {{ end }}
@@ -26,11 +26,5 @@
     <div class="carousel-nav next" onclick="moveSlide(1)">&#10095;</div>
 </div>
 
-<div class="about-container">
-    <div class="about-text">
-        {{ with .Site.GetPage "about" }}
-            {{ .Content }}
-        {{ end }}
-    </div>
-</div>
+{{/* About section removed from here */}}
 {{ end }}
