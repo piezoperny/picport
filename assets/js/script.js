@@ -60,6 +60,21 @@ function init() {
     window.addEventListener("resize", resizeAllGridItems);
 }
 
+/* --- Keyboard Navigation --- */
+document.addEventListener('keydown', function(e) {
+    const lightbox = document.getElementById('lightbox');
+    const isLightboxOpen = lightbox && !lightbox.classList.contains('hidden');
+
+    if (isLightboxOpen) {
+        if (e.key === 'ArrowLeft') navigateLightbox(-1);
+        if (e.key === 'ArrowRight') navigateLightbox(1);
+        if (e.key === 'Escape') closeLightbox();
+    } else if (document.getElementById('carousel')) {
+        if (e.key === 'ArrowLeft') moveSlide(-1);
+        if (e.key === 'ArrowRight') moveSlide(1);
+    }
+});
+
 /* --- Masonry Grid Logic --- */
 function resizeGridItem(item) {
     const grid = document.querySelector(".masonry-grid");
@@ -106,102 +121,68 @@ window.openLightbox = function(src) {
     if (carouselInterval) clearInterval(carouselInterval);
     
     // Clear old dynamic elements
-    ['palette-container', 'lightbox-location'].forEach(id => {
+    ['palette-container', 'lightbox-location', 'lightbox-details'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.remove();
     });
 
     lightboxImg.src = src;
     
+    // Decode Filename for Info
     const filename = src.split('/').pop();
+    
+    // Structure: Date-Camera_ISO_Aperture_Shutter--Coords.jpg
+    // 1. Tech Specs
+    const parts = filename.split('--');
+    const namePart = parts[0];
+    
+    // Ensure we have enough data (Date is 15 chars + 1 hyphen = 16)
+    if (namePart.length > 16) {
+        // Remove date "YYYYMMDD_HHMMSS-"
+        const techString = namePart.substring(16); 
+        const techInfo = techString.split('_');
+        
+        // We expect at least 4 parts: Camera (can be multiple words), ISO, Aperture, Shutter
+        if (techInfo.length >= 4) {
+            let shutter = techInfo.pop();
+            let aperture = techInfo.pop();
+            let iso = techInfo.pop();
+            let camera = techInfo.join(' '); // Join remaining parts as Camera Name
 
-    // 1. Palette extraction
+            // Format values
+            shutter = shutter.replace('1-', '1/') + ' s';
+            aperture = 'f/' + aperture;
+            iso = 'ISO ' + iso;
+
+            const detailsDiv = document.createElement('div');
+            detailsDiv.id = 'lightbox-details';
+            detailsDiv.innerHTML = `<span>📷 ${camera}</span> <span>${iso}</span> <span>${aperture}</span> <span>${shutter}</span>`;
+            lightbox.appendChild(detailsDiv);
+        }
+    }
+
+    // 2. Palette extraction
     const paletteContainer = document.createElement('div');
     paletteContainer.id = 'palette-container';
     lightbox.appendChild(paletteContainer);
 
-    // 2. Location extraction
-    if (filename.includes('--')) {
-        const parts = filename.split('--');
-        if (parts.length > 1) {
-            let coordsRaw = parts[parts.length - 1].replace(/\.(jpg|jpeg|png|webp|gif)$/i, "");
-            const latLon = coordsRaw.split('_');
-            if (latLon.length >= 2) {
-                const lat = latLon[0]; const lon = latLon[1];
-                const locDiv = document.createElement('div');
-                locDiv.id = 'lightbox-location';
-                Object.assign(locDiv.style, {
-                    position: 'absolute', bottom: '20px', left: '20px',
-                    color: '#fff', background: 'rgba(0,0,0,0.6)',
-                    padding: '8px 12px', borderRadius: '4px',
-                    fontSize: '0.85rem', cursor: 'pointer', zIndex: '1002'
-                });
-                locDiv.innerHTML = `📍 ${lat}, ${lon}`;
-                locDiv.onclick = (e) => {
-                    e.stopPropagation();
-                    window.open(`https://www.google.com/maps?q=${lat},${lon}`, '_blank');
-                };
-                lightbox.appendChild(locDiv);
-            }
+    // 3. Location extraction
+    if (parts.length > 1) {
+        let coordsRaw = parts[parts.length - 1].replace(/\.(jpg|jpeg|png|webp|gif)$/i, "");
+        const latLon = coordsRaw.split('_');
+        if (latLon.length >= 2) {
+            const lat = latLon[0]; const lon = latLon[1];
+            const locDiv = document.createElement('div');
+            locDiv.id = 'lightbox-location';
+            locDiv.innerHTML = `📍 ${lat}, ${lon}`;
+            locDiv.onclick = (e) => {
+                e.stopPropagation();
+                window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lon}`, '_blank');
+            };
+            lightbox.appendChild(locDiv);
         }
     }
 
     const extractColors = () => {
         try {
-            const colors = colorThief.getPalette(lightboxImg, 5);
-            colors.forEach(color => {
-                const swatch = document.createElement('div');
-                swatch.className = 'color-swatch';
-                swatch.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
-                paletteContainer.appendChild(swatch);
-            });
-        } catch (e) { }
-    };
-
-    if (lightboxImg.complete) extractColors();
-    else lightboxImg.onload = extractColors;
-
-    lightbox.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-};
-
-if (closeBtn) closeBtn.onclick = closeLightbox;
-if (lightbox) lightbox.onclick = (e) => { if (e.target === lightbox) closeLightbox(); };
-
-function closeLightbox() {
-    lightbox.classList.add('hidden');
-    document.body.style.overflow = '';
-    setTimeout(() => { lightboxImg.src = ''; }, 300);
-    if (document.getElementById('carousel')) startCarousel();
-}
-
-// Carousel Functions
-function startCarousel() {
-    if (carouselInterval) clearInterval(carouselInterval);
-    carouselInterval = setInterval(() => moveSlide(1), 5000);
-}
-window.moveSlide = function(direction) {
-    const slides = document.querySelectorAll('.carousel-slide');
-    if (!slides.length) return;
-    let activeIndex = 0;
-    slides.forEach((slide, index) => {
-        if (slide.classList.contains('active')) activeIndex = index;
-        slide.classList.remove('active');
-    });
-    let nextIndex = activeIndex + direction;
-    if (nextIndex >= slides.length) nextIndex = 0;
-    if (nextIndex < 0) nextIndex = slides.length - 1;
-    slides[nextIndex].classList.add('active');
-    startCarousel();
-}
-function setupSwipe() {
-    const carousel = document.getElementById('carousel');
-    if(carousel) {
-        carousel.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
-        carousel.addEventListener('touchend', e => {
-            touchEndX = e.changedTouches[0].screenX;
-            if (touchEndX < touchStartX - 50) moveSlide(1);
-            if (touchEndX > touchStartX + 50) moveSlide(-1);
-        }, {passive: true});
-    }
-}
+            const colors = colorThief.getPalette(lightboxImg
