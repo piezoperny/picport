@@ -118,7 +118,7 @@ function resizeGridItem(item) {
     let contentHeight = mediaFrame.getBoundingClientRect().height;
     if (metaDiv) contentHeight += metaDiv.getBoundingClientRect().height;
     
-    // INCREASED BUFFER: Changed from 70 to 110 to ensure metadata is wrapped
+    // Increased buffer to ensure metadata is wrapped
     contentHeight += 110; 
 
     const rowSpan = Math.ceil((contentHeight + rowGap) / (rowHeight + rowGap));
@@ -133,7 +133,6 @@ function resizeAllGridItems() {
     }
 }
 window.addEventListener("load", resizeAllGridItems);
-// Ensure grid recalculates after fonts load to prevent cutoff text
 if (document.fonts) {
     document.fonts.ready.then(resizeAllGridItems);
 }
@@ -160,6 +159,7 @@ const closeBtn = document.querySelector('.lightbox-close');
 window.openLightbox = function(src) {
     if (carouselInterval) clearInterval(carouselInterval);
     
+    // Clear previous details
     ['palette-container', 'lightbox-location', 'lightbox-details'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.remove();
@@ -171,6 +171,7 @@ window.openLightbox = function(src) {
     const parts = filename.split('--');
     const namePart = parts[0];
     
+    // Metadata Parsing
     if (namePart.length > 16) {
         const techString = namePart.substring(16); 
         const techInfo = techString.split('_');
@@ -195,21 +196,27 @@ window.openLightbox = function(src) {
         }
     }
 
+    // Color Palette - INSERTED BEFORE IMAGE
     const paletteContainer = document.createElement('div');
     paletteContainer.id = 'palette-container';
-    lightbox.appendChild(paletteContainer);
+    // This moves the palette above the image
+    lightbox.insertBefore(paletteContainer, lightboxImg);
 
+    // GPS Location
     if (parts.length > 1) {
         let coordsRaw = parts[parts.length - 1].replace(/\.(jpg|jpeg|png|webp|gif)$/i, "");
         const latLon = coordsRaw.split('_');
         if (latLon.length >= 2) {
-            const lat = latLon[0]; const lon = latLon[1];
+            const lat = latLon[0]; 
+            const lon = latLon[1];
+            
             const locDiv = document.createElement('div');
             locDiv.id = 'lightbox-location';
             locDiv.innerHTML = `📍 ${lat}, ${lon}`;
             locDiv.onclick = (e) => {
                 e.stopPropagation();
-                window.open(`http://googleusercontent.com/maps.google.com/${lat},${lon}`, '_blank');
+                // Fixed URL to standard Google Maps format
+                window.open(`https://www.google.com/maps?q=${lat},${lon}`, '_blank');
             };
             lightbox.appendChild(locDiv);
         }
