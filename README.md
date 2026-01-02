@@ -8,12 +8,14 @@ personal photography portfolio. custom-built for visual focus.
 marco pernazza. phd student in catalysis at itq, valencia. exploring visual fleetingness through light, deep shadows, and minimalist geometry.
 
 ## features
-* **minimalist ui:** customizable dark/light theme, typography-led.
+* **minimalist ui:** customizable dark/light theme, typography-led design with enforced lowercase aesthetics.
+* **tech specs display:** automatic parsing of filenames to display camera, iso, aperture, and shutter speed on the grid and lightbox.
+* **keyboard navigation:** browse the carousel and lightbox using left/right arrow keys.
 * **responsive:** custom hamburger menu, swipe carousel, and centered flex grid.
 * **interactive:** spinning logo, smooth scrolling, and lightbox functionality.
-* **automated:** python script and github actions auto-update the gallery from image folders.
 * **dynamic palette:** automatic extraction of dominant colors for each image in the lightbox using ColorThief.
 * **geographic mapping:** interactive map view showing photo locations based on filename coordinates.
+* **automated:** github actions auto-update the gallery from image folders.
 
 ## tech stack
 * **engine:** [hugo](https://gohugo.io/) (extended version).
@@ -31,5 +33,3 @@ marco pernazza. phd student in catalysis at itq, valencia. exploring visual flee
 * email: marco@pernazza.com
 
 copyright 2025 marco pernazza
-
-</div>
