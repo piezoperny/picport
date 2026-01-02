@@ -3,11 +3,9 @@
     {{- $images := slice -}}
     
     {{- /* 1. Get the gallery section securely */ -}}
-    {{- $gallery := .Site.GetPage "gallery" -}}
-    
-    {{- if $gallery -}}
-        {{- /* 2. Loop through all subsections (lines, mist, shadows...) */ -}}
-        {{- range $gallery.Sections -}}
+    {{- with .Site.GetPage "section" "gallery" -}}
+        {{- /* 2. Loop through all subsections */ -}}
+        {{- range .Sections -}}
             {{- /* 3. Get images in each subsection */ -}}
             {{- range .Resources.ByType "image" -}}
                 {{- /* 4. Check for the coordinate separator */ -}}
