@@ -12,6 +12,10 @@ title = "marco's gallery"
     [markup.goldmark.renderer]
       unsafe = true
 
+# ADDED: This ensures index.json is actually generated
+[outputs]
+  home = ["HTML", "JSON"]
+
 [menu]
   [[menu.main]]
     identifier = "archive"
