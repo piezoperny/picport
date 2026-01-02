@@ -59,7 +59,6 @@ function init() {
         });
     }
 
-    // 5. Run Grid Calculation initially
     window.addEventListener("resize", resizeAllGridItems);
 }
 
@@ -90,7 +89,6 @@ function setupLayoutSwitcher() {
         if (mode === 'grid') {
             // Force recalculation for masonry
             setTimeout(resizeAllGridItems, 100);
-            // Also retry image load triggers
             const imgs = document.querySelectorAll('.media-frame img');
             imgs.forEach(img => {
                 if(img.complete) resizeGridItem(img.closest('.gallery-item'));
@@ -107,24 +105,20 @@ function setupLayoutSwitcher() {
 function resizeGridItem(item) {
     if (!item) return;
     const grid = document.querySelector(".layout-grid");
-    // Only calculate if we are actually in grid mode
     if (!grid) return;
     
     const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue('grid-auto-rows'));
     const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue('gap').split(' ')[0]) || 0;
     
-    // FIX: Use .media-frame instead of .image-holder
+    // FIX: Using correct class selector
     const mediaFrame = item.querySelector('.media-frame');
     const metaDiv = item.querySelector('.gallery-meta');
     
     if (!mediaFrame) return;
 
-    // Calculate total height of content
     let contentHeight = mediaFrame.getBoundingClientRect().height;
     if (metaDiv) contentHeight += metaDiv.getBoundingClientRect().height;
-    
-    // Add internal padding of the card (e.g. 1rem top + 1rem bottom = 32px approx)
-    contentHeight += 40; 
+    contentHeight += 40; // Approx padding/margin buffer
 
     const rowSpan = Math.ceil((contentHeight + rowGap) / (rowHeight + rowGap));
     item.style.gridRowEnd = "span " + rowSpan;
