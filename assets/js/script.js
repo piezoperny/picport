@@ -128,11 +128,10 @@ window.openLightbox = function(src) {
 
     lightboxImg.src = src;
     
-    // Decode Filename for Info
-    const filename = src.split('/').pop();
+    // Decode Filename for Info (fixes %20 issue)
+    const filename = decodeURIComponent(src.split('/').pop());
     
     // Structure: Date-Camera_ISO_Aperture_Shutter--Coords.jpg
-    // 1. Tech Specs
     const parts = filename.split('--');
     const namePart = parts[0];
     
@@ -161,12 +160,12 @@ window.openLightbox = function(src) {
         }
     }
 
-    // 2. Palette extraction
+    // Palette extraction
     const paletteContainer = document.createElement('div');
     paletteContainer.id = 'palette-container';
     lightbox.appendChild(paletteContainer);
 
-    // 3. Location extraction
+    // Location extraction
     if (parts.length > 1) {
         let coordsRaw = parts[parts.length - 1].replace(/\.(jpg|jpeg|png|webp|gif)$/i, "");
         const latLon = coordsRaw.split('_');
@@ -177,7 +176,7 @@ window.openLightbox = function(src) {
             locDiv.innerHTML = `📍 ${lat}, ${lon}`;
             locDiv.onclick = (e) => {
                 e.stopPropagation();
-                window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lon}`, '_blank');
+                window.open(`https://www.google.com/maps?q=$?q=${lat},${lon}`, '_blank');
             };
             lightbox.appendChild(locDiv);
         }
@@ -256,7 +255,6 @@ window.moveSlide = function(direction) {
     slides[nextIndex].classList.add('active');
     startCarousel();
 };
-
 function setupSwipe() {
     const carousel = document.getElementById('carousel');
     if(carousel) {
