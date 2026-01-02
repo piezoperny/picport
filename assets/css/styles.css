@@ -374,6 +374,21 @@ body {
 .layout-grid .meta-action { display: none; }
 .layout-grid .meta-date { margin-top: 0.2rem; }
 
+/* --- Single Page Content (About, etc.) --- */
+.single-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+    min-height: 60vh;
+    
+    /* Centering Logic */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
 /* --- Header Titles --- */
 .gallery-header { text-align: center; } 
 .gallery-title { 
@@ -455,9 +470,9 @@ body {
     .layout-list .media-frame { width: 100%; padding: 0; box-shadow: none; background: transparent; }
     .layout-list .gallery-meta, .layout-list .gallery-item:nth-child(even) .gallery-meta { align-items: flex-start; width: 100%; }
     
-    /* UPDATED: Force 2 columns on mobile */
+    /* UPDATED: Force 2 columns on mobile with !important */
     .layout-grid { 
-        grid-template-columns: repeat(2, 1fr); 
+        grid-template-columns: repeat(2, 1fr) !important; 
         gap: 0.5rem; 
         padding: 0 0.5rem; 
     }
