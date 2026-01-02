@@ -1,117 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ or .Site.Language.Code "en" }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ if not .IsHome }}{{ .Title | lower }} | {{ end }}{{ .Site.Title | lower }}</title>
-    <meta name="description" content="{{ .Site.Params.description }}">
-    <link rel="icon" type="image/png" href="/favicon.png">
-
-    {{ if .IsHome }}
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Person",
-      "name": "{{ .Site.Params.author }}",
-      "url": "{{ .Site.BaseURL }}",
-      "sameAs": [
-        "{{ .Site.Params.instagram }}"
-      ],
-      "jobTitle": "PhD Student in Catalysis",
-      "description": "{{ .Site.Params.description }}"
-    }
-    </script>
-    {{ end }}
-
-    {{ if or (eq .Section "gallery") (eq .Type "archive") }}
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "ImageGallery",
-      "name": "{{ .Title }} - {{ .Site.Params.author }}",
-      "description": "A collection of {{ .Title }} photography focusing on minimalist geometry and light.",
-      "author": {
-        "@type": "Person",
-        "name": "{{ .Site.Params.author }}"
-      }
-    }
-    </script>
-    {{ end }}
-
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ .Site.BaseURL }}">
-    <meta property="og:title" content="{{ .Site.Title | lower }}">
-    <meta property="og:description" content="{{ .Site.Params.description }}">
-    <meta property="og:image" content="{{ .Site.BaseURL }}banner.png">
-
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="{{ .Site.BaseURL }}">
-    <meta property="twitter:title" content="{{ .Site.Title | lower }}">
-    <meta property="twitter:description" content="{{ .Site.Params.description }}">
-    <meta property="twitter:image" content="{{ .Site.BaseURL }}banner.png">
+    <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} | {{ .Site.Title }}{{ end }}</title>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.4.0/color-thief.umd.js"></script>
-
-    {{ $style := resources.Get "css/styles.css" | minify | fingerprint }}
-    <link rel="stylesheet" href="{{ $style.Permalink }}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-    <script data-goatcounter="https://marcopernazza.goatcounter.com/count"
-        async src="//gc.zgo.at/count.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    
+    {{ $style := resources.Get "css/styles.css" | minify }}
+    <link rel="stylesheet" href="{{ $style.RelPermalink }}">
+    
+    <meta property="og:title" content="{{ .Title }}">
+    <meta property="og:description" content="{{ .Site.Params.description }}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ .Permalink }}">
+    {{ if .Params.image }}
+      <meta property="og:image" content="{{ .Params.image | absURL }}">
+    {{ else }}
+      <meta property="og:image" content="{{ "banner.png" | absURL }}">
+    {{ end }}
 </head>
-<body>
+<body class="{{ if .Site.Params.darkMode }}dark-mode{{ end }}">
+
     <header class="site-header">
         <nav>
             <div class="logo">
-                <a href="/" id="logo-link">
-                    <img src="/logo.png" alt="my portfolio" class="site-logo-img">
+                <a href="{{ .Site.BaseURL }}" id="logo-link">
+                    <img src="{{ "logo.png" | absURL }}" alt="logo" class="site-logo-img">
                 </a>
+                <span class="site-title">{{ .Site.Title }}</span>
             </div>
-            <div class="site-title">{{ .Site.Title | lower }}</div>
+            
+            <div class="mobile-menu-toggle" id="menu-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
 
             <ul id="nav-links">
-                <li><a href="/">home</a></li>
-                <li><a href="/archive">all</a></li>
-                <li><a href="/map">map</a></li>
-                
-                {{ range (.Site.GetPage "section" "gallery").Sections }}
-                <li><a href="{{ .RelPermalink }}">{{ .Title | lower }}</a></li>
+                {{ range .Site.Menus.main }}
+                <li><a href="{{ .URL }}" class="{{ if eq $.RelPermalink .URL }}active{{ end }}">{{ .Name }}</a></li>
                 {{ end }}
-                
-                <li><a href="/about">about</a></li>
-                <li id="theme-toggle" style="cursor: pointer; padding: 1rem;">🌙</li>
+                <li><a href="#" id="theme-toggle">🌙</a></li>
             </ul>
-
-            <div class="mobile-menu-toggle" id="menu-toggle">
-                <span></span><span></span>
-            </div>
         </nav>
     </header>
 
-    <main id="root">
+    <main>
         {{ block "main" . }}{{ end }}
     </main>
-    
+
     <footer class="site-footer">
         <div class="footer-content">
-            <p>&copy; <span id="year">{{ now.Year }}</span> {{ .Site.Params.author | lower }}</p>
             <div class="footer-links">
-                <a href="{{ .Site.Params.instagram }}" target="_blank">@isoperny</a>
-                <span>&bull;</span>
-                <a href="mailto:{{ .Site.Params.email }}">{{ .Site.Params.email }}</a>
+                {{ range .Site.Menus.social }}
+                <a href="{{ .URL }}" target="_blank">{{ .Name }}</a>
+                {{ end }}
             </div>
-            <div class="site-version">{{ .Site.Params.version }} &bull; updated: {{ now.Format "Jan 02 2006" | lower }}</div>
+            <p class="site-version">picport v1.1 • {{ now.Year }} marco pernazza</p>
         </div>
     </footer>
 
-    <a href="#" id="back-to-top" title="Back to Top">&#8593;</a>
+    <a href="#" id="back-to-top" title="Back to Top">↑</a>
 
     <div id="lightbox" class="lightbox hidden">
         <span class="lightbox-close">&times;</span>
-        <img id="lightbox-img" src="" alt="Full Screen">
-    </div>
+        <img id="lightbox-img" src="" alt="Expanded View">
+        </div>
 
-    {{ $script := resources.Get "js/script.js" | minify | fingerprint }}
-    <script src="{{ $script.Permalink }}"></script>
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    {{ $script := resources.Get "js/script.js" | minify }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
+    <script src="{{ $script.RelPermalink }}"></script>
 </body>
 </html>
-
