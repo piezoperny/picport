@@ -1,10 +1,12 @@
 {{ define "main" }}
 <div class="gallery-header"><h1 class="gallery-title">archive</h1></div>
 <div class="masonry-grid">
+    {{/* Collect all images from the gallery section */}}
     {{ $allImages := slice }}
     {{ range (.Site.GetPage "section" "gallery").Sections }}
         {{ range .Resources.ByType "image" }}{{ $allImages = $allImages | append . }}{{ end }}
     {{ end }}
+    
     {{ range sort $allImages "Name" "desc" }}
         <div class="grid-item">
             <div class="image-holder" style="background-image: url('{{ (.Resize "20x jpg q20").RelPermalink }}');">
@@ -30,7 +32,7 @@
                         {{ $camera := delimit $camParts " " }}
                         
                         <div class="photo-meta">
-                            {{ $camera }} &bull; ISO {{ $iso }} &bull; f/{{ $aperture }} &bull; {{ $shutter }} s
+                            {{ (print $camera " • iso " $iso " • f/" $aperture " • " $shutter " s") | lower }}
                         </div>
                     {{ end }}
                 {{ end }}
