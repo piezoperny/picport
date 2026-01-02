@@ -7,7 +7,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     
     {{ $style := resources.Get "css/styles.css" | minify }}
     <link rel="stylesheet" href="{{ $style.RelPermalink }}">
@@ -30,8 +30,7 @@
                 <a href="{{ .Site.BaseURL }}" id="logo-link">
                     <img src="{{ "logo.png" | absURL }}" alt="logo" class="site-logo-img">
                 </a>
-                <span class="site-title">{{ .Site.Title }}</span>
-            </div>
+                </div>
             
             <div class="mobile-menu-toggle" id="menu-toggle">
                 <span></span>
@@ -68,10 +67,7 @@
     <div id="lightbox" class="lightbox hidden">
         <span class="lightbox-close">&times;</span>
         <img id="lightbox-img" src="" alt="Expanded View">
-        </div>
-
-    <div class="cursor-dot"></div>
-    <div class="cursor-outline"></div>
+    </div>
 
     {{ $script := resources.Get "js/script.js" | minify }}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
