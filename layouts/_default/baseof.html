@@ -27,8 +27,9 @@
     <header class="site-header">
         <nav>
             <div class="logo">
-                <a href="{{ .Site.BaseURL }}" id="logo-link">
+                <a href="{{ .Site.BaseURL }}" id="logo-link" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
                     <img src="{{ "logo.png" | absURL }}" alt="logo" class="site-logo-img">
+                    <span style="margin-left: 10px; font-weight: 500; font-size: 1.1rem;">{{ .Site.Title }}</span>
                 </a>
             </div>
             
