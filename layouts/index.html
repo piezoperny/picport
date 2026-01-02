@@ -1,14 +1,16 @@
 {{ define "main" }}
 <div class="carousel-container" id="carousel">
     
-    <h1 class="home-title">marco's gallery</h1>
-
+    {{/* Title moved to header, logic updated to find resources recursively */}}
     {{ $slides := slice }}
-    {{ range (where .Site.RegularPages "Section" "gallery") }}
-        {{ range .Resources.ByType "image" }}
-            {{ $slides = $slides | append . }}
+    {{ with .Site.GetPage "section" "gallery" }}
+        {{ range .Sections }}
+            {{ range .Resources.ByType "image" }}
+                {{ $slides = $slides | append . }}
+            {{ end }}
         {{ end }}
     {{ end }}
+    
     {{ $slides = shuffle $slides | first 5 }}
 
     {{ range $index, $slide := $slides }}
