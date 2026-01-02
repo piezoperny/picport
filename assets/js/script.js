@@ -8,6 +8,8 @@ const colorThief = new ColorThief();
 document.addEventListener('DOMContentLoaded', init);
 
 function init() {
+    setupCustomCursor(); // Initialize cursor
+
     // 1. Mobile Menu
     const toggle = document.getElementById('menu-toggle');
     const nav = document.getElementById('nav-links');
@@ -41,14 +43,15 @@ function init() {
     const body = document.body;
     if (localStorage.getItem('theme') === 'dark') {
         body.classList.add('dark-mode');
-        if(themeToggle) themeToggle.innerText = '☀️';
+        if(themeToggle) themeToggle.innerText = '☀';
     }
     if (themeToggle) {
-        themeToggle.addEventListener('click', () => {
+        themeToggle.addEventListener('click', (e) => {
+            e.preventDefault();
             body.classList.toggle('dark-mode');
             if (body.classList.contains('dark-mode')) {
                 localStorage.setItem('theme', 'dark');
-                themeToggle.innerText = '☀️';
+                themeToggle.innerText = '☀';
             } else {
                 localStorage.setItem('theme', 'light');
                 themeToggle.innerText = '🌙';
@@ -58,6 +61,37 @@ function init() {
 
     // 5. Masonry Grid Calculations
     window.addEventListener("resize", resizeAllGridItems);
+}
+
+/* --- Custom Cursor Logic --- */
+function setupCustomCursor() {
+    const cursorDot = document.querySelector('.cursor-dot');
+    const cursorOutline = document.querySelector('.cursor-outline');
+    
+    // Only active on desktop via media query, but logic runs harmlessly
+    if (!cursorDot || !cursorOutline) return;
+
+    window.addEventListener('mousemove', function(e) {
+        const posX = e.clientX;
+        const posY = e.clientY;
+
+        // Dot follows instantly
+        cursorDot.style.left = `${posX}px`;
+        cursorDot.style.top = `${posY}px`;
+
+        // Outline follows with slight delay (handled by CSS transition), just update pos
+        cursorOutline.animate({
+            left: `${posX}px`,
+            top: `${posY}px`
+        }, { duration: 500, fill: "forwards" });
+    });
+
+    // Hover Effect
+    const interactiveElements = document.querySelectorAll('a, button, img, .logo, .mobile-menu-toggle, .carousel-nav');
+    interactiveElements.forEach(el => {
+        el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+        el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+    });
 }
 
 /* --- Keyboard Navigation --- */
@@ -86,7 +120,8 @@ function resizeGridItem(item) {
     if(!imgHolder) return;
     let contentHeight = imgHolder.getBoundingClientRect().height;
     if (metaHolder) contentHeight += metaHolder.getBoundingClientRect().height;
-    contentHeight += 10; 
+    // Add extra padding for the new matte border styling
+    contentHeight += 50; 
     const rowSpan = Math.ceil((contentHeight + rowGap) / (rowHeight + rowGap));
     item.style.gridRowEnd = "span " + rowSpan;
 }
@@ -135,20 +170,16 @@ window.openLightbox = function(src) {
     const parts = filename.split('--');
     const namePart = parts[0];
     
-    // Ensure we have enough data (Date is 15 chars + 1 hyphen = 16)
     if (namePart.length > 16) {
-        // Remove date "YYYYMMDD_HHMMSS-"
         const techString = namePart.substring(16); 
         const techInfo = techString.split('_');
         
-        // We expect at least 4 parts: Camera (can be multiple words), ISO, Aperture, Shutter
         if (techInfo.length >= 4) {
             let shutter = techInfo.pop();
             let aperture = techInfo.pop();
             let iso = techInfo.pop();
             let camera = techInfo.join(' '); 
 
-            // Format values & Force Lowercase
             shutter = shutter.replace('1-', '1/') + ' s';
             aperture = 'f/' + aperture;
             iso = 'iso ' + iso;
@@ -163,12 +194,10 @@ window.openLightbox = function(src) {
         }
     }
 
-    // Palette extraction
     const paletteContainer = document.createElement('div');
     paletteContainer.id = 'palette-container';
     lightbox.appendChild(paletteContainer);
 
-    // Location extraction
     if (parts.length > 1) {
         let coordsRaw = parts[parts.length - 1].replace(/\.(jpg|jpeg|png|webp|gif)$/i, "");
         const latLon = coordsRaw.split('_');
@@ -208,7 +237,6 @@ function navigateLightbox(dir) {
     const imgs = Array.from(document.querySelectorAll('.grid-item img'));
     const currentSrc = lightboxImg.getAttribute('src');
     
-    // Find index of image that invoked the current lightbox src
     let currentIndex = imgs.findIndex(img => {
         const onclickAttr = img.getAttribute('onclick');
         return onclickAttr && onclickAttr.includes(currentSrc);
@@ -216,11 +244,9 @@ function navigateLightbox(dir) {
     
     if (currentIndex !== -1) {
         let nextIndex = currentIndex + dir;
-        // Wrap around
         if (nextIndex >= imgs.length) nextIndex = 0;
         if (nextIndex < 0) nextIndex = imgs.length - 1;
         
-        // Extract URL from the next image's onclick and open it
         const nextImg = imgs[nextIndex];
         const match = nextImg.getAttribute('onclick').match(/openLightbox\('([^']+)'\)/);
         if (match && match[1]) {
