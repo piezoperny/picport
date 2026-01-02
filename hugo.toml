@@ -1,36 +1,37 @@
 baseURL = 'https://pics.pernazza.com/'
 languageCode = 'en-us'
-title = "marco's gallery"
+title = 'picport'
+theme = 'picport'
 
 [params]
-  description = "visuals"
-  author = "marco pernazza"
-  instagram = "https://instagram.com/isoperny"
-  email = "marco@pernazza.com"
-  version = "v3.01"
+  description = "Marco's photography portfolio"
+  darkMode = true
+  version = "v1.2"
 
 [menu]
   [[menu.main]]
-    name = "All"
+    identifier = "archive"
+    name = "archive"
     url = "/archive/"
     weight = 10
   [[menu.main]]
-    name = "About"
+    identifier = "about"
+    name = "about"
     url = "/about/"
     weight = 20
+  [[menu.main]]
+    identifier = "map"
+    name = "map"
+    url = "/map/"
+    weight = 30
 
-[markup]
-  [markup.goldmark]
-    [markup.goldmark.renderer]
-      unsafe = true
-
-[outputs]
-  home = ["HTML", "JSON"]
-
-
-
-
-
-
-
-
+  [[menu.social]]
+    identifier = "instagram"
+    name = "instagram"
+    url = "https://instagram.com/isoperny"
+    weight = 10
+  [[menu.social]]
+    identifier = "email"
+    name = "email"
+    url = "mailto:marco@pernazza.com"
+    weight = 20
