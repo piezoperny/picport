@@ -362,10 +362,17 @@ body {
     gap: 0.5rem;
 }
 
-.layout-grid .meta-tech { font-size: 0.95rem; }
+.layout-grid .meta-tech { 
+    font-size: 0.95rem; 
+    /* Fix for wrapping issues */
+    overflow-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+    width: 100%;
+}
+
 .layout-grid .meta-action { display: none; }
 .layout-grid .meta-date { margin-top: 0.2rem; }
-
 
 /* --- Header Titles --- */
 .gallery-header { text-align: center; } 
