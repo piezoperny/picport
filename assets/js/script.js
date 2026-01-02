@@ -8,7 +8,7 @@ const colorThief = new ColorThief();
 document.addEventListener('DOMContentLoaded', init);
 
 function init() {
-    setupCustomCursor(); // Initialize cursor
+    setupLayoutSwitcher(); // New Layout Logic
 
     // 1. Mobile Menu
     const toggle = document.getElementById('menu-toggle');
@@ -59,80 +59,74 @@ function init() {
         });
     }
 
-    // 5. Masonry Grid Calculations
+    // 5. Masonry Grid Calculations (Run initially if we are in grid mode)
     window.addEventListener("resize", resizeAllGridItems);
 }
 
-/* --- Custom Cursor Logic --- */
-function setupCustomCursor() {
-    const cursorDot = document.querySelector('.cursor-dot');
-    const cursorOutline = document.querySelector('.cursor-outline');
+/* --- Layout Switcher (List vs Grid) --- */
+function setupLayoutSwitcher() {
+    const feed = document.getElementById('gallery-feed');
+    const btnList = document.getElementById('btn-list');
+    const btnGrid = document.getElementById('btn-grid');
     
-    // Only active on desktop via media query, but logic runs harmlessly
-    if (!cursorDot || !cursorOutline) return;
+    if (!feed || !btnList || !btnGrid) return;
 
-    window.addEventListener('mousemove', function(e) {
-        const posX = e.clientX;
-        const posY = e.clientY;
+    // Load saved preference
+    const savedLayout = localStorage.getItem('layoutPreference') || 'list';
+    setLayout(savedLayout);
 
-        // Dot follows instantly
-        cursorDot.style.left = `${posX}px`;
-        cursorDot.style.top = `${posY}px`;
+    btnList.addEventListener('click', () => setLayout('list'));
+    btnGrid.addEventListener('click', () => setLayout('grid'));
 
-        // Outline follows with slight delay (handled by CSS transition), just update pos
-        cursorOutline.animate({
-            left: `${posX}px`,
-            top: `${posY}px`
-        }, { duration: 500, fill: "forwards" });
-    });
+    function setLayout(mode) {
+        // Update Classes
+        feed.classList.remove('layout-list', 'layout-grid');
+        feed.classList.add(`layout-${mode}`);
+        
+        // Update Buttons
+        btnList.classList.toggle('active', mode === 'list');
+        btnGrid.classList.toggle('active', mode === 'grid');
+        
+        // Save
+        localStorage.setItem('layoutPreference', mode);
 
-    // Hover Effect
-    const interactiveElements = document.querySelectorAll('a, button, img, .logo, .mobile-menu-toggle, .carousel-nav');
-    interactiveElements.forEach(el => {
-        el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
-        el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
-    });
-}
-
-/* --- Keyboard Navigation --- */
-document.addEventListener('keydown', function(e) {
-    const lightbox = document.getElementById('lightbox');
-    const isLightboxOpen = lightbox && !lightbox.classList.contains('hidden');
-
-    if (isLightboxOpen) {
-        if (e.key === 'ArrowLeft') navigateLightbox(-1);
-        if (e.key === 'ArrowRight') navigateLightbox(1);
-        if (e.key === 'Escape') closeLightbox();
-    } else if (document.getElementById('carousel')) {
-        if (e.key === 'ArrowLeft') moveSlide(-1);
-        if (e.key === 'ArrowRight') moveSlide(1);
+        // Handle Masonry Logic
+        if (mode === 'grid') {
+            // Wait for transition or immediate render
+            setTimeout(resizeAllGridItems, 50);
+        } else {
+            // Clear masonry styles
+            const items = document.querySelectorAll('.gallery-item');
+            items.forEach(item => item.style.removeProperty('grid-row-end'));
+        }
     }
-});
+}
 
 /* --- Masonry Grid Logic --- */
 function resizeGridItem(item) {
-    const grid = document.querySelector(".masonry-grid");
+    const grid = document.querySelector(".layout-grid"); // Only apply if grid class exists
     if (!grid) return;
+    
     const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue('grid-auto-rows'));
     const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue('gap').split(' ')[0]) || 0;
-    const imgHolder = item.querySelector('.image-holder');
-    const metaHolder = item.querySelector('.meta-holder');
-    if(!imgHolder) return;
-    let contentHeight = imgHolder.getBoundingClientRect().height;
-    if (metaHolder) contentHeight += metaHolder.getBoundingClientRect().height;
-    // Add extra padding for the new matte border styling
-    contentHeight += 50; 
-    const rowSpan = Math.ceil((contentHeight + rowGap) / (rowHeight + rowGap));
+    
+    // We need to calculate height of content inside the item
+    // In grid mode, the content is just children height + padding
+    const rowSpan = Math.ceil((item.getBoundingClientRect().height + rowGap) / (rowHeight + rowGap));
     item.style.gridRowEnd = "span " + rowSpan;
 }
 
 function resizeAllGridItems() {
-    const allItems = document.getElementsByClassName("grid-item");
+    // Only resize if we are in grid mode
+    if (!document.querySelector('.layout-grid')) return;
+    
+    const allItems = document.getElementsByClassName("gallery-item");
     for (let x = 0; x < allItems.length; x++) {
         resizeGridItem(allItems[x]);
     }
 }
 window.addEventListener("load", resizeAllGridItems);
+
 
 /* --- Back to Top --- */
 const backToTopBtn = document.getElementById('back-to-top');
@@ -165,8 +159,6 @@ window.openLightbox = function(src) {
     
     // Decode Filename for Info
     const filename = decodeURIComponent(src.split('/').pop());
-    
-    // Structure: Date-Camera_ISO_Aperture_Shutter--Coords.jpg
     const parts = filename.split('--');
     const namePart = parts[0];
     
@@ -234,26 +226,56 @@ window.openLightbox = function(src) {
 };
 
 function navigateLightbox(dir) {
-    const imgs = Array.from(document.querySelectorAll('.grid-item img'));
+    // Look for images inside the unified gallery items
+    const imgs = Array.from(document.querySelectorAll('.gallery-item img'));
     const currentSrc = lightboxImg.getAttribute('src');
     
-    let currentIndex = imgs.findIndex(img => {
-        const onclickAttr = img.getAttribute('onclick');
-        return onclickAttr && onclickAttr.includes(currentSrc);
-    });
+    // Find index of image that matches current source
+    // Note: The img tag inside media-frame doesn't have onclick, the wrapper does.
+    // So we match by src directly.
+    let currentIndex = imgs.findIndex(img => img.src.includes(currentSrc) || currentSrc.includes(img.src));
     
+    // Fallback if src match is tricky due to relative/absolute paths
+    if (currentIndex === -1) {
+         // Try to find via wrapper onclick
+         const wrappers = Array.from(document.querySelectorAll('.media-frame'));
+         currentIndex = wrappers.findIndex(div => {
+             const attr = div.getAttribute('onclick');
+             return attr && attr.includes(currentSrc);
+         });
+    }
+
     if (currentIndex !== -1) {
         let nextIndex = currentIndex + dir;
         if (nextIndex >= imgs.length) nextIndex = 0;
         if (nextIndex < 0) nextIndex = imgs.length - 1;
         
+        // Find the wrapper of the next image to get the onclick link
         const nextImg = imgs[nextIndex];
-        const match = nextImg.getAttribute('onclick').match(/openLightbox\('([^']+)'\)/);
-        if (match && match[1]) {
-            openLightbox(match[1]);
+        const wrapper = nextImg.closest('.media-frame');
+        
+        if (wrapper) {
+            const match = wrapper.getAttribute('onclick').match(/openLightbox\('([^']+)'\)/);
+            if (match && match[1]) {
+                openLightbox(match[1]);
+            }
         }
     }
 }
+
+document.addEventListener('keydown', function(e) {
+    const lightbox = document.getElementById('lightbox');
+    const isLightboxOpen = lightbox && !lightbox.classList.contains('hidden');
+
+    if (isLightboxOpen) {
+        if (e.key === 'ArrowLeft') navigateLightbox(-1);
+        if (e.key === 'ArrowRight') navigateLightbox(1);
+        if (e.key === 'Escape') closeLightbox();
+    } else if (document.getElementById('carousel')) {
+        if (e.key === 'ArrowLeft') moveSlide(-1);
+        if (e.key === 'ArrowRight') moveSlide(1);
+    }
+});
 
 if (closeBtn) closeBtn.onclick = closeLightbox;
 if (lightbox) lightbox.onclick = (e) => { if (e.target === lightbox) closeLightbox(); };
