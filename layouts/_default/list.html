@@ -32,7 +32,11 @@
                     {{ end }}
                 {{ end }}
 
-                {{ if ne $dateStr .Name }}<div class="photo-date">{{ replaceRE "^(\\d{4})(\\d{2})(\\d{2}).*" "$1-$2-$3" .Name }}</div>{{ end }}
+                {{/* Date Parsing Logic */}}
+                {{ $dateStr := replaceRE "^(\\d{4})(\\d{2})(\\d{2}).*" "$1-$2-$3" .Name }}
+                {{ if ne $dateStr .Name }}
+                    <div class="photo-date">{{ $dateStr }}</div>
+                {{ end }}
             </div>
         </div>
     {{ end }}
