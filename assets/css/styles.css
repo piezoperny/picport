@@ -10,13 +10,14 @@
 }
 
 body.dark-mode {
-    --bg-color: #121212;
+    /* PANTONE 276 C Base: #221d35 */
+    --bg-color: #221d35; 
     --text-color: #e0e0e0;
-    --text-muted: #aaaaaa;
-    --header-bg: rgba(18, 18, 18, 0.95);
-    --card-bg: #1e1e1e;
-    --lightbox-bg: rgba(18, 18, 18, 0.98);
-    --border-color: rgba(255,255,255,0.1);
+    --text-muted: #a3a0ac; /* Muted lavender-grey to match the hue */
+    --header-bg: rgba(34, 29, 53, 0.95); /* Pantone 276 C with opacity */
+    --card-bg: #2d2645; /* Slightly lighter/elevated version of 276 C */
+    --lightbox-bg: rgba(34, 29, 53, 0.98);
+    --border-color: rgba(255,255,255,0.08);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -220,7 +221,7 @@ body {
     margin-bottom: 1.5rem; /* Visual bottom margin */
     border-radius: 2px;
     background-color: var(--card-bg);
-    transition: transform 0.3s;
+    transition: transform 0.3s, background-color 0.3s;
     break-inside: avoid;
 }
 
@@ -276,7 +277,7 @@ body {
     font-weight: 500;
     letter-spacing: 0.02em;
     opacity: 0.8;
-    text-transform: lowercase; /* Added lowercase enforcement */
+    text-transform: lowercase; 
 }
 
 .photo-date {
@@ -333,7 +334,7 @@ body {
     border-radius: 4px;
     font-size: 0.85rem;
     z-index: 1002;
-    text-transform: lowercase; /* Added lowercase enforcement */
+    text-transform: lowercase; 
 }
 
 #lightbox-location {
@@ -383,7 +384,13 @@ body {
     .carousel-nav.prev { left: 5px; }
     .carousel-nav.next { right: 5px; }
     
-    .photo-date { display: none; }
+    .photo-date { 
+        display: block; /* Fixed: Date is now visible on mobile */
+        font-size: 0.65rem;
+        margin-top: 2px;
+        opacity: 0.7;
+    }
+    
     .photo-meta { font-size: 0.6rem; }
     
     #lightbox-details {
