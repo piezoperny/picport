@@ -65,7 +65,7 @@
                 <a href="{{ .URL }}" target="_blank">{{ .Name }}</a>
                 {{ end }}
             </div>
-            <p class="site-version">picport {{ .Site.Params.version | default "v1.0" }} • {{ now.Year }} marco pernazza</p>
+            <p class="site-version">{{ .Site.Params.version | default "v1.0" }} • {{ now.Format "2006-01-02" }} marco pernazza</p>
         </div>
     </footer>
 
