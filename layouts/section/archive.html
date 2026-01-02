@@ -1,6 +1,7 @@
 {{ define "main" }}
 <div class="gallery-header"><h1 class="gallery-title">archive</h1></div>
-<div class="masonry-grid">
+
+<div class="asymmetric-feed">
     {{/* Collect all images from the gallery section */}}
     {{ $allImages := slice }}
     {{ range (.Site.GetPage "section" "gallery").Sections }}
@@ -8,17 +9,18 @@
     {{ end }}
     
     {{ range sort $allImages "Name" "desc" }}
-        <div class="grid-item">
-            <div class="image-holder" style="background-image: url('{{ (.Resize "20x jpg q20").RelPermalink }}');">
-                {{ $w600 := .Resize "600x" }}
-                <img src="{{ $w600.RelPermalink }}" 
-                     srcset="{{ (.Resize "300x").RelPermalink }} 300w, {{ $w600.RelPermalink }} 600w"
+        <div class="feed-item">
+            <div class="feed-image-frame" onclick="openLightbox('{{ .RelPermalink }}')">
+                {{ $w900 := .Resize "900x" }}
+                <img src="{{ $w900.RelPermalink }}" 
                      alt="photography" loading="lazy" 
-                     data-timestamp="{{ substr .Name 0 15 }}"
-                     onclick="openLightbox('{{ .RelPermalink }}')"
-                     onload="this.classList.add('loaded'); resizeGridItem(this.closest('.grid-item'));">
+                     class="feed-img">
             </div>
-            <div class="meta-holder">
+            
+            <div class="feed-text-content">
+                {{ $dateStr := replaceRE "^(\\d{4})(\\d{2})(\\d{2}).*" "$1-$2-$3" .Name }}
+                <span class="feed-date">{{ $dateStr }}</span>
+                
                 {{/* Tech Spec Parsing Logic */}}
                 {{ $base := index (split .Name "--") 0 }}
                 {{ if gt (len $base) 16 }}
@@ -31,17 +33,14 @@
                         {{ $camParts := first (sub (len $parts) 3) $parts }}
                         {{ $camera := delimit $camParts " " }}
                         
-                        <div class="photo-meta">
-                            {{ (print $camera " • iso " $iso " • f/" $aperture " • " $shutter " s") | lower }}
-                        </div>
+                        <p class="feed-meta">
+                            {{ (print $camera) | lower }}<br>
+                            {{ (print "iso " $iso " • f/" $aperture " • " $shutter " s") | lower }}
+                        </p>
                     {{ end }}
                 {{ end }}
-
-                {{/* Date Parsing Logic */}}
-                {{ $dateStr := replaceRE "^(\\d{4})(\\d{2})(\\d{2}).*" "$1-$2-$3" .Name }}
-                {{ if ne $dateStr .Name }}
-                    <div class="photo-date">{{ $dateStr }}</div>
-                {{ end }}
+                
+                <span class="feed-action" onclick="openLightbox('{{ .RelPermalink }}')">view details</span>
             </div>
         </div>
     {{ end }}
