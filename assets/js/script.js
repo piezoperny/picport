@@ -110,7 +110,6 @@ function resizeGridItem(item) {
     const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue('grid-auto-rows'));
     const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue('gap').split(' ')[0]) || 0;
     
-    // FIX: Using correct class selector
     const mediaFrame = item.querySelector('.media-frame');
     const metaDiv = item.querySelector('.gallery-meta');
     
@@ -118,7 +117,9 @@ function resizeGridItem(item) {
 
     let contentHeight = mediaFrame.getBoundingClientRect().height;
     if (metaDiv) contentHeight += metaDiv.getBoundingClientRect().height;
-    contentHeight += 40; // Approx padding/margin buffer
+    
+    // Increased buffer to account for padding (approx 32px) + margins + safe area
+    contentHeight += 70; 
 
     const rowSpan = Math.ceil((contentHeight + rowGap) / (rowHeight + rowGap));
     item.style.gridRowEnd = "span " + rowSpan;
@@ -132,6 +133,10 @@ function resizeAllGridItems() {
     }
 }
 window.addEventListener("load", resizeAllGridItems);
+// Ensure grid recalculates after fonts load to prevent cutoff text
+if (document.fonts) {
+    document.fonts.ready.then(resizeAllGridItems);
+}
 
 
 /* --- Back to Top --- */
