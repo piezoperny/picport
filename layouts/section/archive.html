@@ -17,6 +17,24 @@
                      onload="this.classList.add('loaded'); resizeGridItem(this.closest('.grid-item'));">
             </div>
             <div class="meta-holder">
+                {{/* Tech Spec Parsing Logic */}}
+                {{ $base := index (split .Name "--") 0 }}
+                {{ if gt (len $base) 16 }}
+                    {{ $techRaw := substr $base 16 }}
+                    {{ $parts := split $techRaw "_" }}
+                    {{ if ge (len $parts) 4 }}
+                        {{ $shutter := index $parts (sub (len $parts) 1) | replaceRE "1-" "1/" }}
+                        {{ $aperture := index $parts (sub (len $parts) 2) }}
+                        {{ $iso := index $parts (sub (len $parts) 3) }}
+                        {{ $camParts := first (sub (len $parts) 3) $parts }}
+                        {{ $camera := delimit $camParts " " }}
+                        
+                        <div class="photo-meta">
+                            {{ $camera }} &bull; ISO {{ $iso }} &bull; f/{{ $aperture }} &bull; {{ $shutter }} s
+                        </div>
+                    {{ end }}
+                {{ end }}
+
                 {{ $dateStr := replaceRE "^(\\d{4})(\\d{2})(\\d{2}).*" "$1-$2-$3" .Name }}
                 <div class="photo-date">{{ $dateStr }}</div>
             </div>
