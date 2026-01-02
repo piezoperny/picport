@@ -118,8 +118,8 @@ function resizeGridItem(item) {
     let contentHeight = mediaFrame.getBoundingClientRect().height;
     if (metaDiv) contentHeight += metaDiv.getBoundingClientRect().height;
     
-    // Increased buffer to account for padding (approx 32px) + margins + safe area
-    contentHeight += 70; 
+    // INCREASED BUFFER: Changed from 70 to 110 to ensure metadata is wrapped
+    contentHeight += 110; 
 
     const rowSpan = Math.ceil((contentHeight + rowGap) / (rowHeight + rowGap));
     item.style.gridRowEnd = "span " + rowSpan;
