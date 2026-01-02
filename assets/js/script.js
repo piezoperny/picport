@@ -185,4 +185,86 @@ window.openLightbox = function(src) {
 
     const extractColors = () => {
         try {
-            const colors = colorThief.getPalette(lightboxImg
+            const colors = colorThief.getPalette(lightboxImg, 5);
+            colors.forEach(color => {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch';
+                swatch.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+                paletteContainer.appendChild(swatch);
+            });
+        } catch (e) { }
+    };
+
+    if (lightboxImg.complete) extractColors();
+    else lightboxImg.onload = extractColors;
+
+    lightbox.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+};
+
+function navigateLightbox(dir) {
+    const imgs = Array.from(document.querySelectorAll('.grid-item img'));
+    const currentSrc = lightboxImg.getAttribute('src');
+    
+    // Find index of image that invoked the current lightbox src
+    let currentIndex = imgs.findIndex(img => {
+        const onclickAttr = img.getAttribute('onclick');
+        return onclickAttr && onclickAttr.includes(currentSrc);
+    });
+    
+    if (currentIndex !== -1) {
+        let nextIndex = currentIndex + dir;
+        // Wrap around
+        if (nextIndex >= imgs.length) nextIndex = 0;
+        if (nextIndex < 0) nextIndex = imgs.length - 1;
+        
+        // Extract URL from the next image's onclick and open it
+        const nextImg = imgs[nextIndex];
+        const match = nextImg.getAttribute('onclick').match(/openLightbox\('([^']+)'\)/);
+        if (match && match[1]) {
+            openLightbox(match[1]);
+        }
+    }
+}
+
+if (closeBtn) closeBtn.onclick = closeLightbox;
+if (lightbox) lightbox.onclick = (e) => { if (e.target === lightbox) closeLightbox(); };
+
+function closeLightbox() {
+    lightbox.classList.add('hidden');
+    document.body.style.overflow = '';
+    setTimeout(() => { lightboxImg.src = ''; }, 300);
+    if (document.getElementById('carousel')) startCarousel();
+}
+
+// Carousel Functions
+function startCarousel() {
+    if (carouselInterval) clearInterval(carouselInterval);
+    carouselInterval = setInterval(() => moveSlide(1), 5000);
+}
+window.moveSlide = function(direction) {
+    const slides = document.querySelectorAll('.carousel-slide');
+    if (!slides.length) return;
+    let activeIndex = 0;
+    slides.forEach((slide, index) => {
+        if (slide.classList.contains('active')) activeIndex = index;
+        slide.classList.remove('active');
+    });
+    let nextIndex = activeIndex + direction;
+    if (nextIndex >= slides.length) nextIndex = 0;
+    if (nextIndex < 0) nextIndex = slides.length - 1;
+    slides[nextIndex].classList.add('active');
+    startCarousel();
+};
+
+function setupSwipe() {
+    const carousel = document.getElementById('carousel');
+    if(carousel) {
+        carousel.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
+        carousel.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            if (touchEndX < touchStartX - 50) moveSlide(1);
+            if (touchEndX > touchStartX + 50) moveSlide(-1);
+        }, {passive: true});
+    }
+}
