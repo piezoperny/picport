@@ -7,7 +7,7 @@
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
 <style>
-    #map { height: 85vh; width: 100%; background: #111; z-index: 1; }
+    #map { height: 85vh; width: 100%; background: #111; z-index: 1; margin-top: 0; }
     .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: #222; color: #eee; border: 1px solid #444; }
     .leaflet-popup-content { margin: 10px; text-align: center; }
     .popup-thumb { width: 100%; max-width: 200px; height: auto; display: block; margin-bottom: 8px; cursor: pointer; border-radius: 2px; }
@@ -29,13 +29,19 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             data.forEach(img => {
+                // Filename format example: ...--Latitude_Longitude.jpg
                 const parts = img.name.split('--');
                 if (parts.length > 1) {
                     let coordsRaw = parts[parts.length - 1].replace(/\.(jpg|jpeg|png|webp|gif)$/i, "");
+                    
+                    // Split strictly by underscore to handle negative numbers correctly
+                    // e.g. "39.478_-0.368" -> ["39.478", "-0.368"]
                     const latLon = coordsRaw.split('_');
+                    
                     if (latLon.length >= 2) {
                         const lat = parseFloat(latLon[0]);
                         const lon = parseFloat(latLon[1]);
+                        
                         if (!isNaN(lat) && !isNaN(lon)) {
                             const marker = L.marker([lat, lon]);
                             const popupHtml = `<div><img src="${img.url}" class="popup-thumb" onclick="openLightbox('${img.url}')"></div>`;
