@@ -1,11 +1,16 @@
 baseURL = 'https://pics.pernazza.com/'
 languageCode = 'en-us'
-title = 'picport'
+title = "marco's gallery"
 
 [params]
   description = "marco's photography portfolio"
   darkMode = true
-  version = "v1.2"
+  version = "v1.3"
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
 
 [menu]
   [[menu.main]]
