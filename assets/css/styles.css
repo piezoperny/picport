@@ -270,10 +270,18 @@ body {
     padding: 8px 4px 0 4px;
 }
 
+.photo-meta {
+    font-size: 0.7rem;
+    color: var(--text-color);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    opacity: 0.8;
+}
+
 .photo-date {
     font-size: 0.75rem; 
     color: var(--text-muted);
-    margin-top: 5px; 
+    margin-top: 3px; 
     text-align: right;
 }
 
@@ -288,7 +296,7 @@ body {
 /* --- Footer, About, Lightbox etc --- */
 .site-footer {
     margin-top: auto; 
-    padding: 3rem 2rem 6rem 2rem; /* Added extra bottom padding for fix */
+    padding: 3rem 2rem 6rem 2rem;
     text-align: center;
     font-size: 0.85rem;
     color: var(--text-muted);
@@ -369,4 +377,18 @@ body {
         grid-template-columns: repeat(2, 1fr);
     }
     
-    .carousel-nav { display: block !important; font-size: 1.5rem; padding: 1rem 0.5rem; background: rgba(
+    .carousel-nav { display: block !important; font-size: 1.5rem; padding: 1rem 0.5rem; background: rgba(0,0,0,0.1); border-radius: 4px; }
+    .carousel-nav.prev { left: 5px; }
+    .carousel-nav.next { right: 5px; }
+    
+    .photo-date { display: none; }
+    .photo-meta { font-size: 0.6rem; }
+    
+    #lightbox-details {
+        bottom: 60px;
+        right: auto;
+        left: 20px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+}
