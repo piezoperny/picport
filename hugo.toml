@@ -5,7 +5,7 @@ title = "marco's gallery"
 [params]
   description = "marco's photography portfolio"
   darkMode = true
-  version = "v1.2"
+  version = "v1.3"
 
 [markup]
   [markup.goldmark]
@@ -43,4 +43,5 @@ title = "marco's gallery"
     name = "email"
     url = "mailto:marco@pernazza.com"
     weight = 20
+
 
