@@ -1,11 +1,11 @@
-# picport — marco's gallery
+# picport - marco's gallery
 
 personal photography portfolio. custom-built for visual focus.
 
 **live:** [pics.pernazza.com](https://pics.pernazza.com)
 
 ## about the author
-marco pernazza. phd student in catalysis at itq, valencia. exploring visual fleetingness through light, deep shadows, and minimalist geometry.
+marco pernazza. phd student in catalysis at itq, valencia. exploring visuals through light, deep shadows, and minimalist geometry.
 
 ## features
 * **minimalist ui:** customizable dark/light theme, typography-led design with enforced lowercase aesthetics.
@@ -30,6 +30,6 @@ marco pernazza. phd student in catalysis at itq, valencia. exploring visual flee
 
 ## contact
 * instagram: [@isoperny](https://instagram.com/isoperny)
-* email: marco@pernazza.com
+* email: marco.it@pernazza.com
 
 copyright 2026 marco pernazza
