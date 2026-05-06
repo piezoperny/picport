@@ -34,6 +34,7 @@ function init() {
 
     // 3. Carousel
     if (document.getElementById('carousel')) {
+        initDynamicCarousel();
         startCarousel();
         setupSwipe();
     }
@@ -291,6 +292,42 @@ function closeLightbox() {
     document.body.style.overflow = '';
     setTimeout(() => { lightboxImg.src = ''; }, 300);
     if (document.getElementById('carousel')) startCarousel();
+}
+
+/* --- Dynamic Carousel --- */
+function initDynamicCarousel() {
+    if (typeof allGalleryImages === 'undefined' || allGalleryImages.length === 0) return;
+
+    const shuffled = allGalleryImages.sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, 5);
+    const carousel = document.getElementById('carousel');
+    const prevNav = carousel.querySelector('.prev');
+
+    selected.forEach((imgData, index) => {
+        const slide = document.createElement('div');
+        slide.className = `carousel-slide ${index === 0 ? 'active' : ''}`;
+
+        const bg = document.createElement('div');
+        bg.className = 'carousel-bg';
+        bg.style.backgroundImage = `url('${imgData.original}')`;
+
+        const img = document.createElement('img');
+        img.className = 'carousel-img';
+        img.src = imgData.resized;
+        img.alt = 'featured photo';
+        img.style.cursor = 'pointer';
+        img.onclick = () => openLightbox(imgData.original);
+
+        const dateDiv = document.createElement('div');
+        dateDiv.className = 'carousel-date';
+        dateDiv.textContent = imgData.date;
+
+        slide.appendChild(bg);
+        slide.appendChild(img);
+        slide.appendChild(dateDiv);
+        
+        carousel.insertBefore(slide, prevNav);
+    });
 }
 
 function startCarousel() {
