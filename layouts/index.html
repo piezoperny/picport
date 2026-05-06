@@ -1,30 +1,24 @@
 {{ define "main" }}
 <div class="carousel-container" id="carousel">
-    
-    {{ $slides := slice }}
-    {{ with .Site.GetPage "section" "gallery" }}
-        {{ range .Sections }}
-            {{ range .Resources.ByType "image" }}
-                {{ $slides = $slides | append . }}
-            {{ end }}
-        {{ end }}
-    {{ end }}
-    
-    {{ $slides = shuffle $slides | first 5 }}
-
-    {{ range $index, $slide := $slides }}
-    <div class="carousel-slide {{ if eq $index 0 }}active{{ end }}">
-        <div class="carousel-bg" style="background-image: url('{{ .RelPermalink }}');"></div>
-        {{ $w1200 := .Resize "1200x" }}
-        <img src="{{ $w1200.RelPermalink }}" class="carousel-img" alt="featured photo" 
-             onclick="openLightbox('{{ .RelPermalink }}')" style="cursor: pointer;">
-        <div class="carousel-date">{{ replaceRE "^(\\d{4})(\\d{2})(\\d{2}).*" "$1.$2.$3" .Name }}</div>
-    </div>
-    {{ end }}
-
     <div class="carousel-nav prev" onclick="moveSlide(-1)">&#10094;</div>
     <div class="carousel-nav next" onclick="moveSlide(1)">&#10095;</div>
 </div>
 
-{{/* About section removed from here */}}
+<script>
+    const allGalleryImages = [
+    {{ $slides := slice }}
+    {{ with .Site.GetPage "section" "gallery" }}
+        {{ range .Sections }}
+            {{ range .Resources.ByType "image" }}
+                {{ $w1200 := .Resize "1200x" }}
+                {
+                    "original": "{{ .RelPermalink }}",
+                    "resized": "{{ $w1200.RelPermalink }}",
+                    "date": "{{ replaceRE "^(\\d{4})(\\d{2})(\\d{2}).*" "$1.$2.$3" .Name }}"
+                },
+            {{ end }}
+        {{ end }}
+    {{ end }}
+    ];
+</script>
 {{ end }}
