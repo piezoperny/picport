@@ -44,13 +44,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (!isNaN(lat) && !isNaN(lon)) {
                             heatPoints.push([lat, lon, 1]); 
                             
-                            // Delicate semi-transparent rings instead of solid blobs
+                            // Solid dots with a dark border for clear visibility
                             const marker = L.circleMarker([lat, lon], {
-                                radius: 3,
+                                radius: 5,
                                 fillColor: '#ffffff',
-                                color: '#ffffff',
-                                weight: 1,
-                                fillOpacity: 0.1
+                                color: '#222222',
+                                weight: 2,
+                                fillOpacity: 0.9
                             });
                             
                             const popupHtml = `<div><img src="${img.url}" class="popup-thumb" onclick="openLightbox('${img.url}')"></div>`;
@@ -61,17 +61,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            // Softer, monochrome heatmap that matches the dark theme
+            // Sleek blue heatmap that pops against the dark background
             L.heatLayer(heatPoints, {
-                radius: 25,
-                blur: 35,
+                radius: 30,
+                blur: 20,
                 maxZoom: 10,
-                maxOpacity: 0.4,
+                maxOpacity: 0.6,
                 gradient: {
-                    0.4: '#2a2a2a', // Subtle grey
-                    0.6: '#555555', // Mid grey
-                    0.8: '#888888', // Light grey
-                    1.0: '#ffffff'  // Pure white at the densest cores
+                    0.4: '#1e3a8a', // Deep blue
+                    0.6: '#3b82f6', // Bright blue
+                    0.8: '#93c5fd', // Light sky blue
+                    1.0: '#ffffff'  // White core
                 }
             }).addTo(map);
         });
