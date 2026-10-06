@@ -8,11 +8,6 @@
     .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: #222; color: #eee; border: 1px solid #444; }
     .leaflet-popup-content { margin: 10px; text-align: center; }
     .popup-thumb { width: 100%; max-width: 200px; height: auto; display: block; margin-bottom: 8px; cursor: pointer; border-radius: 2px; }
-    
-    /* Inverts standard OSM tiles to create a dark map */
-    .leaflet-tile-pane {
-        filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
-    }
 </style>
 
 <div id="map"></div>
@@ -21,15 +16,18 @@
 document.addEventListener('DOMContentLoaded', function() {
     const map = L.map('map').setView([46.0, 10.0], 4);
     
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 19
+    // Minimalist Esri Dark Canvas - No clutter, no API key
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '&copy; <a href="https://www.esri.com/">Esri</a>, HERE, Garmin, FAO, NOAA, USGS, EPA',
+        maxNativeZoom: 16, // Esri tiles stop at 16
+        maxZoom: 19        // But allows Leaflet to upscale them if you zoom closer
     }).addTo(map);
 
     fetch('/index.json')
         .then(response => response.json())
         .then(data => {
             const heatPoints = [];
+            const photoMarkers = []; // Store markers here so we can resize them later
             
             data.forEach(img => {
                 const parts = img.name.split('--');
@@ -44,33 +42,39 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (!isNaN(lat) && !isNaN(lon)) {
                             heatPoints.push([lat, lon, 1]); 
                             
-                            // Clean, borderless blush dots
+                            // Initialize dot based on the starting zoom level
                             const marker = L.circleMarker([lat, lon], {
-                                radius: 3.5,
+                                radius: Math.max(3.5, map.getZoom() * 0.7),
                                 fillColor: '#f472b6',
                                 color: 'transparent',
-                                weight: 0,
+                                weight: 15, // Giant invisible hit-box for easy mobile tapping
                                 fillOpacity: 0.8
                             });
                             
                             const popupHtml = `<div><img src="${img.url}" class="popup-thumb" onclick="openLightbox('${img.url}')"></div>`;
                             marker.bindPopup(popupHtml);
                             marker.addTo(map);
+                            photoMarkers.push(marker);
                         }
                     }
                 }
             });
             
-            // Muted, ethereal glow without harsh white cores
+            // Listen for zooming and dynamically scale the dots
+            map.on('zoomend', function() {
+                const newRadius = Math.max(3.5, map.getZoom() * 0.7);
+                photoMarkers.forEach(m => m.setRadius(newRadius));
+            });
+            
             L.heatLayer(heatPoints, {
                 radius: 40,
                 blur: 45,
                 maxZoom: 12,
                 maxOpacity: 0.35,
                 gradient: {
-                    0.4: '#4c1d95', // Deep violet
-                    0.7: '#c026d3', // Fuchsia
-                    1.0: '#f472b6'  // Soft blush (no white)
+                    0.4: '#4c1d95', 
+                    0.7: '#c026d3', 
+                    1.0: '#f472b6'  
                 }
             }).addTo(map);
         });
