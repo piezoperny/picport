@@ -44,13 +44,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (!isNaN(lat) && !isNaN(lon)) {
                             heatPoints.push([lat, lon, 1]); 
                             
-                            // Solid dots with a dark border for clear visibility
+                            // Delicate, cute markers with a soft pink halo
                             const marker = L.circleMarker([lat, lon], {
-                                radius: 5,
+                                radius: 4,
                                 fillColor: '#ffffff',
-                                color: '#222222',
+                                color: '#f472b6', 
                                 weight: 2,
-                                fillOpacity: 0.9
+                                opacity: 0.7,
+                                fillOpacity: 1.0
                             });
                             
                             const popupHtml = `<div><img src="${img.url}" class="popup-thumb" onclick="openLightbox('${img.url}')"></div>`;
@@ -61,17 +62,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            // Sleek blue heatmap that pops against the dark background
+            // Soft, atmospheric blush heatmap
             L.heatLayer(heatPoints, {
-                radius: 30,
-                blur: 20,
+                radius: 45,
+                blur: 40,
                 maxZoom: 10,
-                maxOpacity: 0.6,
+                maxOpacity: 0.5,
                 gradient: {
-                    0.4: '#1e3a8a', // Deep blue
-                    0.6: '#3b82f6', // Bright blue
-                    0.8: '#93c5fd', // Light sky blue
-                    1.0: '#ffffff'  // White core
+                    0.4: '#701a75', // Deep plum base
+                    0.6: '#db2777', // Vibrant pink
+                    0.8: '#f472b6', // Soft pastel pink
+                    1.0: '#fdf2f8'  // Delicate blush white
                 }
             }).addTo(map);
         });
