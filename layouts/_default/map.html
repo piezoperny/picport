@@ -1,9 +1,7 @@
 {{ define "main" }}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
-<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 
 <style>
     #map { height: 85vh; width: 100%; background: #111; z-index: 1; margin-top: 0; }
@@ -23,17 +21,16 @@
 document.addEventListener('DOMContentLoaded', function() {
     const map = L.map('map').setView([46.0, 10.0], 4);
     
-    // Swapped to standard OSM tiles (no API key required)
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 19
     }).addTo(map);
 
-    const markers = L.markerClusterGroup();
-
     fetch('/index.json')
         .then(response => response.json())
         .then(data => {
+            const heatPoints = [];
+            
             data.forEach(img => {
                 const parts = img.name.split('--');
                 if (parts.length > 1) {
@@ -45,15 +42,38 @@ document.addEventListener('DOMContentLoaded', function() {
                         const lon = parseFloat(latLon[1]);
                         
                         if (!isNaN(lat) && !isNaN(lon)) {
-                            const marker = L.marker([lat, lon]);
+                            // Add coordinates to the heatmap array
+                            heatPoints.push([lat, lon, 1]); 
+                            
+                            // Create a subtle clickable dot for the lightbox popup
+                            const marker = L.circleMarker([lat, lon], {
+                                radius: 4,
+                                fillColor: '#ffffff',
+                                color: 'transparent',
+                                weight: 0,
+                                fillOpacity: 0.5
+                            });
+                            
                             const popupHtml = `<div><img src="${img.url}" class="popup-thumb" onclick="openLightbox('${img.url}')"></div>`;
                             marker.bindPopup(popupHtml);
-                            markers.addLayer(marker);
+                            marker.addTo(map);
                         }
                     }
                 }
             });
-            map.addLayer(markers);
+            
+            // Render the heatmap layer
+            L.heatLayer(heatPoints, {
+                radius: 35,
+                blur: 25,
+                maxZoom: 10,
+                gradient: {
+                    0.3: '#4f46e5', // Indigo
+                    0.5: '#9333ea', // Purple
+                    0.7: '#f43f5e', // Rose
+                    1.0: '#fbbf24'  // Amber
+                }
+            }).addTo(map);
         });
 });
 </script>
