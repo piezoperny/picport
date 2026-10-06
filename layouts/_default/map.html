@@ -42,16 +42,15 @@ document.addEventListener('DOMContentLoaded', function() {
                         const lon = parseFloat(latLon[1]);
                         
                         if (!isNaN(lat) && !isNaN(lon)) {
-                            // Add coordinates to the heatmap array
                             heatPoints.push([lat, lon, 1]); 
                             
-                            // Create a subtle clickable dot for the lightbox popup
+                            // Delicate semi-transparent rings instead of solid blobs
                             const marker = L.circleMarker([lat, lon], {
-                                radius: 4,
+                                radius: 3,
                                 fillColor: '#ffffff',
-                                color: 'transparent',
-                                weight: 0,
-                                fillOpacity: 0.5
+                                color: '#ffffff',
+                                weight: 1,
+                                fillOpacity: 0.1
                             });
                             
                             const popupHtml = `<div><img src="${img.url}" class="popup-thumb" onclick="openLightbox('${img.url}')"></div>`;
@@ -62,16 +61,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            // Render the heatmap layer
+            // Softer, monochrome heatmap that matches the dark theme
             L.heatLayer(heatPoints, {
-                radius: 35,
-                blur: 25,
+                radius: 25,
+                blur: 35,
                 maxZoom: 10,
+                maxOpacity: 0.4,
                 gradient: {
-                    0.3: '#4f46e5', // Indigo
-                    0.5: '#9333ea', // Purple
-                    0.7: '#f43f5e', // Rose
-                    1.0: '#fbbf24'  // Amber
+                    0.4: '#2a2a2a', // Subtle grey
+                    0.6: '#555555', // Mid grey
+                    0.8: '#888888', // Light grey
+                    1.0: '#ffffff'  // Pure white at the densest cores
                 }
             }).addTo(map);
         });
