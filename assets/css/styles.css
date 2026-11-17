@@ -916,15 +916,14 @@ input[type="range"].dual-range::-moz-range-thumb {
 
 /* --- MODE: GRID (CSS NATIVE MASONRY + HOVER EXIF OVERLAY) --- */
 .layout-grid {
-    column-count: 3;
-    column-gap: 1.75rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.75rem;
+    align-items: start;
 }
 
 .layout-grid .gallery-item {
-    break-inside: avoid;
-    -webkit-column-break-inside: avoid;
-    page-break-inside: avoid;
-    margin-bottom: 1.75rem;
+    margin-bottom: 0;
     padding: 0;
     display: block;
     position: relative;
@@ -1511,12 +1510,12 @@ input[type="range"].dual-range::-moz-range-thumb {
 
 @media (max-width: 640px) {
     .layout-grid {
-        column-count: 1;
-        column-gap: 0;
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
         padding: 0 1rem;
     }
 
     .layout-grid .gallery-item {
-        margin-bottom: 1.25rem;
+        margin-bottom: 0;
     }
 }
