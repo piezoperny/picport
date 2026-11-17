@@ -1,859 +1,186 @@
 {{ define "main" }}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 
 <style>
-    .map-shell {
-        position: relative;
-        width: 100%;
-        height: 88vh;
-        min-height: 560px;
-        background: var(--bg-color);
-        overflow: hidden;
+    #map { height: 85vh; width: 100%; background: #111; z-index: 1; margin-top: 0; }
+    .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+        background: #221d35;
+        color: #eee;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 10px;
     }
-
-    #map {
-        height: 100%;
-        width: 100%;
-        background: var(--bg-color);
-        z-index: 1;
-    }
-
-    /* Region Fly-To Pill Bar */
-    .map-region-bar {
-        position: absolute;
-        top: 88px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 500;
-        display: flex;
-        align-items: center;
-        gap: 0.35rem;
-        padding: 0.35rem 0.45rem;
-        max-width: calc(100% - 2rem);
-        overflow-x: auto;
-        scrollbar-width: none;
-        background: var(--header-bg);
-        border: 1px solid var(--header-border);
-        border-radius: 999px;
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14);
-    }
-    .map-region-bar::-webkit-scrollbar { display: none; }
-
-    .region-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        padding: 0.35rem 0.8rem;
-        border-radius: 999px;
-        border: 1px solid transparent;
-        background: transparent;
-        color: var(--text-color);
-        font-family: 'Inter', sans-serif;
-        font-size: 0.74rem;
-        font-weight: 500;
-        letter-spacing: 0.04em;
-        text-transform: lowercase;
-        white-space: nowrap;
-        cursor: pointer;
-        transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
-    }
-    .region-pill:hover {
-        background: rgba(155, 135, 245, 0.14);
-        border-color: rgba(155, 135, 245, 0.35);
-    }
-    .region-pill.active {
-        background: #9b87f5;
-        color: #141022;
-        border-color: #9b87f5;
-        font-weight: 600;
-    }
-    .region-pill-count {
-        font-size: 0.65rem;
-        opacity: 0.72;
-    }
-    .region-pill.active .region-pill-count {
-        opacity: 0.85;
-    }
-
-    .region-bar-divider {
-        width: 1px;
-        height: 16px;
-        background: var(--header-border);
-        margin: 0 0.15rem;
-        flex-shrink: 0;
-    }
-
-    .heatmap-toggle.active {
-        background: rgba(155, 135, 245, 0.22);
-        border-color: #9b87f5;
-        color: var(--text-color);
-    }
-
-    /* Floating Glassmorphism Travelogue Sidebar */
-    .map-drawer {
-        position: absolute;
-        top: 146px;
-        left: 20px;
-        width: 316px;
-        max-height: calc(100% - 170px);
-        z-index: 480;
-        display: flex;
-        flex-direction: column;
-        background: var(--header-bg);
-        border: 1px solid var(--header-border);
-        border-radius: 20px;
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.18);
-        color: var(--text-color);
-        overflow: hidden;
-        transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
-    }
-    .map-drawer.collapsed {
-        transform: translateX(calc(-100% - 28px));
-        opacity: 0;
-        pointer-events: none;
-    }
-
-    .map-drawer-reopen {
-        position: absolute;
-        top: 146px;
-        left: 20px;
-        z-index: 475;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.45rem;
-        padding: 0.48rem 0.9rem;
-        border-radius: 999px;
-        background: var(--header-bg);
-        border: 1px solid var(--header-border);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        color: var(--text-color);
-        font-family: 'Inter', sans-serif;
-        font-size: 0.74rem;
-        letter-spacing: 0.05em;
-        text-transform: lowercase;
-        cursor: pointer;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
-        opacity: 0;
-        pointer-events: none;
-        transform: translateY(-6px);
-        transition: opacity 0.2s ease, transform 0.2s ease;
-    }
-    .map-drawer-reopen.visible {
-        opacity: 1;
-        pointer-events: auto;
-        transform: translateY(0);
-    }
-
-    .drawer-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0.85rem 1rem 0.7rem;
-        border-bottom: 1px solid var(--border-color);
-        flex-shrink: 0;
-    }
-    .drawer-title-wrap {
-        display: flex;
-        align-items: baseline;
-        gap: 0.5rem;
-    }
-    .drawer-title {
-        font-family: 'Cormorant Garamond', serif;
-        font-size: 1.25rem;
-        font-weight: 600;
-        text-transform: lowercase;
-        line-height: 1;
-    }
-    .drawer-count {
-        font-family: 'Inter', sans-serif;
-        font-size: 0.7rem;
-        color: var(--text-muted);
-    }
-    .drawer-close {
-        width: 26px;
-        height: 26px;
-        border-radius: 50%;
-        border: 1px solid var(--border-color);
-        background: transparent;
-        color: var(--text-color);
-        font-size: 0.95rem;
-        line-height: 1;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        transition: background-color 0.2s;
-    }
-    .drawer-close:hover {
-        background: rgba(155, 135, 245, 0.18);
-    }
-
-    /* Spotlight Card */
-    .drawer-spotlight {
-        padding: 0.85rem 1rem;
-        border-bottom: 1px solid var(--border-color);
-        flex-shrink: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 0.55rem;
-    }
-    .drawer-spotlight.hidden {
-        display: none;
-    }
-    .spotlight-media {
-        position: relative;
-        width: 100%;
-        aspect-ratio: 16 / 10;
-        border-radius: 12px;
-        overflow: hidden;
-        cursor: pointer;
-        background: var(--card-bg);
-    }
-    .spotlight-media img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-        transition: transform 0.35s ease;
-    }
-    .spotlight-media:hover img {
-        transform: scale(1.03);
-    }
-    .spotlight-meta-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 0.5rem;
-        font-family: 'Inter', sans-serif;
-        font-size: 0.7rem;
-    }
-    .spotlight-collection {
-        color: #9b87f5;
-        text-decoration: none;
-        font-weight: 600;
-        letter-spacing: 0.04em;
-        text-transform: lowercase;
-    }
-    .spotlight-collection:hover {
-        text-decoration: underline;
-    }
-    .spotlight-date {
-        color: var(--text-muted);
-    }
-    .spotlight-exif {
-        font-family: 'Inter', sans-serif;
-        font-size: 0.72rem;
-        color: var(--text-color);
-        line-height: 1.4;
-    }
-    .spotlight-actions {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 0.5rem;
-        margin-top: 0.15rem;
-    }
-    .spotlight-coords {
-        font-family: 'Inter', sans-serif;
-        font-size: 0.66rem;
-        color: var(--text-muted);
-    }
-    .spotlight-open-btn {
-        padding: 0.3rem 0.7rem;
-        border-radius: 999px;
-        border: 1px solid rgba(155, 135, 245, 0.5);
-        background: rgba(155, 135, 245, 0.16);
-        color: var(--text-color);
-        font-family: 'Inter', sans-serif;
-        font-size: 0.68rem;
-        letter-spacing: 0.04em;
-        text-transform: lowercase;
-        cursor: pointer;
-        transition: background-color 0.2s, border-color 0.2s;
-    }
-    .spotlight-open-btn:hover {
-        background: #9b87f5;
-        color: #141022;
-        border-color: #9b87f5;
-    }
-
-    /* Scrollable Photo Strip */
-    .drawer-list {
-        overflow-y: auto;
-        padding: 0.6rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.45rem;
-        scrollbar-width: thin;
-    }
-    .drawer-item {
-        display: flex;
-        align-items: center;
-        gap: 0.7rem;
-        padding: 0.42rem;
-        border-radius: 12px;
-        border: 1px solid transparent;
-        background: transparent;
-        color: inherit;
-        text-align: left;
-        cursor: pointer;
-        transition: background-color 0.18s ease, border-color 0.18s ease;
-    }
-    .drawer-item:hover {
-        background: rgba(155, 135, 245, 0.1);
-    }
-    .drawer-item.active {
-        background: rgba(155, 135, 245, 0.18);
-        border-color: rgba(155, 135, 245, 0.45);
-    }
-    .drawer-item-thumb {
-        width: 52px;
-        height: 52px;
-        border-radius: 8px;
-        object-fit: cover;
-        flex-shrink: 0;
-        background: var(--card-bg);
-    }
-    .drawer-item-info {
-        min-width: 0;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 0.15rem;
-    }
-    .drawer-item-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 0.4rem;
-        font-family: 'Inter', sans-serif;
-        font-size: 0.68rem;
-    }
-    .drawer-item-col {
-        font-weight: 600;
-        color: var(--text-color);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .drawer-item-date {
-        color: var(--text-muted);
-        flex-shrink: 0;
-    }
-    .drawer-item-exif {
-        font-family: 'Inter', sans-serif;
-        font-size: 0.66rem;
-        color: var(--text-muted);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    /* Markers & Clusters */
-    .map-photo-pin {
-        width: 14px;
-        height: 14px;
-        border-radius: 50%;
-        background: #9b87f5;
-        border: 2px solid rgba(255, 255, 255, 0.88);
-        box-shadow: 0 0 10px rgba(155, 135, 245, 0.75);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .map-photo-pin:hover,
-    .map-photo-pin.is-selected {
-        transform: scale(1.35);
-        box-shadow: 0 0 16px rgba(155, 135, 245, 1);
-    }
-
-    .map-cluster-wrapper {
-        background: transparent;
-        border: none;
-    }
-    .map-cluster-badge {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        background: rgba(155, 135, 245, 0.88);
-        color: #141022;
-        font-family: 'Inter', sans-serif;
-        font-size: 0.75rem;
-        font-weight: 700;
-        border: 2px solid rgba(255, 255, 255, 0.75);
-        box-shadow: 0 4px 16px rgba(91, 74, 153, 0.45);
-        backdrop-filter: blur(6px);
-    }
-    body.dark-mode .map-cluster-badge {
-        background: rgba(155, 135, 245, 0.85);
-        color: #161224;
-        border-color: rgba(34, 29, 53, 0.9);
-    }
-
-    /* Rich Popup Card */
-    .leaflet-popup-content-wrapper,
-    .leaflet-popup-tip {
-        background: var(--header-bg);
-        color: var(--text-color);
-        border: 1px solid var(--header-border);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
-    }
-    .leaflet-popup-content-wrapper {
-        border-radius: 14px;
-        padding: 0;
-    }
-    .leaflet-popup-content {
-        margin: 10px;
-        width: 224px !important;
-        text-align: left;
-    }
-    .popup-card {
-        display: flex;
-        flex-direction: column;
-        gap: 0.45rem;
-    }
-    .popup-thumb {
-        width: 100%;
-        height: 148px;
-        object-fit: cover;
-        display: block;
-        cursor: pointer;
-        border-radius: 8px;
-        background: var(--card-bg);
-    }
-    .popup-meta-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 0.4rem;
-        font-family: 'Inter', sans-serif;
-        font-size: 0.68rem;
-    }
+    .leaflet-popup-content { margin: 12px; min-width: 210px; text-align: left; }
+    .popup-card { display: flex; flex-direction: column; gap: 8px; }
+    .popup-thumb { width: 100%; max-width: 230px; height: auto; display: block; cursor: pointer; border-radius: 4px; }
+    .popup-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
     .popup-collection {
-        color: #9b87f5;
-        font-weight: 600;
-        text-transform: lowercase;
-    }
-    .popup-date {
-        color: var(--text-muted);
-    }
-    .popup-exif {
+        display: inline-block;
         font-family: 'Inter', sans-serif;
         font-size: 0.68rem;
-        color: var(--text-color);
-        line-height: 1.35;
-    }
-    .popup-view-btn {
-        align-self: flex-start;
-        margin-top: 0.1rem;
-        padding: 0.24rem 0.65rem;
-        border-radius: 999px;
-        border: 1px solid rgba(155, 135, 245, 0.5);
-        background: rgba(155, 135, 245, 0.14);
-        color: var(--text-color);
-        font-family: 'Inter', sans-serif;
-        font-size: 0.66rem;
+        letter-spacing: 0.08em;
         text-transform: lowercase;
-        cursor: pointer;
+        color: #e9e4ff;
+        background: rgba(155, 135, 245, 0.18);
+        border: 1px solid rgba(155, 135, 245, 0.35);
+        padding: 2px 8px;
+        border-radius: 999px;
+        text-decoration: none;
     }
-    .popup-view-btn:hover {
-        background: #9b87f5;
-        color: #141022;
-    }
-
-    /* Leaflet Controls Theme Sync */
-    .leaflet-control-zoom a {
-        background: var(--header-bg) !important;
-        color: var(--text-color) !important;
-        border-color: var(--header-border) !important;
-        backdrop-filter: blur(10px);
-    }
-    .leaflet-control-attribution {
-        background: var(--header-bg) !important;
-        color: var(--text-muted) !important;
-        font-size: 0.65rem !important;
-    }
-    .leaflet-control-attribution a {
-        color: var(--text-color) !important;
-    }
-
-    @media (max-width: 768px) {
-        .map-shell {
-            height: 85vh;
-            min-height: 520px;
-        }
-        .map-region-bar {
-            top: 72px;
-            padding: 0.28rem 0.38rem;
-            gap: 0.25rem;
-        }
-        .region-pill {
-            padding: 0.3rem 0.65rem;
-            font-size: 0.7rem;
-        }
-        .map-drawer {
-            top: auto;
-            bottom: 12px;
-            left: 12px;
-            right: 12px;
-            width: auto;
-            max-height: 44%;
-        }
-        .map-drawer.collapsed {
-            transform: translateY(calc(100% + 20px));
-        }
-        .map-drawer-reopen {
-            top: auto;
-            bottom: 14px;
-            left: 14px;
-        }
+    .popup-collection:hover { background: rgba(155, 135, 245, 0.3); }
+    .popup-datetime { font-family: 'Inter', sans-serif; font-size: 0.7rem; color: #a3a0ac; }
+    .popup-camera { font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; font-weight: 500; color: #fff; text-transform: lowercase; line-height: 1.2; }
+    .popup-pills { display: flex; flex-wrap: wrap; gap: 4px; }
+    .popup-pill {
+        font-family: 'Inter', sans-serif;
+        font-size: 0.68rem;
+        color: #d8d4e8;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 2px 6px;
+        border-radius: 4px;
+        text-transform: lowercase;
     }
 </style>
 
-<div class="map-shell">
-    <div id="map-region-bar" class="map-region-bar" role="toolbar" aria-label="Fly to region">
-        <button type="button" class="region-pill active" data-region="all">all <span class="region-pill-count" id="count-all">0</span></button>
-        <button type="button" class="region-pill" data-region="valencia">valencia <span class="region-pill-count" id="count-valencia">0</span></button>
-        <button type="button" class="region-pill" data-region="italy">italy <span class="region-pill-count" id="count-italy">0</span></button>
-        <button type="button" class="region-pill" data-region="central-europe">central europe <span class="region-pill-count" id="count-central-europe">0</span></button>
-        <button type="button" class="region-pill" data-region="portugal">portugal <span class="region-pill-count" id="count-portugal">0</span></button>
-        <span class="region-bar-divider" aria-hidden="true"></span>
-        <button type="button" id="toggle-heatmap" class="region-pill heatmap-toggle active" aria-pressed="true">heatmap</button>
-    </div>
-
-    <button type="button" id="map-drawer-reopen" class="map-drawer-reopen" aria-label="Open travelogue drawer">
-        travelogue
-    </button>
-
-    <aside id="map-drawer" class="map-drawer" aria-label="Photo travelogue">
-        <div class="drawer-header">
-            <div class="drawer-title-wrap">
-                <span class="drawer-title" id="drawer-region-title">all locations</span>
-                <span class="drawer-count" id="drawer-photo-count">0 photos</span>
-            </div>
-            <button type="button" id="drawer-close" class="drawer-close" aria-label="Collapse travelogue">&times;</button>
-        </div>
-
-        <div id="drawer-spotlight" class="drawer-spotlight hidden">
-            <div class="spotlight-media" id="spotlight-media">
-                <img id="spotlight-img" src="" alt="Selected photo">
-            </div>
-            <div class="spotlight-meta-row">
-                <a id="spotlight-collection" href="#" class="spotlight-collection"></a>
-                <span id="spotlight-date" class="spotlight-date"></span>
-            </div>
-            <div id="spotlight-exif" class="spotlight-exif"></div>
-            <div class="spotlight-actions">
-                <span id="spotlight-coords" class="spotlight-coords"></span>
-                <button type="button" id="spotlight-open-btn" class="spotlight-open-btn">open in darkroom</button>
-            </div>
-        </div>
-
-        <div id="drawer-list" class="drawer-list"></div>
-    </aside>
-
-    <div id="map"></div>
-</div>
+<div id="map"></div>
 
 <script>
+function parsePhotoMetadata(img) {
+    const name = decodeURIComponent(img.name || (img.url ? img.url.split('/').pop() : ''));
+    const parts = name.split('--');
+    const base = parts[0] || '';
+
+    let date = img.date || '';
+    let time = img.time || '';
+    if (!date) {
+        const dtMatch = base.match(/^(\d{4})(\d{2})(\d{2})(?:_(\d{2})(\d{2}))?/);
+        if (dtMatch) {
+            date = `${dtMatch[1]}-${dtMatch[2]}-${dtMatch[3]}`;
+            if (!time && dtMatch[4] && dtMatch[5]) {
+                time = `${dtMatch[4]}:${dtMatch[5]}`;
+            }
+        }
+    }
+
+    let camera = img.camera || '';
+    let iso = img.iso || '';
+    let aperture = img.aperture || '';
+    let shutter = img.shutter || '';
+
+    if ((!camera || !iso || !aperture || !shutter) && base.length > 16) {
+        const techRaw = base.substring(16);
+        const techParts = techRaw.split('_');
+        if (techParts.length >= 4) {
+            const shutterRaw = techParts.pop();
+            const apertureRaw = techParts.pop();
+            const isoRaw = techParts.pop();
+            camera = camera || techParts.join(' ').toLowerCase();
+            iso = iso || `iso ${isoRaw}`.toLowerCase();
+            aperture = aperture || `f/${apertureRaw}`.toLowerCase();
+            shutter = shutter || `${shutterRaw.replace(/^1-/, '1/')} s`.toLowerCase();
+        }
+    }
+
+    let collection = img.collection || '';
+    let collectionUrl = img.collectionUrl || '';
+    if (!collection && img.url) {
+        const urlMatch = img.url.match(/\/gallery\/([^/]+)\//i);
+        if (urlMatch) {
+            const slug = decodeURIComponent(urlMatch[1]);
+            collection = slug.replace(/-/g, ' ').toLowerCase();
+            collectionUrl = `/gallery/${urlMatch[1]}/`;
+        }
+    }
+
+    return { date, time, camera, iso, aperture, shutter, collection, collectionUrl };
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-    const TILE_DARK = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}';
-    const TILE_LIGHT = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}';
-    const TILE_ATTR = '&copy; <a href="https://www.esri.com/">Esri</a>, HERE, Garmin, FAO, NOAA, USGS, EPA';
+    const map = L.map('map').setView([46.0, 10.0], 4);
+    
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '&copy; <a href="https://www.esri.com/">Esri</a>, HERE, Garmin, FAO, NOAA, USGS, EPA',
+        maxNativeZoom: 16,
+        maxZoom: 19
+    }).addTo(map);
 
-    const REGIONS = {
-        all: { label: 'all locations', match: () => true },
-        valencia: { label: 'valencia', match: (lat, lon) => lat >= 38.5 && lat <= 41.0 && lon >= -2.5 && lon <= 1.0 },
-        italy: { label: 'italy', match: (lat, lon) => lat >= 43.0 && lat <= 47.0 && lon >= 6.5 && lon <= 15.0 },
-        'central-europe': { label: 'central europe', match: (lat, lon) => lat >= 46.8 && lat <= 52.0 && lon >= 15.5 && lon <= 22.5 },
-        portugal: { label: 'portugal', match: (lat, lon) => lat >= 36.8 && lat <= 42.2 && lon >= -10.0 && lon <= -6.2 }
-    };
-
-    const map = L.map('map', { zoomControl: false }).setView([45.5, 9.0], 4);
-    L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-    let currentTileLayer = null;
-    let heatLayer = null;
-    let heatmapEnabled = true;
-
-    function isDarkMode() {
-        return document.body.classList.contains('dark-mode');
-    }
-
-    function syncTileLayer() {
-        const nextUrl = isDarkMode() ? TILE_DARK : TILE_LIGHT;
-        if (currentTileLayer) {
-            map.removeLayer(currentTileLayer);
-        }
-        currentTileLayer = L.tileLayer(nextUrl, {
-            attribution: TILE_ATTR,
-            maxNativeZoom: 16,
-            maxZoom: 19
-        }).addTo(map);
-        currentTileLayer.bringToBack();
-    }
-
-    syncTileLayer();
-
-    const themeObserver = new MutationObserver(() => {
-        syncTileLayer();
-    });
-    themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-
-    const clusterGroup = L.markerClusterGroup({
-        showCoverageOnHover: false,
-        maxClusterRadius: 42,
-        spiderfyOnMaxZoom: true,
-        iconCreateFunction: function(cluster) {
-            const count = cluster.getChildCount();
-            const size = count < 10 ? 34 : (count < 25 ? 40 : 46);
-            return L.divIcon({
-                html: `<div class="map-cluster-badge">${count}</div>`,
-                className: 'map-cluster-wrapper',
-                iconSize: L.point(size, size)
-            });
-        }
-    });
-    map.addLayer(clusterGroup);
-
-    const drawerEl = document.getElementById('map-drawer');
-    const drawerReopenBtn = document.getElementById('map-drawer-reopen');
-    const drawerCloseBtn = document.getElementById('drawer-close');
-    const drawerListEl = document.getElementById('drawer-list');
-    const drawerTitleEl = document.getElementById('drawer-region-title');
-    const drawerCountEl = document.getElementById('drawer-photo-count');
-    const spotlightEl = document.getElementById('drawer-spotlight');
-    const spotlightImg = document.getElementById('spotlight-img');
-    const spotlightMedia = document.getElementById('spotlight-media');
-    const spotlightCol = document.getElementById('spotlight-collection');
-    const spotlightDate = document.getElementById('spotlight-date');
-    const spotlightExif = document.getElementById('spotlight-exif');
-    const spotlightCoords = document.getElementById('spotlight-coords');
-    const spotlightOpenBtn = document.getElementById('spotlight-open-btn');
-    const heatmapBtn = document.getElementById('toggle-heatmap');
-
-    if (drawerCloseBtn && drawerEl && drawerReopenBtn) {
-        drawerCloseBtn.addEventListener('click', () => {
-            drawerEl.classList.add('collapsed');
-            drawerReopenBtn.classList.add('visible');
-        });
-        drawerReopenBtn.addEventListener('click', () => {
-            drawerEl.classList.remove('collapsed');
-            drawerReopenBtn.classList.remove('visible');
-        });
-    }
-
-    let allPhotos = [];
-    let activeRegion = 'all';
-    let selectedPhotoIndex = -1;
-
-    function selectPhoto(photo, shouldFly) {
-        selectedPhotoIndex = photo.index;
-
-        if (spotlightEl) {
-            spotlightEl.classList.remove('hidden');
-            spotlightImg.src = photo.thumb;
-            spotlightImg.alt = `${photo.collection || 'photo'} preview`;
-            spotlightCol.textContent = photo.collection || 'gallery';
-            spotlightCol.href = photo.collectionUrl || '#';
-            spotlightDate.textContent = photo.date || '';
-            spotlightExif.textContent = photo.exif || 'no exif metadata';
-            spotlightCoords.textContent = `${photo.lat.toFixed(3)}, ${photo.lon.toFixed(3)}`;
-
-            const openFn = () => openLightbox(photo.lightbox);
-            spotlightMedia.onclick = openFn;
-            spotlightOpenBtn.onclick = openFn;
-        }
-
-        document.querySelectorAll('.drawer-item').forEach(el => {
-            el.classList.toggle('active', Number(el.dataset.index) === photo.index);
-        });
-
-        if (shouldFly) {
-            clusterGroup.zoomToShowLayer(photo.marker, () => {
-                map.panTo([photo.lat, photo.lon], { animate: true });
-                photo.marker.openPopup();
-            });
-        }
-    }
-
-    function renderDrawerList(regionKey) {
-        const region = REGIONS[regionKey] || REGIONS.all;
-        const filtered = allPhotos.filter(p => region.match(p.lat, p.lon));
-
-        if (drawerTitleEl) drawerTitleEl.textContent = region.label;
-        if (drawerCountEl) drawerCountEl.textContent = `${filtered.length} ${filtered.length === 1 ? 'photo' : 'photos'}`;
-
-        if (!drawerListEl) return;
-        drawerListEl.innerHTML = '';
-
-        filtered.forEach(photo => {
-            const item = document.createElement('button');
-            item.type = 'button';
-            item.className = `drawer-item${photo.index === selectedPhotoIndex ? ' active' : ''}`;
-            item.dataset.index = String(photo.index);
-            item.innerHTML = `
-                <img src="${photo.thumb}" alt="${photo.collection || 'photo'}" class="drawer-item-thumb" loading="lazy">
-                <div class="drawer-item-info">
-                    <div class="drawer-item-top">
-                        <span class="drawer-item-col">${photo.collection || 'gallery'}</span>
-                        <span class="drawer-item-date">${photo.date || ''}</span>
-                    </div>
-                    <div class="drawer-item-exif">${photo.exif || `${photo.lat.toFixed(2)}, ${photo.lon.toFixed(2)}`}</div>
-                </div>
-            `;
-            item.addEventListener('click', () => selectPhoto(photo, true));
-            drawerListEl.appendChild(item);
-        });
-
-        window.lightboxImages = filtered.map(p => p.lightbox);
-    }
-
-    function flyToRegion(regionKey) {
-        activeRegion = regionKey;
-        document.querySelectorAll('.region-pill[data-region]').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.region === regionKey);
-        });
-
-        const region = REGIONS[regionKey] || REGIONS.all;
-        const matching = allPhotos.filter(p => region.match(p.lat, p.lon));
-
-        renderDrawerList(regionKey);
-
-        if (matching.length > 0) {
-            const bounds = L.latLngBounds(matching.map(p => [p.lat, p.lon]));
-            map.flyToBounds(bounds, {
-                padding: [70, 70],
-                maxZoom: regionKey === 'all' ? 5 : 12,
-                duration: 0.85
-            });
-            if (selectedPhotoIndex === -1 || !region.match(allPhotos[selectedPhotoIndex].lat, allPhotos[selectedPhotoIndex].lon)) {
-                selectPhoto(matching[0], false);
-            }
-        }
-    }
-
-    document.querySelectorAll('.region-pill[data-region]').forEach(btn => {
-        btn.addEventListener('click', () => flyToRegion(btn.dataset.region));
-    });
-
-    if (heatmapBtn) {
-        heatmapBtn.addEventListener('click', () => {
-            if (!heatLayer) return;
-            heatmapEnabled = !heatmapEnabled;
-            heatmapBtn.classList.toggle('active', heatmapEnabled);
-            heatmapBtn.setAttribute('aria-pressed', String(heatmapEnabled));
-            if (heatmapEnabled) {
-                heatLayer.addTo(map);
-            } else {
-                map.removeLayer(heatLayer);
-            }
-        });
-    }
-
-    fetch('/index.json')
+    fetch('/index.json?v={{ .Site.Params.version | urlize }}')
         .then(response => response.json())
         .then(data => {
             const heatPoints = [];
-
+            const photoMarkers = []; 
+            const mapImageUrls = [];
+            
             data.forEach(img => {
-                const parts = (img.name || '').split('--');
+                const parts = img.name.split('--');
                 if (parts.length > 1) {
-                    const coordsRaw = parts[parts.length - 1].replace(/\.(jpg|jpeg|png|webp|gif)$/i, '');
+                    let coordsRaw = parts[parts.length - 1].replace(/\.(jpg|jpeg|png|webp|gif)$/i, "");
                     const latLon = coordsRaw.split('_');
-
+                    
                     if (latLon.length >= 2) {
                         const lat = parseFloat(latLon[0]);
                         const lon = parseFloat(latLon[1]);
-
+                        
                         if (!isNaN(lat) && !isNaN(lon)) {
-                            const thumbUrl = img.thumb || img.url;
-                            const lightboxUrl = img.lightbox || img.url;
-                            const collection = img.collection || 'gallery';
-                            const collectionUrl = img.collectionUrl || '#';
-                            const date = img.date || '';
-                            const exif = img.exif || '';
+                            heatPoints.push([lat, lon, 1]); 
+                            mapImageUrls.push(img.url);
 
-                            heatPoints.push([lat, lon, 1]);
-
-                            const marker = L.marker([lat, lon], {
-                                icon: L.divIcon({
-                                    className: '',
-                                    html: '<div class="map-photo-pin"></div>',
-                                    iconSize: [14, 14],
-                                    iconAnchor: [7, 7]
-                                })
+                            const meta = parsePhotoMetadata(img);
+                            const dateTimeStr = [meta.date, meta.time].filter(Boolean).join(' • ');
+                            const pills = [meta.iso, meta.aperture, meta.shutter].filter(Boolean)
+                                .map(p => `<span class="popup-pill">${p}</span>`).join('');
+                            const collectionBadge = meta.collection
+                                ? `<a href="${meta.collectionUrl || '#'}" class="popup-collection">${meta.collection}</a>`
+                                : '';
+                            const cameraLabel = meta.camera ? `📷 ${meta.camera}` : '';
+                            
+                            // Updated to a lilac that complements your #221d35 background
+                            const marker = L.circleMarker([lat, lon], {
+                                radius: Math.max(3.5, map.getZoom() * 0.7),
+                                fillColor: '#9b87f5',
+                                color: 'transparent',
+                                weight: 15, 
+                                fillOpacity: 0.8
                             });
-
+                            
                             const popupHtml = `
                                 <div class="popup-card">
-                                    <img src="${thumbUrl}" class="popup-thumb" alt="${collection} photo" onclick="openLightbox('${lightboxUrl}')">
-                                    <div class="popup-meta-top">
-                                        <span class="popup-collection">${collection}</span>
-                                        <span class="popup-date">${date}</span>
+                                    <img src="${img.url}" class="popup-thumb" onclick="openLightbox('${img.url}')" alt="${meta.camera || 'photo'}">
+                                    <div class="popup-top">
+                                        ${collectionBadge}
+                                        ${dateTimeStr ? `<span class="popup-datetime">${dateTimeStr}</span>` : ''}
                                     </div>
-                                    ${exif ? `<div class="popup-exif">${exif}</div>` : ''}
-                                    <button type="button" class="popup-view-btn" onclick="openLightbox('${lightboxUrl}')">view full</button>
-                                </div>
-                            `;
-                            marker.bindPopup(popupHtml, { maxWidth: 250 });
-
-                            const photoObj = {
-                                index: allPhotos.length,
-                                lat,
-                                lon,
-                                thumb: thumbUrl,
-                                lightbox: lightboxUrl,
-                                collection,
-                                collectionUrl,
-                                date,
-                                exif,
-                                marker
-                            };
-
-                            marker.on('click', () => selectPhoto(photoObj, false));
-                            clusterGroup.addLayer(marker);
-                            allPhotos.push(photoObj);
+                                    ${cameraLabel ? `<div class="popup-camera">${cameraLabel}</div>` : ''}
+                                    ${pills ? `<div class="popup-pills">${pills}</div>` : ''}
+                                </div>`;
+                            marker.bindPopup(popupHtml);
+                            marker.addTo(map);
+                            photoMarkers.push(marker);
                         }
                     }
                 }
             });
-
-            heatLayer = L.heatLayer(heatPoints, {
-                radius: 38,
-                blur: 42,
+            window.lightboxImages = mapImageUrls;
+            
+            map.on('zoomend', function() {
+                const newRadius = Math.max(3.5, map.getZoom() * 0.7);
+                photoMarkers.forEach(m => m.setRadius(newRadius));
+            });
+            
+            // Heatmap gradient transitions seamlessly into your dark mode CSS base
+            L.heatLayer(heatPoints, {
+                radius: 40,
+                blur: 45,
                 maxZoom: 12,
                 maxOpacity: 0.35,
                 gradient: {
-                    0.4: '#221d35',
-                    0.7: '#5b4a99',
-                    1.0: '#9b87f5'
+                    0.4: '#221d35', // Your CSS dark background base
+                    0.7: '#5b4a99', // Mid-tone purple
+                    1.0: '#9b87f5'  // Bright lilac core
                 }
             }).addTo(map);
-
-            Object.keys(REGIONS).forEach(key => {
-                const countEl = document.getElementById(`count-${key}`);
-                if (countEl) {
-                    countEl.textContent = allPhotos.filter(p => REGIONS[key].match(p.lat, p.lon)).length;
-                }
-            });
-
-            renderDrawerList('all');
-            if (allPhotos.length > 0) {
-                selectPhoto(allPhotos[0], false);
-            }
         });
 });
 </script>
