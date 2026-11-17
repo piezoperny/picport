@@ -1,58 +1,53 @@
-{{- /* Generate a JSON list of images that contain coordinates (marked by "--") */ -}}
-[
-    {{- $items := slice -}}
-    {{- with .Site.GetPage "section" "gallery" -}}
-        {{- range .Sections -}}
-            {{- $secTitle := .Title | lower -}}
-            {{- $secUrl := .RelPermalink -}}
-            {{- range .Resources.ByType "image" -}}
-                {{- if in .Name "--" -}}
-                    {{- $items = $items | append (dict "res" . "collection" $secTitle "collectionUrl" $secUrl) -}}
+{{- /* Generate a JSON list of geotagged images (marked by "--") with thumbnails, date/time, and EXIF */ -}}
+{{- $items := slice -}}
+{{- with .Site.GetPage "section" "gallery" -}}
+    {{- range .Sections -}}
+        {{- $collectionTitle := .Title | lower -}}
+        {{- $collectionUrl := .RelPermalink -}}
+        {{- range sort (.Resources.ByType "image") "Name" "desc" -}}
+            {{- if in .Name "--" -}}
+                {{- $thumb := .Resize "400x webp q85" -}}
+                {{- $lightbox := .Resize "1600x webp q90" -}}
+                {{- $dateStr := replaceRE "^(\\d{4})(\\d{2})(\\d{2}).*" "$1-$2-$3" .Name -}}
+                {{- if eq $dateStr .Name -}}{{- $dateStr = "" -}}{{- end -}}
+                {{- $timeStr := replaceRE "^\\d{8}_(\\d{2})(\\d{2}).*" "$1:$2" .Name -}}
+                {{- if eq $timeStr .Name -}}{{- $timeStr = "" -}}{{- end -}}
+                {{- $camera := "" -}}
+                {{- $iso := "" -}}
+                {{- $aperture := "" -}}
+                {{- $shutter := "" -}}
+                {{- $exifStr := "" -}}
+                {{- $base := index (split .Name "--") 0 -}}
+                {{- if gt (len $base) 16 -}}
+                    {{- $techRaw := substr $base 16 -}}
+                    {{- $parts := split $techRaw "_" -}}
+                    {{- if ge (len $parts) 4 -}}
+                        {{- $shutterRaw := index $parts (sub (len $parts) 1) -}}
+                        {{- $shutter = printf "%s s" (replaceRE "^1-" "1/" $shutterRaw) | lower -}}
+                        {{- $aperture = printf "f/%s" (index $parts (sub (len $parts) 2)) | lower -}}
+                        {{- $iso = printf "iso %s" (index $parts (sub (len $parts) 3)) | lower -}}
+                        {{- $camParts := first (sub (len $parts) 3) $parts -}}
+                        {{- $camera = delimit $camParts " " | lower -}}
+                        {{- $exifStr = printf "📷 %s • %s • %s • %s" $camera $iso $aperture $shutter -}}
+                    {{- end -}}
                 {{- end -}}
+                {{- $items = $items | append (dict
+                    "url" $lightbox.RelPermalink
+                    "lightbox" $lightbox.RelPermalink
+                    "thumb" $thumb.RelPermalink
+                    "name" .Name
+                    "collection" $collectionTitle
+                    "collectionUrl" $collectionUrl
+                    "date" $dateStr
+                    "time" $timeStr
+                    "exif" $exifStr
+                    "camera" $camera
+                    "iso" $iso
+                    "aperture" $aperture
+                    "shutter" $shutter
+                ) -}}
             {{- end -}}
         {{- end -}}
     {{- end -}}
-
-    {{- range $index, $item := $items -}}
-        {{- if $index -}},{{- end -}}
-        {{- $res := $item.res -}}
-        {{- $name := $res.Name -}}
-        {{- $dateStr := replaceRE "^(\\d{4})(\\d{2})(\\d{2}).*" "$1-$2-$3" $name -}}
-        {{- if eq $dateStr $name -}}{{ $dateStr = "" }}{{- end -}}
-        {{- $timeStr := replaceRE "^\\d{8}_(\\d{2})(\\d{2}).*" "$1:$2" $name -}}
-        {{- if eq $timeStr $name -}}{{ $timeStr = "" }}{{- end -}}
-
-        {{- $camera := "" -}}
-        {{- $iso := "" -}}
-        {{- $aperture := "" -}}
-        {{- $shutter := "" -}}
-        {{- $exif := "" -}}
-        {{- $base := index (split $name "--") 0 -}}
-        {{- if gt (len $base) 16 -}}
-            {{- $techRaw := substr $base 16 -}}
-            {{- $parts := split $techRaw "_" -}}
-            {{- if ge (len $parts) 4 -}}
-                {{- $shutterRaw := index $parts (sub (len $parts) 1) -}}
-                {{- $shutter = printf "%s s" (replaceRE "^1-" "1/" $shutterRaw) | lower -}}
-                {{- $aperture = printf "f/%s" (index $parts (sub (len $parts) 2)) | lower -}}
-                {{- $iso = printf "iso %s" (index $parts (sub (len $parts) 3)) | lower -}}
-                {{- $camParts := first (sub (len $parts) 3) $parts -}}
-                {{- $camera = (delimit $camParts " ") | lower -}}
-                {{- $exif = printf "📷 %s • %s • %s • %s" $camera $iso $aperture $shutter -}}
-            {{- end -}}
-        {{- end -}}
-        {
-            "url": {{ $res.RelPermalink | jsonify }},
-            "name": {{ $name | jsonify }},
-            "collection": {{ $item.collection | jsonify }},
-            "collectionUrl": {{ $item.collectionUrl | jsonify }},
-            "date": {{ $dateStr | jsonify }},
-            "time": {{ $timeStr | jsonify }},
-            "camera": {{ $camera | jsonify }},
-            "iso": {{ $iso | jsonify }},
-            "aperture": {{ $aperture | jsonify }},
-            "shutter": {{ $shutter | jsonify }},
-            "exif": {{ $exif | jsonify }}
-        }
-    {{- end -}}
-]
+{{- end -}}
+{{- $items | jsonify -}}
