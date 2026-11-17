@@ -41,7 +41,7 @@
             <div class="logo">
                 <a href="{{ .Site.BaseURL }}" id="logo-link" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
                     <img src="{{ "logo.png" | absURL }}" alt="logo" class="site-logo-img">
-                    <span style="margin-left: 10px; font-weight: 500; font-size: 1.1rem;">{{ .Site.Title }}</span>
+                    <span class="logo-title" style="margin-left: 10px; font-weight: 500; font-size: 1.1rem;">{{ .Site.Title }}</span>
                 </a>
             </div>
             
@@ -72,6 +72,8 @@
                 
                 <li class="nav-theme-item"><a href="#" id="theme-toggle" role="button" aria-label="Toggle theme">{{ if .Site.Params.darkMode }}☀{{ else }}🌙{{ end }}</a></li>
             </ul>
+
+            <button type="button" id="dock-collapse-toggle" class="dock-collapse-toggle" aria-label="Collapse navigation bar" aria-expanded="true" title="Collapse navigation">«</button>
         </nav>
     </header>
 

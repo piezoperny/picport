@@ -75,6 +75,31 @@ function init() {
         }
     });
 
+    // 1b. Collapsible Pill Dock
+    const dockToggle = document.getElementById('dock-collapse-toggle');
+    if (siteHeader && dockToggle) {
+        const applyDockState = (collapsed) => {
+            siteHeader.classList.toggle('is-collapsed', collapsed);
+            dockToggle.textContent = collapsed ? '»' : '«';
+            dockToggle.setAttribute('aria-expanded', String(!collapsed));
+            dockToggle.setAttribute('aria-label', collapsed ? 'Expand navigation bar' : 'Collapse navigation bar');
+            dockToggle.setAttribute('title', collapsed ? 'Expand navigation' : 'Collapse navigation');
+            if (collapsed) {
+                closeCollectionsMenu();
+                closeMobileMenu();
+            }
+        };
+
+        applyDockState(localStorage.getItem('dockCollapsed') === 'true');
+
+        dockToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const nextCollapsed = !siteHeader.classList.contains('is-collapsed');
+            localStorage.setItem('dockCollapsed', String(nextCollapsed));
+            applyDockState(nextCollapsed);
+        });
+    }
+
     // 2. Spinning Logo
     const logoLink = document.getElementById('logo-link');
     const logoImg = document.querySelector('.site-logo-img');
