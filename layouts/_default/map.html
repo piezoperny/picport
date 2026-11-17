@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             const heatPoints = [];
             const photoMarkers = []; 
+            const mapImageUrls = [];
             
             data.forEach(img => {
                 const parts = img.name.split('--');
@@ -40,6 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         
                         if (!isNaN(lat) && !isNaN(lon)) {
                             heatPoints.push([lat, lon, 1]); 
+                            mapImageUrls.push(img.url);
                             
                             // Updated to a lilac that complements your #221d35 background
                             const marker = L.circleMarker([lat, lon], {
@@ -58,6 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             });
+            window.lightboxImages = mapImageUrls;
             
             map.on('zoomend', function() {
                 const newRadius = Math.max(3.5, map.getZoom() * 0.7);
