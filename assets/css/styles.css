@@ -215,10 +215,11 @@ body {
 .carousel-container {
     position: relative;
     width: 100%;
-    height: 80vh; 
+    height: 85vh;
+    min-height: 520px;
     overflow: hidden;
     background: #111;
-    margin-top: 0; 
+    margin-top: 0;
 }
 
 /* HOME TITLE OVERLAY */
@@ -266,21 +267,144 @@ body {
 .carousel-img {
     position: relative;
     max-width: 90%;
-    max-height: 85%;
+    max-height: 78%;
     width: auto; height: auto;
     object-fit: contain;
     z-index: 2;
     box-shadow: 0 10px 40px rgba(0,0,0,0.5);
 }
 
-.carousel-date {
+.carousel-scrim {
     position: absolute;
-    bottom: 2rem; right: 2rem;
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 1rem;
-    z-index: 3;
+    inset: 0;
+    background: linear-gradient(to top, rgba(12, 10, 20, 0.72) 0%, rgba(12, 10, 20, 0.18) 28%, transparent 55%);
     pointer-events: none;
-    font-style: normal;
+    z-index: 4;
+}
+
+.carousel-hud {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 24px;
+    padding: 0 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1.5rem;
+    z-index: 6;
+    pointer-events: none;
+}
+
+.carousel-hud-left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.45rem;
+    pointer-events: auto;
+}
+
+.carousel-collection-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.9rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: lowercase;
+    text-decoration: none;
+    transition: background 0.25s, border-color 0.25s, transform 0.25s;
+}
+.carousel-collection-badge:hover {
+    background: rgba(255, 255, 255, 0.26);
+    border-color: rgba(255, 255, 255, 0.55);
+    transform: translateY(-1px);
+}
+
+.carousel-exif {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.85);
+    letter-spacing: 0.04em;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55);
+}
+
+.carousel-hud-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.2rem;
+    text-align: right;
+}
+
+.carousel-counter {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    color: rgba(255, 255, 255, 0.92);
+    font-variant-numeric: tabular-nums;
+}
+
+.carousel-date-hud {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.75);
+    letter-spacing: 0.04em;
+}
+
+.carousel-progress {
+    position: absolute;
+    left: 2.5rem;
+    right: 2.5rem;
+    bottom: 10px;
+    display: flex;
+    gap: 8px;
+    z-index: 7;
+}
+
+.progress-segment {
+    position: relative;
+    flex: 1;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.22);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    overflow: visible;
+    border-radius: 2px;
+    transition: height 0.2s;
+}
+.progress-segment::after {
+    content: '';
+    position: absolute;
+    inset: -8px 0;
+}
+.progress-segment:hover {
+    height: 3px;
+}
+.progress-fill {
+    display: block;
+    width: 0%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: 2px;
+}
+.progress-segment.completed .progress-fill {
+    width: 100%;
+}
+.progress-segment.active .progress-fill {
+    animation: carouselProgress 5s linear forwards;
+}
+@keyframes carouselProgress {
+    from { width: 0%; }
+    to { width: 100%; }
 }
 
 .carousel-nav {
@@ -664,6 +788,194 @@ body {
 }
 #back-to-top.visible { opacity: 1; visibility: visible; }
 
+/* --- Curated Collections Grid (Home) --- */
+.home-collections {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 5rem 2rem 6rem;
+}
+
+.collections-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.collections-eyebrow {
+    display: block;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--text-muted);
+    margin-bottom: 0.35rem;
+}
+
+.collections-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.5rem;
+    font-weight: 400;
+    color: var(--text-color);
+    line-height: 1.1;
+    text-transform: lowercase;
+}
+
+.collections-header-links {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+}
+
+.editorial-link {
+    color: var(--text-color);
+    text-decoration: none;
+    border-bottom: 1px solid var(--text-muted);
+    padding-bottom: 2px;
+    transition: opacity 0.25s;
+}
+.editorial-link:hover {
+    opacity: 0.65;
+}
+.editorial-sep {
+    color: var(--text-muted);
+    opacity: 0.6;
+}
+
+.collections-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.5rem;
+}
+
+.collection-card {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+}
+.collection-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+    border-color: var(--text-muted);
+}
+
+.collection-card-media {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: #111;
+}
+
+.collection-card-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), filter 0.4s ease;
+}
+.collection-card:hover .collection-card-media img {
+    transform: scale(1.05);
+    filter: brightness(0.88);
+}
+
+.collection-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(12, 10, 20, 0.55) 0%, transparent 55%);
+    opacity: 0.65;
+    transition: opacity 0.35s ease;
+}
+.collection-card:hover .collection-card-overlay {
+    opacity: 1;
+}
+
+.collection-card-index {
+    position: absolute;
+    top: 1rem;
+    left: 1.1rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+}
+
+.collection-card-hover-cta {
+    position: absolute;
+    bottom: 1rem;
+    right: 1.1rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: lowercase;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.collection-card:hover .collection-card-hover-cta {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.collection-card-body {
+    padding: 1.25rem 1.5rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.collection-card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+}
+
+.collection-card-cta {
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    color: var(--text-color);
+}
+.collection-card:hover .collection-card-cta {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.collection-card-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    font-weight: 500;
+    color: var(--text-color);
+    text-transform: lowercase;
+    line-height: 1.2;
+}
+
 /* Mobile */
 @media (max-width: 768px) {
     .site-header { width: 95%; top: 10px; padding: 0.6rem 1rem; }
@@ -732,6 +1044,17 @@ body {
     }
 
     .layout-controls { padding-top: 5rem; }
+
+    .carousel-container { height: 75vh; min-height: 460px; }
+    .carousel-hud { padding: 0 1.25rem; bottom: 20px; }
+    .carousel-progress { left: 1.25rem; right: 1.25rem; }
+    .carousel-exif { font-size: 0.7rem; max-width: 65vw; }
+
+    .home-collections { padding: 3.5rem 1.25rem 4rem; }
+    .collections-header { flex-direction: column; align-items: flex-start; gap: 1rem; margin-bottom: 2rem; }
+    .collections-heading { font-size: 2rem; }
+    .collections-grid { grid-template-columns: 1fr; gap: 1.75rem; }
+    .collection-card-cta { opacity: 1; transform: none; }
     
     .layout-list { padding: 0 1rem; gap: 3rem; }
     .layout-list .gallery-item, .layout-list .gallery-item:nth-child(even) {

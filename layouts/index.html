@@ -1,20 +1,95 @@
 {{ define "main" }}
 <div class="carousel-container" id="carousel">
-    <div class="carousel-nav prev" onclick="moveSlide(-1)">&#10094;</div>
-    <div class="carousel-nav next" onclick="moveSlide(1)">&#10095;</div>
+    <div class="carousel-scrim"></div>
+    <div class="carousel-nav prev" onclick="moveSlide(-1)" aria-label="previous slide">&#10094;</div>
+    <div class="carousel-nav next" onclick="moveSlide(1)" aria-label="next slide">&#10095;</div>
+
+    <div class="carousel-hud">
+        <div class="carousel-hud-left">
+            <a href="#" id="carousel-collection" class="carousel-collection-badge"></a>
+            <div id="carousel-exif" class="carousel-exif"></div>
+        </div>
+        <div class="carousel-hud-right">
+            <div id="carousel-counter" class="carousel-counter">01 / 05</div>
+            <div id="carousel-date" class="carousel-date-hud"></div>
+        </div>
+    </div>
+
+    <div class="carousel-progress" id="carousel-progress" role="tablist" aria-label="slide progress"></div>
 </div>
+
+<section class="home-collections" aria-label="curated collections">
+    <div class="collections-header">
+        <div class="collections-header-left">
+            <span class="collections-eyebrow">curated series</span>
+            <h1 class="collections-heading">selected collections</h1>
+        </div>
+        <div class="collections-header-links">
+            <a href="{{ "archive/" | relURL }}" class="editorial-link">full archive</a>
+            <span class="editorial-sep">/</span>
+            <a href="{{ "map/" | relURL }}" class="editorial-link">photo map</a>
+        </div>
+    </div>
+
+    <div class="collections-grid">
+        {{ with .Site.GetPage "section" "gallery" }}
+            {{ range $idx, $sec := .Sections }}
+                {{ $images := sort ($sec.Resources.ByType "image") "Name" "desc" }}
+                {{ $count := len $images }}
+                {{ if gt $count 0 }}
+                    {{ $cover := index $images 0 }}
+                    {{ $coverResized := $cover.Resize "900x" }}
+                    <a href="{{ $sec.RelPermalink }}" class="collection-card">
+                        <div class="collection-card-media">
+                            <img src="{{ $coverResized.RelPermalink }}" alt="{{ $sec.Title | lower }}" loading="lazy">
+                            <div class="collection-card-overlay"></div>
+                            <span class="collection-card-index">{{ printf "%02d" (add $idx 1) }}</span>
+                            <span class="collection-card-hover-cta">open gallery &rarr;</span>
+                        </div>
+                        <div class="collection-card-body">
+                            <div class="collection-card-meta">
+                                <span class="collection-card-count">{{ $count }} {{ if eq $count 1 }}photograph{{ else }}photographs{{ end }}</span>
+                                <span class="collection-card-cta">explore series &rarr;</span>
+                            </div>
+                            <h2 class="collection-card-title">{{ $sec.Title | lower }}</h2>
+                        </div>
+                    </a>
+                {{ end }}
+            {{ end }}
+        {{ end }}
+    </div>
+</section>
 
 <script>
     const allGalleryImages = [
-    {{ $slides := slice }}
     {{ with .Site.GetPage "section" "gallery" }}
         {{ range .Sections }}
+            {{ $sectionTitle := .Title | lower }}
+            {{ $sectionUrl := .RelPermalink }}
             {{ range .Resources.ByType "image" }}
                 {{ $w1200 := .Resize "1200x" }}
+                {{ $dateStr := replaceRE "^(\\d{4})(\\d{2})(\\d{2}).*" "$1.$2.$3" .Name }}
+                {{ $exifStr := "" }}
+                {{ $base := index (split .Name "--") 0 }}
+                {{ if gt (len $base) 16 }}
+                    {{ $techRaw := substr $base 16 }}
+                    {{ $parts := split $techRaw "_" }}
+                    {{ if ge (len $parts) 4 }}
+                        {{ $shutter := index $parts (sub (len $parts) 1) | replaceRE "1-" "1/" }}
+                        {{ $aperture := index $parts (sub (len $parts) 2) }}
+                        {{ $iso := index $parts (sub (len $parts) 3) }}
+                        {{ $camParts := first (sub (len $parts) 3) $parts }}
+                        {{ $camera := delimit $camParts " " }}
+                        {{ $exifStr = (print $camera " • iso " $iso " • f/" $aperture " • " $shutter " s") | lower }}
+                    {{ end }}
+                {{ end }}
                 {
                     "original": "{{ .RelPermalink }}",
                     "resized": "{{ $w1200.RelPermalink }}",
-                    "date": "{{ replaceRE "^(\\d{4})(\\d{2})(\\d{2}).*" "$1.$2.$3" .Name }}"
+                    "date": "{{ if ne $dateStr .Name }}{{ $dateStr }}{{ end }}",
+                    "exif": "{{ $exifStr }}",
+                    "collection": "{{ $sectionTitle }}",
+                    "collectionUrl": "{{ $sectionUrl }}"
                 },
             {{ end }}
         {{ end }}
