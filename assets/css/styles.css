@@ -532,6 +532,38 @@ body {
     font-family: 'Inter', sans-serif;
 }
 
+.archive-controls-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.archive-filter-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-color);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: lowercase;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+.archive-filter-toggle:hover {
+    border-color: var(--text-muted);
+}
+
+.archive-controls.is-collapsed .archive-filter-body {
+    display: none;
+}
+
 .filter-bar {
     display: flex;
     flex-direction: column;

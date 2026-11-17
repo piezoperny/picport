@@ -203,6 +203,24 @@ function setupArchiveControls() {
     const feed = document.getElementById('gallery-feed');
     if (!controls || !feed) return;
 
+    const filterToggleBtn = document.getElementById('archive-filter-toggle');
+    const filterBody = document.getElementById('archive-filter-body');
+    if (filterToggleBtn && filterBody) {
+        const setCollapsed = (collapsed) => {
+            controls.classList.toggle('is-collapsed', collapsed);
+            filterToggleBtn.setAttribute('aria-expanded', String(!collapsed));
+            const icon = filterToggleBtn.querySelector('.archive-filter-toggle-icon');
+            if (icon) icon.textContent = collapsed ? '▾' : '▴';
+        };
+        const savedCollapsed = localStorage.getItem('archiveFilterCollapsed') === 'true';
+        setCollapsed(savedCollapsed);
+        filterToggleBtn.addEventListener('click', () => {
+            const nextCollapsed = !controls.classList.contains('is-collapsed');
+            setCollapsed(nextCollapsed);
+            localStorage.setItem('archiveFilterCollapsed', String(nextCollapsed));
+        });
+    }
+
     const itemEls = Array.from(feed.querySelectorAll('.gallery-item'));
     if (!itemEls.length) return;
 
