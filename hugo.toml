@@ -5,7 +5,7 @@ title = "marco's gallery"
 [params]
   description = "marco's photography portfolio"
   darkMode = true
-  version = "v2.3"
+  version = "v2.5"
 
 [markup]
   [markup.goldmark]
