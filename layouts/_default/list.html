@@ -10,9 +10,15 @@
 <div id="gallery-feed" class="layout-list">
     {{ range sort (.Resources.ByType "image") "Name" "desc" }}
         <div class="gallery-item">
-            <div class="media-frame" onclick="openLightbox('{{ .RelPermalink }}')">
-                {{ $w900 := .Resize "900x" }}
-                <img src="{{ $w900.RelPermalink }}" 
+            {{ $w450 := .Resize "450x webp q80" }}
+            {{ $w900 := .Resize "900x webp q85" }}
+            {{ $w1600 := .Resize "1600x webp q90" }}
+            <div class="media-frame" onclick="openLightbox('{{ $w1600.RelPermalink }}')">
+                <img src="{{ $w900.RelPermalink }}"
+                     srcset="{{ $w450.RelPermalink }} 450w, {{ $w900.RelPermalink }} 900w"
+                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                     width="{{ $w900.Width }}"
+                     height="{{ $w900.Height }}"
                      alt="photography" loading="lazy">
             </div>
             
@@ -41,7 +47,7 @@
                     {{ end }}
                 {{ end }}
                 
-                <span class="meta-action" onclick="openLightbox('{{ .RelPermalink }}')">view details</span>
+                <span class="meta-action" onclick="openLightbox('{{ $w1600.RelPermalink }}')">view details</span>
             </div>
         </div>
     {{ end }}

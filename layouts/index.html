@@ -38,10 +38,16 @@
                 {{ $count := len $images }}
                 {{ if gt $count 0 }}
                     {{ $cover := index $images 0 }}
-                    {{ $coverResized := $cover.Resize "900x" }}
+                    {{ $cover450 := $cover.Resize "450x webp q80" }}
+                    {{ $coverResized := $cover.Resize "900x webp q85" }}
                     <a href="{{ $sec.RelPermalink }}" class="collection-card">
                         <div class="collection-card-media">
-                            <img src="{{ $coverResized.RelPermalink }}" alt="{{ $sec.Title | lower }}" loading="lazy">
+                            <img src="{{ $coverResized.RelPermalink }}"
+                                 srcset="{{ $cover450.RelPermalink }} 450w, {{ $coverResized.RelPermalink }} 900w"
+                                 sizes="(max-width: 768px) 100vw, 50vw"
+                                 width="{{ $coverResized.Width }}"
+                                 height="{{ $coverResized.Height }}"
+                                 alt="{{ $sec.Title | lower }}" loading="lazy">
                             <div class="collection-card-overlay"></div>
                             <span class="collection-card-index">{{ printf "%02d" (add $idx 1) }}</span>
                             <span class="collection-card-hover-cta">open gallery &rarr;</span>
@@ -67,7 +73,7 @@
             {{ $sectionTitle := .Title | lower }}
             {{ $sectionUrl := .RelPermalink }}
             {{ range .Resources.ByType "image" }}
-                {{ $w1200 := .Resize "1200x" }}
+                {{ $w1600 := .Resize "1600x webp q90" }}
                 {{ $dateStr := replaceRE "^(\\d{4})(\\d{2})(\\d{2}).*" "$1.$2.$3" .Name }}
                 {{ $exifStr := "" }}
                 {{ $base := index (split .Name "--") 0 }}
@@ -84,8 +90,8 @@
                     {{ end }}
                 {{ end }}
                 {
-                    "original": "{{ .RelPermalink }}",
-                    "resized": "{{ $w1200.RelPermalink }}",
+                    "original": "{{ $w1600.RelPermalink }}",
+                    "resized": "{{ $w1600.RelPermalink }}",
                     "date": "{{ if ne $dateStr .Name }}{{ $dateStr }}{{ end }}",
                     "exif": "{{ $exifStr }}",
                     "collection": "{{ $sectionTitle }}",
