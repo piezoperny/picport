@@ -8,7 +8,8 @@ const colorThief = new ColorThief();
 document.addEventListener('DOMContentLoaded', init);
 
 function init() {
-    setupLayoutSwitcher(); 
+    setupLayoutSwitcher();
+    setupArchiveControls();
 
     // 1. Mobile Menu & Collections Popover
     const toggle = document.getElementById('menu-toggle');
@@ -124,8 +125,6 @@ function init() {
             syncThemeIcon();
         });
     }
-
-    window.addEventListener("resize", resizeAllGridItems);
 }
 
 /* --- Layout Switcher --- */
@@ -151,56 +150,157 @@ function setupLayoutSwitcher() {
         btnGrid.classList.toggle('active', mode === 'grid');
         
         localStorage.setItem('layoutPreference', mode);
+    }
+}
 
-        if (mode === 'grid') {
-            // Force recalculation for masonry
-            setTimeout(resizeAllGridItems, 100);
-            const imgs = document.querySelectorAll('.media-frame img');
-            imgs.forEach(img => {
-                if(img.complete) resizeGridItem(img.closest('.gallery-item'));
+/* --- Archive Filter & Sort Controls --- */
+function setupArchiveControls() {
+    const controls = document.getElementById('archive-controls');
+    const feed = document.getElementById('gallery-feed');
+    if (!controls || !feed) return;
+
+    const itemEls = Array.from(feed.querySelectorAll('.gallery-item'));
+    if (!itemEls.length) return;
+
+    const items = itemEls.map(el => ({
+        el,
+        camera: (el.dataset.camera || '').trim().toLowerCase(),
+        collection: (el.dataset.collection || '').trim().toLowerCase(),
+        year: (el.dataset.year || '').trim(),
+        date: (el.dataset.date || '').trim()
+    }));
+
+    const cameras = Array.from(new Set(items.map(i => i.camera).filter(Boolean))).sort();
+    const collections = Array.from(new Set(items.map(i => i.collection).filter(Boolean))).sort();
+    const years = Array.from(new Set(items.map(i => i.year).filter(Boolean))).sort((a, b) => b.localeCompare(a));
+
+    const state = {
+        camera: 'all',
+        collection: 'all',
+        year: 'all',
+        sort: 'newest'
+    };
+
+    const cameraContainer = document.getElementById('filter-camera');
+    const collectionContainer = document.getElementById('filter-collection');
+    const yearContainer = document.getElementById('filter-year');
+    const sortContainer = document.getElementById('sort-order');
+    const countBadge = document.getElementById('archive-count-badge');
+    const resetBtn = document.getElementById('archive-reset');
+    const emptyState = document.getElementById('archive-empty');
+    const emptyResetBtn = document.getElementById('archive-empty-reset');
+
+    function matchesFilters(item, excludeGroup = null) {
+        if (excludeGroup !== 'camera' && state.camera !== 'all' && item.camera !== state.camera) return false;
+        if (excludeGroup !== 'collection' && state.collection !== 'all' && item.collection !== state.collection) return false;
+        if (excludeGroup !== 'year' && state.year !== 'all' && item.year !== state.year) return false;
+        return true;
+    }
+
+    function createChip(group, value, label) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `filter-chip${value === 'all' ? ' active' : ''}`;
+        btn.dataset.group = group;
+        btn.dataset.value = value;
+        btn.innerHTML = `<span class="filter-chip-label">${label}</span><span class="filter-count">0</span>`;
+        btn.addEventListener('click', () => {
+            state[group] = value;
+            const siblings = btn.parentElement.querySelectorAll('.filter-chip');
+            siblings.forEach(s => s.classList.toggle('active', s === btn));
+            applyFiltersAndSort();
+        });
+        return btn;
+    }
+
+    function populateGroup(container, group, values) {
+        if (!container) return;
+        container.innerHTML = '';
+        container.appendChild(createChip(group, 'all', 'all'));
+        values.forEach(val => container.appendChild(createChip(group, val, val)));
+    }
+
+    populateGroup(cameraContainer, 'camera', cameras);
+    populateGroup(collectionContainer, 'collection', collections);
+    populateGroup(yearContainer, 'year', years);
+
+    if (sortContainer) {
+        sortContainer.querySelectorAll('.filter-chip').forEach(btn => {
+            btn.addEventListener('click', () => {
+                state.sort = btn.dataset.sort;
+                sortContainer.querySelectorAll('.filter-chip').forEach(s => s.classList.toggle('active', s === btn));
+                applyFiltersAndSort();
             });
-        } else {
-            // Clean up grid styles
-            const items = document.querySelectorAll('.gallery-item');
-            items.forEach(item => item.style.removeProperty('grid-row-end'));
+        });
+    }
+
+    function resetAll() {
+        state.camera = 'all';
+        state.collection = 'all';
+        state.year = 'all';
+        state.sort = 'newest';
+
+        controls.querySelectorAll('.filter-options').forEach(groupEl => {
+            const chips = groupEl.querySelectorAll('.filter-chip');
+            chips.forEach((chip, idx) => chip.classList.toggle('active', idx === 0));
+        });
+
+        applyFiltersAndSort();
+    }
+
+    if (resetBtn) resetBtn.addEventListener('click', resetAll);
+    if (emptyResetBtn) emptyResetBtn.addEventListener('click', resetAll);
+
+    function updateGroupCounts(container, group) {
+        if (!container) return;
+        const baseItems = items.filter(item => matchesFilters(item, group));
+        container.querySelectorAll('.filter-chip').forEach(chip => {
+            const val = chip.dataset.value;
+            const count = val === 'all'
+                ? baseItems.length
+                : baseItems.filter(item => item[group] === val).length;
+            const countEl = chip.querySelector('.filter-count');
+            if (countEl) countEl.textContent = count;
+            chip.classList.toggle('is-empty', count === 0 && !chip.classList.contains('active'));
+        });
+    }
+
+    function applyFiltersAndSort() {
+        const sorted = [...items].sort((a, b) => {
+            return state.sort === 'oldest'
+                ? a.date.localeCompare(b.date)
+                : b.date.localeCompare(a.date);
+        });
+
+        let visibleCount = 0;
+        const fragment = document.createDocumentFragment();
+
+        sorted.forEach(item => {
+            const isVisible = matchesFilters(item);
+            item.el.classList.toggle('is-filtered-out', !isVisible);
+            if (isVisible) visibleCount++;
+            fragment.appendChild(item.el);
+        });
+
+        feed.appendChild(fragment);
+
+        const isFiltered = state.camera !== 'all' || state.collection !== 'all' || state.year !== 'all';
+        const isModified = isFiltered || state.sort !== 'newest';
+
+        if (countBadge) {
+            countBadge.textContent = isFiltered
+                ? `${visibleCount} of ${items.length} photos`
+                : `${items.length} photos`;
         }
+        if (resetBtn) resetBtn.classList.toggle('hidden', !isModified);
+        if (emptyState) emptyState.classList.toggle('hidden', visibleCount > 0);
+
+        updateGroupCounts(cameraContainer, 'camera');
+        updateGroupCounts(collectionContainer, 'collection');
+        updateGroupCounts(yearContainer, 'year');
     }
-}
 
-/* --- Masonry Grid Logic --- */
-function resizeGridItem(item) {
-    if (!item) return;
-    const grid = document.querySelector(".layout-grid");
-    if (!grid) return;
-    
-    const rowHeight = parseInt(window.getComputedStyle(grid).getPropertyValue('grid-auto-rows'));
-    const rowGap = parseInt(window.getComputedStyle(grid).getPropertyValue('gap').split(' ')[0]) || 0;
-    
-    const mediaFrame = item.querySelector('.media-frame');
-    const metaDiv = item.querySelector('.gallery-meta');
-    
-    if (!mediaFrame) return;
-
-    let contentHeight = mediaFrame.getBoundingClientRect().height;
-    if (metaDiv) contentHeight += metaDiv.getBoundingClientRect().height;
-    
-    // Increased buffer to ensure metadata is wrapped
-    contentHeight += 110; 
-
-    const rowSpan = Math.ceil((contentHeight + rowGap) / (rowHeight + rowGap));
-    item.style.gridRowEnd = "span " + rowSpan;
-}
-
-function resizeAllGridItems() {
-    if (!document.querySelector('.layout-grid')) return;
-    const allItems = document.getElementsByClassName("gallery-item");
-    for (let x = 0; x < allItems.length; x++) {
-        resizeGridItem(allItems[x]);
-    }
-}
-window.addEventListener("load", resizeAllGridItems);
-if (document.fonts) {
-    document.fonts.ready.then(resizeAllGridItems);
+    applyFiltersAndSort();
 }
 
 
@@ -287,7 +387,7 @@ function getLightboxPlaylist() {
         return window.lightboxImages;
     }
 
-    const frames = Array.from(document.querySelectorAll('.gallery-item .media-frame'));
+    const frames = Array.from(document.querySelectorAll('.gallery-item:not(.is-filtered-out) .media-frame'));
     if (frames.length > 0) {
         const urls = frames.map(frame => {
             if (frame.dataset && frame.dataset.src) return frame.dataset.src;

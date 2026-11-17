@@ -7,45 +7,98 @@
 
 <div class="gallery-header"><h1 class="gallery-title">archive</h1></div>
 
+<section id="archive-controls" class="archive-controls" aria-label="Filter and sort archive">
+    <div class="filter-bar">
+        <div class="filter-group" data-filter-group="camera">
+            <span class="filter-label">camera</span>
+            <div class="filter-options" id="filter-camera"></div>
+        </div>
+        <div class="filter-group" data-filter-group="collection">
+            <span class="filter-label">collection</span>
+            <div class="filter-options" id="filter-collection"></div>
+        </div>
+        <div class="filter-group filter-group-inline">
+            <div class="filter-subgroup" data-filter-group="year">
+                <span class="filter-label">year</span>
+                <div class="filter-options" id="filter-year"></div>
+            </div>
+            <div class="filter-subgroup" data-sort-group>
+                <span class="filter-label">sort</span>
+                <div class="filter-options" id="sort-order">
+                    <button type="button" class="filter-chip active" data-sort="newest">newest</button>
+                    <button type="button" class="filter-chip" data-sort="oldest">oldest</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="archive-status">
+        <span id="archive-count-badge" class="count-badge"></span>
+        <button type="button" id="archive-reset" class="filter-reset hidden">reset filters</button>
+    </div>
+</section>
+
+<div id="archive-empty" class="archive-empty hidden">
+    <p>no photos match the selected filters.</p>
+    <button type="button" id="archive-empty-reset" class="filter-chip">clear all filters</button>
+</div>
+
 <div id="gallery-feed" class="layout-list">
-    {{ $allImages := slice }}
+    {{ $allItems := slice }}
     {{ range (.Site.GetPage "section" "gallery").Sections }}
-        {{ range .Resources.ByType "image" }}{{ $allImages = $allImages | append . }}{{ end }}
+        {{ $collectionTitle := .Title | lower }}
+        {{ range .Resources.ByType "image" }}
+            {{ $allItems = $allItems | append (dict "img" . "collection" $collectionTitle "name" .Name) }}
+        {{ end }}
     {{ end }}
     
-    {{ range sort $allImages "Name" "desc" }}
-        <div class="gallery-item">
-            <div class="media-frame" onclick="openLightbox('{{ .RelPermalink }}')">
-                {{ $w900 := .Resize "900x" }}
+    {{ range sort $allItems "name" "desc" }}
+        {{ $img := .img }}
+        {{ $collection := .collection }}
+        {{ $dateStr := replaceRE "^(\\d{4})(\\d{2})(\\d{2}).*" "$1-$2-$3" $img.Name }}
+        {{ $year := replaceRE "^(\\d{4}).*" "$1" $img.Name }}
+        {{ $sortDate := replaceRE "^(\\d{8})_(\\d{6}).*" "$1$2" $img.Name }}
+        {{ $camera := "" }}
+        {{ $iso := "" }}
+        {{ $aperture := "" }}
+        {{ $shutter := "" }}
+        {{ $base := index (split $img.Name "--") 0 }}
+        {{ if gt (len $base) 16 }}
+            {{ $techRaw := substr $base 16 }}
+            {{ $parts := split $techRaw "_" }}
+            {{ if ge (len $parts) 4 }}
+                {{ $shutter = index $parts (sub (len $parts) 1) | replaceRE "1-" "1/" }}
+                {{ $aperture = index $parts (sub (len $parts) 2) }}
+                {{ $iso = index $parts (sub (len $parts) 3) }}
+                {{ $camParts := first (sub (len $parts) 3) $parts }}
+                {{ $camera = delimit $camParts " " | lower }}
+            {{ end }}
+        {{ end }}
+
+        <div class="gallery-item"
+             data-camera="{{ $camera }}"
+             data-collection="{{ $collection }}"
+             data-year="{{ $year }}"
+             data-date="{{ $sortDate }}">
+            <div class="media-frame" onclick="openLightbox('{{ $img.RelPermalink }}')">
+                {{ $w900 := $img.Resize "900x" }}
                 <img src="{{ $w900.RelPermalink }}" 
-                     alt="photography" loading="lazy" 
-                     onload="resizeGridItem(this.closest('.gallery-item'))">
+                     alt="{{ $collection }} photography" loading="lazy">
             </div>
             
             <div class="gallery-meta">
-                {{ $dateStr := replaceRE "^(\\d{4})(\\d{2})(\\d{2}).*" "$1-$2-$3" .Name }}
-                <span class="meta-date">{{ $dateStr }}</span>
+                <div class="meta-header">
+                    <span class="meta-date">{{ $dateStr }}</span>
+                    <span class="meta-collection">{{ $collection }}</span>
+                </div>
                 
-                {{/* Tech Spec Parsing Logic */}}
-                {{ $base := index (split .Name "--") 0 }}
-                {{ if gt (len $base) 16 }}
-                    {{ $techRaw := substr $base 16 }}
-                    {{ $parts := split $techRaw "_" }}
-                    {{ if ge (len $parts) 4 }}
-                        {{ $shutter := index $parts (sub (len $parts) 1) | replaceRE "1-" "1/" }}
-                        {{ $aperture := index $parts (sub (len $parts) 2) }}
-                        {{ $iso := index $parts (sub (len $parts) 3) }}
-                        {{ $camParts := first (sub (len $parts) 3) $parts }}
-                        {{ $camera := delimit $camParts " " }}
-                        
-                        <div class="meta-tech">
-                            {{ (print $camera) | lower }}<br>
-                            {{ (print "iso " $iso " • f/" $aperture " • " $shutter " s") | lower }}
-                        </div>
-                    {{ end }}
+                {{ if $camera }}
+                    <div class="meta-tech">
+                        {{ $camera }}<br>
+                        {{ (print "iso " $iso " • f/" $aperture " • " $shutter " s") | lower }}
+                    </div>
                 {{ end }}
                 
-                <span class="meta-action" onclick="openLightbox('{{ .RelPermalink }}')">view details</span>
+                <span class="meta-action" onclick="openLightbox('{{ $img.RelPermalink }}')">view details</span>
             </div>
         </div>
     {{ end }}

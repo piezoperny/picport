@@ -13,8 +13,7 @@
             <div class="media-frame" onclick="openLightbox('{{ .RelPermalink }}')">
                 {{ $w900 := .Resize "900x" }}
                 <img src="{{ $w900.RelPermalink }}" 
-                     alt="photography" loading="lazy" 
-                     onload="resizeGridItem(this.closest('.gallery-item'))">
+                     alt="photography" loading="lazy">
             </div>
             
             <div class="gallery-meta">

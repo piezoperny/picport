@@ -450,6 +450,145 @@ body {
     border-bottom: 1px solid var(--text-color);
 }
 
+/* --- ARCHIVE FILTER & SORT BAR --- */
+.archive-controls {
+    max-width: 1000px;
+    margin: 0 auto 2.5rem;
+    padding: 0 2rem;
+    font-family: 'Inter', sans-serif;
+}
+
+.filter-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+
+.filter-group {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.filter-group-inline {
+    justify-content: space-between;
+    gap: 1.5rem;
+}
+
+.filter-subgroup {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.filter-label {
+    font-size: 0.7rem;
+    text-transform: lowercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    min-width: 68px;
+}
+
+.filter-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-color);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.03em;
+    text-transform: lowercase;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, opacity 0.2s;
+}
+
+.filter-chip:hover {
+    border-color: var(--text-muted);
+}
+
+.filter-chip.active {
+    background: var(--text-color);
+    color: var(--bg-color);
+    border-color: var(--text-color);
+}
+
+.filter-chip.is-empty {
+    opacity: 0.4;
+}
+
+.filter-count {
+    font-size: 0.65rem;
+    opacity: 0.7;
+}
+
+.filter-chip.active .filter-count {
+    opacity: 0.85;
+}
+
+.archive-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.75rem;
+    padding: 0 0.25rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+}
+
+.filter-reset {
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--text-muted);
+    color: var(--text-color);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    text-transform: lowercase;
+    cursor: pointer;
+    padding-bottom: 1px;
+    transition: opacity 0.2s;
+}
+
+.filter-reset:hover {
+    opacity: 0.7;
+}
+
+.archive-empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.archive-reset.hidden,
+.archive-empty.hidden {
+    display: none;
+}
+
+.gallery-item.is-filtered-out {
+    display: none !important;
+}
+
 /* --- UNIFIED GALLERY CONTAINER --- */
 #gallery-feed {
     max-width: 1400px;
@@ -482,12 +621,26 @@ body {
     flex-direction: column;
 }
 
-.meta-date {
+.meta-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.meta-date,
+.meta-collection {
     font-family: 'Inter', sans-serif;
     font-size: 0.75rem;
     color: var(--text-muted);
     letter-spacing: 0.05em;
     font-style: normal;
+}
+
+.meta-collection::before {
+    content: "•";
+    margin-right: 0.5rem;
+    opacity: 0.6;
 }
 
 .meta-tech {
@@ -540,43 +693,90 @@ body {
 }
 .layout-list .gallery-item:nth-child(even) .gallery-meta { align-items: flex-end; }
 .layout-list .gallery-item:nth-child(odd) .gallery-meta { align-items: flex-start; }
+.layout-list .gallery-item:nth-child(even) .meta-header { justify-content: flex-end; }
 
 
-/* --- MODE: GRID (MASONRY) --- */
+/* --- MODE: GRID (CSS NATIVE MASONRY + HOVER EXIF OVERLAY) --- */
 .layout-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    grid-auto-rows: 10px;
-    gap: 0 2rem;
+    column-count: 3;
+    column-gap: 1.75rem;
 }
 
 .layout-grid .gallery-item {
-    margin-bottom: 2.5rem;
-    padding: 1rem; 
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 1.75rem;
+    padding: 0;
     display: block;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
 }
 
-.layout-grid .media-frame { margin-bottom: 1rem; }
+.layout-grid .media-frame { margin-bottom: 0; }
 .layout-grid .media-frame:hover img { transform: scale(1.03); }
 
 .layout-grid .gallery-meta {
-    align-items: center;
-    text-align: center;
-    gap: 0.5rem;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 2.5rem 1rem 0.9rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
+    color: #f5f5f5;
+    align-items: flex-start;
+    text-align: left;
+    gap: 0.25rem;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: none;
+}
+
+.layout-grid .gallery-item:hover .gallery-meta,
+.layout-grid .gallery-item:focus-within .gallery-meta {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.layout-grid .meta-date,
+.layout-grid .meta-collection {
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.7rem;
 }
 
 .layout-grid .meta-tech { 
-    font-size: 0.95rem; 
-    /* Fix for wrapping issues */
+    font-size: 0.9rem; 
+    line-height: 1.3;
+    color: #ffffff;
     overflow-wrap: break-word;
     word-break: break-word;
-    hyphens: auto;
     width: 100%;
 }
 
 .layout-grid .meta-action { display: none; }
-.layout-grid .meta-date { margin-top: 0.2rem; }
+
+@media (hover: none) {
+    .layout-grid .gallery-meta {
+        position: static;
+        opacity: 1;
+        transform: none;
+        background: var(--card-bg);
+        color: var(--text-color);
+        padding: 0.75rem 1rem;
+        pointer-events: auto;
+    }
+
+    .layout-grid .meta-date,
+    .layout-grid .meta-collection {
+        color: var(--text-muted);
+    }
+
+    .layout-grid .meta-tech {
+        color: var(--text-color);
+    }
+}
 
 /* --- Single Page Content (About, etc.) --- */
 .single-container {
@@ -788,6 +988,7 @@ body {
 }
 #back-to-top.visible { opacity: 1; visibility: visible; }
 
+<<<<<<< HEAD
 /* --- Curated Collections Grid (Home) --- */
 .home-collections {
     max-width: 1200px;
@@ -976,6 +1177,18 @@ body {
     line-height: 1.2;
 }
 
+/* Tablet */
+@media (max-width: 1024px) {
+    .layout-grid {
+        column-count: 2;
+        column-gap: 1.25rem;
+    }
+
+    .layout-grid .gallery-item {
+        margin-bottom: 1.25rem;
+    }
+}
+
 /* Mobile */
 @media (max-width: 768px) {
     .site-header { width: 95%; top: 10px; padding: 0.6rem 1rem; }
@@ -1055,6 +1268,12 @@ body {
     .collections-heading { font-size: 2rem; }
     .collections-grid { grid-template-columns: 1fr; gap: 1.75rem; }
     .collection-card-cta { opacity: 1; transform: none; }
+
+    .archive-controls { padding: 0 1rem; margin-bottom: 2rem; }
+    .filter-bar { padding: 1rem; gap: 0.75rem; }
+    .filter-group { flex-direction: column; align-items: flex-start; gap: 0.45rem; }
+    .filter-group-inline { flex-direction: column; gap: 0.75rem; }
+    .filter-subgroup { flex-direction: column; align-items: flex-start; gap: 0.45rem; }
     
     .layout-list { padding: 0 1rem; gap: 3rem; }
     .layout-list .gallery-item, .layout-list .gallery-item:nth-child(even) {
@@ -1063,13 +1282,7 @@ body {
     }
     .layout-list .media-frame { width: 100%; padding: 0; box-shadow: none; background: transparent; }
     .layout-list .gallery-meta, .layout-list .gallery-item:nth-child(even) .gallery-meta { align-items: flex-start; width: 100%; }
-    
-    /* UPDATED: Force 2 columns on mobile with !important */
-    .layout-grid { 
-        grid-template-columns: repeat(2, 1fr) !important; 
-        gap: 0.5rem; 
-        padding: 0 0.5rem; 
-    }
+    .layout-list .gallery-item:nth-child(even) .meta-header { justify-content: flex-start; }
     
     .lightbox-nav { width: 38px; height: 38px; font-size: 1.05rem; }
     .lightbox-nav.prev { left: 0.75rem; }
@@ -1077,4 +1290,16 @@ body {
     #lightbox-details { bottom: 70px; right: auto; left: 20px; flex-wrap: wrap; gap: 10px; }
     #lightbox-location { bottom: 20px; left: 20px; }
     .home-title { font-size: 2rem; }
+}
+
+@media (max-width: 640px) {
+    .layout-grid {
+        column-count: 1;
+        column-gap: 0;
+        padding: 0 1rem;
+    }
+
+    .layout-grid .gallery-item {
+        margin-bottom: 1.25rem;
+    }
 }
