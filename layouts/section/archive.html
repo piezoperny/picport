@@ -30,6 +30,43 @@
                 </div>
             </div>
         </div>
+        <div class="filter-group filter-group-exposure" id="filter-exposure">
+            <div class="exposure-sliders">
+                <div class="exposure-slider-item">
+                    <div class="exposure-slider-header">
+                        <span class="filter-label">iso</span>
+                        <span class="exposure-readout" id="readout-iso">all</span>
+                    </div>
+                    <div class="dual-range-wrap">
+                        <div class="dual-range-track"><div class="dual-range-fill" id="track-iso"></div></div>
+                        <input type="range" id="range-iso-min" class="dual-range dual-range-min" min="0" max="0" value="0" aria-label="Minimum ISO">
+                        <input type="range" id="range-iso-max" class="dual-range dual-range-max" min="0" max="0" value="0" aria-label="Maximum ISO">
+                    </div>
+                </div>
+                <div class="exposure-slider-item">
+                    <div class="exposure-slider-header">
+                        <span class="filter-label">diaphragm</span>
+                        <span class="exposure-readout" id="readout-aperture">all</span>
+                    </div>
+                    <div class="dual-range-wrap">
+                        <div class="dual-range-track"><div class="dual-range-fill" id="track-aperture"></div></div>
+                        <input type="range" id="range-aperture-min" class="dual-range dual-range-min" min="0" max="0" value="0" aria-label="Minimum diaphragm">
+                        <input type="range" id="range-aperture-max" class="dual-range dual-range-max" min="0" max="0" value="0" aria-label="Maximum diaphragm">
+                    </div>
+                </div>
+                <div class="exposure-slider-item">
+                    <div class="exposure-slider-header">
+                        <span class="filter-label">speed</span>
+                        <span class="exposure-readout" id="readout-shutter">all</span>
+                    </div>
+                    <div class="dual-range-wrap">
+                        <div class="dual-range-track"><div class="dual-range-fill" id="track-shutter"></div></div>
+                        <input type="range" id="range-shutter-min" class="dual-range dual-range-min" min="0" max="0" value="0" aria-label="Minimum shutter speed">
+                        <input type="range" id="range-shutter-max" class="dual-range dual-range-max" min="0" max="0" value="0" aria-label="Maximum shutter speed">
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="archive-status">
         <span id="archive-count-badge" class="count-badge"></span>
@@ -78,7 +115,10 @@
              data-camera="{{ $camera }}"
              data-collection="{{ $collection }}"
              data-year="{{ $year }}"
-             data-date="{{ $sortDate }}">
+             data-date="{{ $sortDate }}"
+             data-iso="{{ $iso }}"
+             data-aperture="{{ $aperture }}"
+             data-shutter-raw="{{ $shutter }}">
             {{ $w450 := $img.Resize "450x webp q80" }}
             {{ $w900 := $img.Resize "900x webp q85" }}
             {{ $w1600 := $img.Resize "1600x webp q90" }}

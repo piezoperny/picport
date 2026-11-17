@@ -179,6 +179,25 @@ function setupLayoutSwitcher() {
 }
 
 /* --- Archive Filter & Sort Controls --- */
+function parseShutterSeconds(raw) {
+    if (!raw) return NaN;
+    const cleaned = String(raw).trim().replace(/^1-/, '1/');
+    if (cleaned.includes('/')) {
+        const parts = cleaned.split('/');
+        const num = parseFloat(parts[0]);
+        const den = parseFloat(parts[1]);
+        if (!isNaN(num) && !isNaN(den) && den !== 0) return num / den;
+        return NaN;
+    }
+    const val = parseFloat(cleaned);
+    return isNaN(val) ? NaN : val;
+}
+
+function formatShutterLabel(raw) {
+    if (!raw) return '';
+    return `${String(raw).trim().replace(/^1-/, '1/')} s`;
+}
+
 function setupArchiveControls() {
     const controls = document.getElementById('archive-controls');
     const feed = document.getElementById('gallery-feed');
@@ -187,23 +206,54 @@ function setupArchiveControls() {
     const itemEls = Array.from(feed.querySelectorAll('.gallery-item'));
     if (!itemEls.length) return;
 
-    const items = itemEls.map(el => ({
-        el,
-        camera: (el.dataset.camera || '').trim().toLowerCase(),
-        collection: (el.dataset.collection || '').trim().toLowerCase(),
-        year: (el.dataset.year || '').trim(),
-        date: (el.dataset.date || '').trim()
-    }));
+    const items = itemEls.map(el => {
+        const isoVal = parseFloat(el.dataset.iso);
+        const apertureVal = parseFloat(el.dataset.aperture);
+        const shutterRaw = (el.dataset.shutterRaw || '').trim();
+        const shutterVal = parseShutterSeconds(shutterRaw);
+        return {
+            el,
+            camera: (el.dataset.camera || '').trim().toLowerCase(),
+            collection: (el.dataset.collection || '').trim().toLowerCase(),
+            year: (el.dataset.year || '').trim(),
+            date: (el.dataset.date || '').trim(),
+            iso: isNaN(isoVal) ? null : isoVal,
+            aperture: isNaN(apertureVal) ? null : apertureVal,
+            shutter: isNaN(shutterVal) ? null : shutterVal,
+            shutterRaw
+        };
+    });
 
     const cameras = Array.from(new Set(items.map(i => i.camera).filter(Boolean))).sort();
     const collections = Array.from(new Set(items.map(i => i.collection).filter(Boolean))).sort();
     const years = Array.from(new Set(items.map(i => i.year).filter(Boolean))).sort((a, b) => b.localeCompare(a));
 
+    const isoStops = Array.from(new Set(items.map(i => i.iso).filter(v => v !== null)))
+        .sort((a, b) => a - b)
+        .map(v => ({ val: v, label: String(v) }));
+
+    const apertureStops = Array.from(new Set(items.map(i => i.aperture).filter(v => v !== null)))
+        .sort((a, b) => a - b)
+        .map(v => ({ val: v, label: `f/${v}` }));
+
+    const shutterMap = new Map();
+    items.forEach(i => {
+        if (i.shutter !== null && !shutterMap.has(i.shutter)) {
+            shutterMap.set(i.shutter, formatShutterLabel(i.shutterRaw));
+        }
+    });
+    const shutterStops = Array.from(shutterMap.entries())
+        .sort((a, b) => a[0] - b[0])
+        .map(([val, label]) => ({ val, label }));
+
     const state = {
         camera: 'all',
         collection: 'all',
         year: 'all',
-        sort: 'newest'
+        sort: 'newest',
+        isoRange: [0, Math.max(0, isoStops.length - 1)],
+        apertureRange: [0, Math.max(0, apertureStops.length - 1)],
+        shutterRange: [0, Math.max(0, shutterStops.length - 1)]
     };
 
     const cameraContainer = document.getElementById('filter-camera');
@@ -215,10 +265,130 @@ function setupArchiveControls() {
     const emptyState = document.getElementById('archive-empty');
     const emptyResetBtn = document.getElementById('archive-empty-reset');
 
+    function isRangeActive(rangeKey, stops) {
+        if (stops.length <= 1) return false;
+        const [minIdx, maxIdx] = state[rangeKey];
+        return minIdx > 0 || maxIdx < stops.length - 1;
+    }
+
+    function setupDualSlider({ minId, maxId, trackId, readoutId, stops, stateKey }) {
+        const minEl = document.getElementById(minId);
+        const maxEl = document.getElementById(maxId);
+        const trackEl = document.getElementById(trackId);
+        const readoutEl = document.getElementById(readoutId);
+        if (!minEl || !maxEl || !trackEl || !readoutEl) return null;
+
+        const maxIdx = Math.max(0, stops.length - 1);
+        minEl.min = 0;
+        minEl.max = maxIdx;
+        minEl.value = 0;
+        maxEl.min = 0;
+        maxEl.max = maxIdx;
+        maxEl.value = maxIdx;
+
+        if (stops.length <= 1) {
+            minEl.disabled = true;
+            maxEl.disabled = true;
+        }
+
+        function syncVisuals() {
+            const minVal = parseInt(minEl.value, 10);
+            const maxVal = parseInt(maxEl.value, 10);
+            state[stateKey] = [minVal, maxVal];
+
+            const span = maxIdx || 1;
+            const leftPct = (minVal / span) * 100;
+            const rightPct = (maxVal / span) * 100;
+            trackEl.style.left = `${leftPct}%`;
+            trackEl.style.width = `${Math.max(0, rightPct - leftPct)}%`;
+
+            if (stops.length === 0) {
+                readoutEl.textContent = 'n/a';
+            } else if (minVal === 0 && maxVal === maxIdx) {
+                readoutEl.textContent = 'all';
+            } else if (minVal === maxVal) {
+                readoutEl.textContent = stops[minVal].label;
+            } else {
+                readoutEl.textContent = `${stops[minVal].label} – ${stops[maxVal].label}`;
+            }
+        }
+
+        minEl.addEventListener('input', () => {
+            if (parseInt(minEl.value, 10) > parseInt(maxEl.value, 10)) {
+                minEl.value = maxEl.value;
+            }
+            syncVisuals();
+            applyFiltersAndSort();
+        });
+
+        maxEl.addEventListener('input', () => {
+            if (parseInt(maxEl.value, 10) < parseInt(minEl.value, 10)) {
+                maxEl.value = minEl.value;
+            }
+            syncVisuals();
+            applyFiltersAndSort();
+        });
+
+        syncVisuals();
+        return {
+            reset() {
+                minEl.value = 0;
+                maxEl.value = maxIdx;
+                syncVisuals();
+            }
+        };
+    }
+
+    const isoSlider = setupDualSlider({
+        minId: 'range-iso-min',
+        maxId: 'range-iso-max',
+        trackId: 'track-iso',
+        readoutId: 'readout-iso',
+        stops: isoStops,
+        stateKey: 'isoRange'
+    });
+
+    const apertureSlider = setupDualSlider({
+        minId: 'range-aperture-min',
+        maxId: 'range-aperture-max',
+        trackId: 'track-aperture',
+        readoutId: 'readout-aperture',
+        stops: apertureStops,
+        stateKey: 'apertureRange'
+    });
+
+    const shutterSlider = setupDualSlider({
+        minId: 'range-shutter-min',
+        maxId: 'range-shutter-max',
+        trackId: 'track-shutter',
+        readoutId: 'readout-shutter',
+        stops: shutterStops,
+        stateKey: 'shutterRange'
+    });
+
     function matchesFilters(item, excludeGroup = null) {
         if (excludeGroup !== 'camera' && state.camera !== 'all' && item.camera !== state.camera) return false;
         if (excludeGroup !== 'collection' && state.collection !== 'all' && item.collection !== state.collection) return false;
         if (excludeGroup !== 'year' && state.year !== 'all' && item.year !== state.year) return false;
+
+        if (isRangeActive('isoRange', isoStops)) {
+            const minIso = isoStops[state.isoRange[0]].val;
+            const maxIso = isoStops[state.isoRange[1]].val;
+            if (item.iso === null || item.iso < minIso || item.iso > maxIso) return false;
+        }
+
+        if (isRangeActive('apertureRange', apertureStops)) {
+            const minAp = apertureStops[state.apertureRange[0]].val;
+            const maxAp = apertureStops[state.apertureRange[1]].val;
+            if (item.aperture === null || item.aperture < minAp || item.aperture > maxAp) return false;
+        }
+
+        if (isRangeActive('shutterRange', shutterStops)) {
+            const minSh = shutterStops[state.shutterRange[0]].val;
+            const maxSh = shutterStops[state.shutterRange[1]].val;
+            if (item.shutter === null || item.shutter < minSh || item.shutter > maxSh) return false;
+        }
+
         return true;
     }
 
@@ -270,6 +440,10 @@ function setupArchiveControls() {
             chips.forEach((chip, idx) => chip.classList.toggle('active', idx === 0));
         });
 
+        if (isoSlider) isoSlider.reset();
+        if (apertureSlider) apertureSlider.reset();
+        if (shutterSlider) shutterSlider.reset();
+
         applyFiltersAndSort();
     }
 
@@ -309,7 +483,10 @@ function setupArchiveControls() {
 
         feed.appendChild(fragment);
 
-        const isFiltered = state.camera !== 'all' || state.collection !== 'all' || state.year !== 'all';
+        const isExposureFiltered = isRangeActive('isoRange', isoStops)
+            || isRangeActive('apertureRange', apertureStops)
+            || isRangeActive('shutterRange', shutterStops);
+        const isFiltered = state.camera !== 'all' || state.collection !== 'all' || state.year !== 'all' || isExposureFiltered;
         const isModified = isFiltered || state.sort !== 'newest';
 
         if (countBadge) {
