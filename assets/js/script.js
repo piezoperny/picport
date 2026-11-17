@@ -10,12 +10,69 @@ document.addEventListener('DOMContentLoaded', init);
 function init() {
     setupLayoutSwitcher(); 
 
-    // 1. Mobile Menu
+    // 1. Mobile Menu & Collections Popover
     const toggle = document.getElementById('menu-toggle');
     const nav = document.getElementById('nav-links');
+    const collectionsDropdown = document.getElementById('collections-dropdown');
+    const collectionsToggle = document.getElementById('collections-toggle');
+    const siteHeader = document.querySelector('.site-header');
+
+    const closeMobileMenu = () => {
+        if (nav) nav.classList.remove('active');
+        if (toggle) {
+            toggle.classList.remove('open');
+            toggle.setAttribute('aria-expanded', 'false');
+        }
+    };
+
+    const closeCollectionsMenu = () => {
+        if (collectionsDropdown) collectionsDropdown.classList.remove('open');
+        if (collectionsToggle) collectionsToggle.setAttribute('aria-expanded', 'false');
+    };
+
     if (toggle && nav) {
-        toggle.onclick = () => nav.classList.toggle('active');
+        toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = nav.classList.toggle('active');
+            toggle.classList.toggle('open', isOpen);
+            toggle.setAttribute('aria-expanded', String(isOpen));
+            if (!isOpen) closeCollectionsMenu();
+        });
     }
+
+    if (collectionsDropdown && collectionsToggle) {
+        collectionsToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = collectionsDropdown.classList.toggle('open');
+            collectionsToggle.setAttribute('aria-expanded', String(isOpen));
+        });
+    }
+
+    if (nav) {
+        nav.addEventListener('click', (e) => {
+            const link = e.target.closest('a');
+            if (link && link.id !== 'theme-toggle') {
+                closeMobileMenu();
+                closeCollectionsMenu();
+            }
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (siteHeader && !siteHeader.contains(e.target)) {
+            closeMobileMenu();
+            closeCollectionsMenu();
+        } else if (collectionsDropdown && !collectionsDropdown.contains(e.target)) {
+            closeCollectionsMenu();
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeCollectionsMenu();
+            closeMobileMenu();
+        }
+    });
 
     // 2. Spinning Logo
     const logoLink = document.getElementById('logo-link');
@@ -42,21 +99,29 @@ function init() {
     // 4. Dark Mode
     const themeToggle = document.getElementById('theme-toggle');
     const body = document.body;
-    if (localStorage.getItem('theme') === 'dark') {
+
+    const syncThemeIcon = () => {
+        if (!themeToggle) return;
+        const isDark = body.classList.contains('dark-mode');
+        themeToggle.textContent = isDark ? '☀' : '🌙';
+        themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+        themeToggle.setAttribute('title', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+    };
+
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        body.classList.remove('dark-mode');
+    } else if (savedTheme === 'dark') {
         body.classList.add('dark-mode');
-        if(themeToggle) themeToggle.innerText = '☀';
     }
+    syncThemeIcon();
+
     if (themeToggle) {
         themeToggle.addEventListener('click', (e) => {
             e.preventDefault();
             body.classList.toggle('dark-mode');
-            if (body.classList.contains('dark-mode')) {
-                localStorage.setItem('theme', 'dark');
-                themeToggle.innerText = '☀';
-            } else {
-                localStorage.setItem('theme', 'light');
-                themeToggle.innerText = '🌙';
-            }
+            localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
+            syncThemeIcon();
         });
     }
 
